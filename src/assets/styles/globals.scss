@@ -1,0 +1,49 @@
+@use "sass:math";
+
+// 默认设计稿的宽度和高度
+$default-design-width: 1920px;
+$default-design-height: 1080px;
+
+// 默认根字体大小（rem 的基准值）
+$default-root-font-size: 16px;
+
+// 根据屏幕分辨率调整的宽度和高度
+$designWidth: $default-design-width;
+$designHeight: $default-design-height;
+
+// px 转为 vw 的函数
+@function vw($px) {
+  @return math.div($px, $designWidth) * 100vw;
+}
+
+// px 转为 vh 的函数
+@function vh($px) {
+  @return math.div($px, $designHeight) * 100vh;
+}
+
+// rem 转换函数
+// $base: 指定根字体大小，默认是 16px
+@function rem($px, $base: $default-root-font-size) {
+  @return math.div($px, $base) * 1rem;
+}
+
+// 根据屏幕分辨率调整设计稿尺寸
+@media (max-width: 3840px) and (max-height: 2160px) {
+  $designWidth: 3840px;
+  $designHeight: 2160px;
+}
+
+@media (max-width: 2560px) and (max-height: 1440px) {
+  $designWidth: 2560px;
+  $designHeight: 1440px;
+}
+
+@media (max-width: 1920px) and (max-height: 1080px) {
+  $designWidth: 1920px;
+  $designHeight: 1080px;
+}
+
+@media (max-width: 1366px) and (max-height: 768px) {
+  $designWidth: 1366px;
+  $designHeight: 768px;
+}
