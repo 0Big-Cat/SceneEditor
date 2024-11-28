@@ -10,7 +10,7 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
-  base: './', // 设置公共路径
+  base: '/SceneEditor/', // 设置公共路径
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
