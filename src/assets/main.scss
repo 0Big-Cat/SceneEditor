@@ -4,6 +4,20 @@
   box-sizing: border-box;
 }
 
+body {
+  overflow: hidden;
+  margin: 0px 
+}
+
+canvas {
+  display: block; 
+  position: fixed; 
+  left: 0; 
+  top: 0; 
+  width: 100vw; 
+  height: 100vh 
+}
+
 li{
   list-style: none;
 }
