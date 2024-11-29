@@ -5,4 +5,4 @@ const pinia = createPinia()
 
 export default pinia
 
-export * from '@/stores/models.js'
+export * from '@/stores/funset.js'

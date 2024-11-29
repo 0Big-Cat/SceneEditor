@@ -13,9 +13,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <transition name="right">
-    <div id="rightmainpanel" v-if="panelValue"></div>
-  </transition>
+  <!-- <transition name="right"> -->
+  <!-- v-if="panelValue" -->
+  <div id="rightmainpanel"></div>
+  <!-- </transition> -->
 </template>
 
 <style lang="scss" scoped>
@@ -31,18 +32,17 @@ onMounted(() => {
 }
 
 // 组件动画
-.right-enter-active,
-.right-leave-active {
-  transition: opacity 1s, transform 1s;
-}
+// .right-enter-active,
+// .right-leave-active {
+//   transition: opacity 1s, transform 1s;
+// }
 
-.right-enter-from {
-  opacity: 0;
-  transform: translateX(100px);
-}
+// .right-enter-from {
+//   opacity: 0;
+//   transform: translateX(100px);
+// }
 
-.right-leave-to {
-  opacity: 0;
-  transform: translateX(100px);
-}
-</style>
+// .right-leave-to {
+//   opacity: 0;
+//   transform: translateX(100px);
+// }</style>

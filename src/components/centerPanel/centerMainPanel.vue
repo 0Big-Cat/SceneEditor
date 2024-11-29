@@ -1,13 +1,10 @@
 <script setup>
 // 中心模块
 
-// 引入文件上传组件
-import uploadmodule from '../moduleSet/uploadModule/uploadModule.vue'
 </script>
 
 <template>
   <div id="centermainpanel">
-    <uploadmodule></uploadmodule>
   </div>
 </template>
 
