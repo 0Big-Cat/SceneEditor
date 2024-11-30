@@ -16,6 +16,8 @@ export function initThreeScene() {
   const scene = new THREE.Scene()
 
 
+  // 相机位置+旋转中心位置模块
+  const point = pointCounterStore()
   // 初始化相机
   const camera = new THREE.PerspectiveCamera(
     75,
@@ -23,8 +25,10 @@ export function initThreeScene() {
     0.1,
     1000
   )
-  camera.position.set(-3.23, 2.98, 4.06)
-
+  // camera.position.set(point.camerapoint.x, point.camerapoint.y, point.camerapoint.z)
+  camera.position.set(5, 5, 5)
+  // 实时传递camera坐标
+  point.updateCameraPosition(camera.position.x, camera.position.y, camera.position.z)
 
   // 初始化渲染器
   const render = new THREE.WebGLRenderer({
@@ -71,10 +75,12 @@ export function initThreeScene() {
     camera.updateProjectionMatrix()
   })
 
+  // console.log(camera.position)
 
   // 创建渲染函数
   const animate = () => {
     requestAnimationFrame(animate)
+
     render.render(scene, camera)
     controls.update()
   }
@@ -112,86 +118,20 @@ export function initThreeScene() {
   )
 
 
-  // 相机位置+旋转中心位置模块
-  const point = pointCounterStore()
+  // // 相机位置+旋转中心位置模块
+  // const point = pointCounterStore()
 
-  point.camerapoint = [camera.position.x, camera.position.y, camera.position.z]
-  point.controlspoint = [controls.target.x, controls.target.y, controls.target.z]
+  // point.camerapoint = [camera.position.x, camera.position.y, camera.position.z]
+  // point.controlspoint = [controls.target.x, controls.target.y, controls.target.z]
 
   // 监听坐标是否被修改
-  document.querySelector('#camerapointX').addEventListener('change', () => {
-    camera.position.x = point.camerapoint[0]
-  })
-  document.querySelector('#camerapointY').addEventListener('change', () => {
-    camera.position.y = point.camerapoint[1]
-  })
-  document.querySelector('#camerapointZ').addEventListener('change', () => {
-    camera.position.z = point.camerapoint[2]
-  })
+  // document.querySelector('#camerapointX').addEventListener('change', () => {
+  //   camera.position.x = point.camerapoint.x
+  // })
+  // document.querySelector('#camerapointY').addEventListener('change', () => {
+  //   camera.position.y = point.camerapoint.y
+  // })
+  // document.querySelector('#camerapointZ').addEventListener('change', () => {
+  //   camera.position.z = point.camerapoint.z
+  // })
 }
-
-// 在pinia中设置变量
-// store.js
-// import { defineStore } from 'pinia';
-
-// export const useCameraStore = defineStore('camera', {
-//   state: () => ({
-//     position: { x: 0, y: 0, z: 0 },
-//   }),
-//   actions: {
-//     updatePosition(x, y, z) {
-//       this.position.x = x;
-//       this.position.y = y;
-//       this.position.z = z;
-//     },
-//   },
-// });
-
-
-// 在three中的animate中调用那个函数
-// scene.js
-// import { useCameraStore } from './store';
-
-// const cameraStore = useCameraStore();
-
-// // 假设你有一个动画循环
-// function animate() {
-//   requestAnimationFrame(animate);
-
-//   // 更新相机位置（示例）
-//   camera.position.x += 0.01; // 这里可以是任何相机移动的逻辑
-
-//   // 更新 Pinia store 中的相机坐标
-//   cameraStore.updatePosition(camera.position.x, camera.position.y, camera.position.z);
-
-//   // 渲染场景
-//   renderer.render(scene, camera);
-// }
-
-// animate();
-
-
-// 在组件中使用
-//  <template>
-//   <div>
-//     <p>Camera Position: X: {{ cameraPosition.x }}, Y: {{ cameraPosition.y }}, Z: {{ cameraPosition.z }}</p>
-//   </div>
-// </template>
-
-// <script>
-// import { useCameraStore } from './store';
-// import { computed } from 'vue';
-
-// export default {
-//   setup() {
-//     const cameraStore = useCameraStore();
-    
-//     // 使用计算属性来实时获取相机坐标
-//     const cameraPosition = computed(() => cameraStore.position);
-
-//     return {
-//       cameraPosition,
-//     };
-//   },
-// };
-// </script> 
