@@ -24,9 +24,9 @@ export const pointCounterStore = defineStore('pointStore', () => {
 
   // 函数：更新旋转中心位置
   const updateControlPoint = (x, y, z) => {
-    controlspoint.value.x = x
-    controlspoint.value.y = y
-    controlspoint.value.z = z
+    controlspoint.value.x = parseFloat(x.toFixed(5))
+    controlspoint.value.y = parseFloat(y.toFixed(5))
+    controlspoint.value.z = parseFloat(z.toFixed(5))
   }
   return {
     camerapoint,

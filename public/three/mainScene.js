@@ -6,12 +6,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 // 引入gltf解析器（压缩过的模型要使用解析器！！！）
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
+// 引入帧率查看器
+import Stats from 'three/addons/libs/stats.module.js'
 // 引入相机位置+旋转中心位置模块变量
 import { pointCounterStore } from '@/stores'
 
 
 // 导出三维场景函数
-export function initThreeScene() {
+export const initThreeScene = () => {
+
   // 初始化三维场景
   const scene = new THREE.Scene()
 
@@ -25,10 +28,8 @@ export function initThreeScene() {
     0.1,
     1000
   )
-  // camera.position.set(point.camerapoint.x, point.camerapoint.y, point.camerapoint.z)
   camera.position.set(5, 5, 5)
-  // 实时传递camera坐标
-  point.updateCameraPosition(camera.position.x, camera.position.y, camera.position.z)
+
 
   // 初始化渲染器
   const render = new THREE.WebGLRenderer({
@@ -42,9 +43,9 @@ export function initThreeScene() {
   // 初始化轨道控制器
   const controls = new OrbitControls(camera, render.domElement)
   // 阻尼效果
-  controls.enableDamping = true
+  // controls.enableDamping = true
   // 阻尼系数
-  controls.dampingFactor = 0.05
+  // controls.dampingFactor = 0.05
 
 
   const textureloader = new THREE.TextureLoader()
@@ -75,12 +76,18 @@ export function initThreeScene() {
     camera.updateProjectionMatrix()
   })
 
-  // console.log(camera.position)
+
+  // 帧率查看器
+  const stats = new Stats()
+  // document.body.appendChild(stats.domElement)
 
   // 创建渲染函数
   const animate = () => {
     requestAnimationFrame(animate)
-
+    // 实时传递camera坐标
+    point.updateCameraPosition(camera.position.x, camera.position.y, camera.position.z)
+    point.updateControlPoint(controls.target.x, controls.target.y, controls.target.z)
+    stats.update()
     render.render(scene, camera)
     controls.update()
   }
@@ -90,6 +97,7 @@ export function initThreeScene() {
   // 辅助坐标系
   const axesHelper = new THREE.AxesHelper(5)
   scene.add(axesHelper)
+
 
 
   // 模型上传模块
@@ -107,31 +115,16 @@ export function initThreeScene() {
       console.error(error)
     })
   }
-  // 监听文件上传事件
-  document.querySelector('#fileInput').addEventListener('change',
-    event => {
-      const file = event.target.files[0]
-      if (file) {
-        loadModel(file)
-      }
-    }
-  )
+  // // 监听文件上传事件
+  // document.querySelector('#fileInput').addEventListener('change',
+  //   event => {
+  //     const file = event.target.files[0]
+  //     if (file) {
+  //       loadModel(file)
+  //     }
+  //   }
+  // )
 
+  return { loadModel }
 
-  // // 相机位置+旋转中心位置模块
-  // const point = pointCounterStore()
-
-  // point.camerapoint = [camera.position.x, camera.position.y, camera.position.z]
-  // point.controlspoint = [controls.target.x, controls.target.y, controls.target.z]
-
-  // 监听坐标是否被修改
-  // document.querySelector('#camerapointX').addEventListener('change', () => {
-  //   camera.position.x = point.camerapoint.x
-  // })
-  // document.querySelector('#camerapointY').addEventListener('change', () => {
-  //   camera.position.y = point.camerapoint.y
-  // })
-  // document.querySelector('#camerapointZ').addEventListener('change', () => {
-  //   camera.position.z = point.camerapoint.z
-  // })
 }

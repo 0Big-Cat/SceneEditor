@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { initThreeScene } from '../public/three/mainScene'
 import leftMainPanel from './components/leftPanel/leftMainPanel.vue'
-import rightMainPanel from './components/rightPanel/rightMainPanel.vue'
+// import rightMainPanel from './components/rightPanel/rightMainPanel.vue'
 import centerMainPanel from './components/centerPanel/centerMainPanel.vue'
 
 onMounted(() => {
@@ -13,7 +13,7 @@ onMounted(() => {
 <template>
   <leftMainPanel></leftMainPanel>
   <centerMainPanel></centerMainPanel>
-  <rightMainPanel></rightMainPanel>
+  <!-- <rightMainPanel></rightMainPanel> -->
 </template>
 
 <style scoped></style>

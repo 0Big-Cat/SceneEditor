@@ -5,4 +5,5 @@ const pinia = createPinia()
 
 export default pinia
 
-export * from '@/stores/funset.js'
+export * from '@/stores/camerapoint.js'
+export * from '@/stores/par.js'

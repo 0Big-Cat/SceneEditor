@@ -1,0 +1,72 @@
+{
+  "id": "4766188",
+  "name": "场景编辑器",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "145154",
+      "name": "雾",
+      "font_class": "wu",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "630128",
+      "name": "照相机",
+      "font_class": "zhaoxiangji",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
+      "icon_id": "2471345",
+      "name": "动画",
+      "font_class": "donghua",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
+      "icon_id": "3790422",
+      "name": "点位资源管理",
+      "font_class": "web-icon-",
+      "unicode": "e71c",
+      "unicode_decimal": 59164
+    },
+    {
+      "icon_id": "6879500",
+      "name": "灯光",
+      "font_class": "dengguang",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "7911321",
+      "name": "天空",
+      "font_class": "tiankong",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "11891796",
+      "name": "model",
+      "font_class": "model",
+      "unicode": "e66e",
+      "unicode_decimal": 58990
+    },
+    {
+      "icon_id": "23492405",
+      "name": "地面",
+      "font_class": "dimian",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "34133209",
+      "name": "后期",
+      "font_class": "houqi",
+      "unicode": "e632",
+      "unicode_decimal": 58930
+    }
+  ]
+}
