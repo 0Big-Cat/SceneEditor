@@ -29,7 +29,7 @@ function changeper() {
   width: vw(200px);
   height: 100%;
   z-index: 1;
-  background-color: #ccc;
+  background-color: #0d0d0d;
 
   .packupbtn {
     position: relative;
@@ -38,7 +38,7 @@ function changeper() {
     transform: translate(0, -50%);
     width: vw(30px);
     height: vh(100px);
-    background-color: #ccc;
+    background-color: #0d0d0d;
   }
 }
 

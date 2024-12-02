@@ -4,7 +4,7 @@ import { initThreeScene } from '../public/three/mainScene'
 import leftMainPanel from './components/leftPanel/leftMainPanel.vue'
 // import rightMainPanel from './components/rightPanel/rightMainPanel.vue'
 import centerMainPanel from './components/centerPanel/centerMainPanel.vue'
-
+import '../public/three/mainScene.js'
 onMounted(() => {
   initThreeScene()
 })
