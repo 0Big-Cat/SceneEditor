@@ -1,5 +1,7 @@
 import '@/assets/main.scss'
 import '@/assets/font/iconfont.css'
+import 'element-plus/theme-chalk/el-message.css'
+
 
 import { createApp } from 'vue'
 import pinia from './stores'

@@ -9,7 +9,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 // 引入帧率查看器
 import Stats from 'three/addons/libs/stats.module.js'
 // 引入相机位置+旋转中心位置模块变量
-import { pointCounterStore } from '@/stores'
+import { pointCounterStore, loadingCounterStore } from '@/stores'
 
 
 // 将关键变量提出
@@ -97,22 +97,106 @@ export const initThreeScene = () => {
   scene.add(axesHelper)
 }
 
-
 // 模型上传模块
+// let models = []
+// let model
+
+// 加载并显示模型
+// export const loadModelScen = file => {
+//   console.log(file)
+
+//   const loadval = loadingCounterStore()
+//   // 处理其他模型文件
+//   gltfLoader.load(URL.createObjectURL(file[0]), gltf => {
+//     model = gltf.scene
+//     models.push(model)
+//     scene.add(model)
+//     model.name = file[0].name
+//     loadval.loadingshow = false
+//   }, (xhr) => {
+//     const percent = parseInt((xhr.loaded / xhr.total) * 100)
+//     loadval.loadingvalue = percent
+//   })
+
+//   return { loadModelScen }
+// }
+
 let models = []
 let model
-// 加载并显示模型
-export const loadModelScen = file => {
-  gltfLoader.load(URL.createObjectURL(file), gltf => {
-    model = gltf.scene
-    models.push(model)
-    scene.add(model)
-    model.name = file.name
-  }, undefined, error => {
-    console.error(error)
-  })
+export const loadModelScen = files => {
+
+  const loadval = loadingCounterStore()
+
+  const fileMap = {}
+
+  //  将文件存入 Map，便于后续匹配
+  for (let file of files) {
+    fileMap[file.name] = file
+  }
+
+  // 查找 .gltf 文件
+  const gltfFile = Object.values(fileMap).find(file => file.name.endsWith('.gltf'))
+  if (!gltfFile) {
+    // console.error('GLTF 文件未找到')
+    gltfLoader.load(URL.createObjectURL(files[0]), gltf => {
+      model = gltf.scene
+      models.push(model)
+      scene.add(model)
+      model.name = files[0].name
+      loadval.loadingshow = false
+    }, (xhr) => {
+      const percent = parseInt((xhr.loaded / xhr.total) * 100)
+      loadval.loadingvalue = percent
+    })
+    return
+  }
+
+  const fileReader = new FileReader()
+
+  fileReader.onload = () => {
+    const arrayBuffer = fileReader.result // 获取读取的 ArrayBuffer
+    const gltfBlob = new Blob([arrayBuffer], { type: 'model/gltf+json' })
+    const gltfUrl = URL.createObjectURL(gltfBlob)
+    gltfLoader.setPath('')// 设置为空
+    gltfLoader.setResourcePath('')// 清空资源路径
+    gltfLoader.manager.setURLModifier((url) => {
+      // 替换资源路径为 Blob URL
+      const fileName = url.split('/').pop()
+      if (fileMap[fileName]) {
+        const fileBlob = new Blob([fileMap[fileName]])
+        return URL.createObjectURL(fileBlob)
+      }
+      return url
+    })
+    // 加载模型
+    gltfLoader.load(
+      gltfUrl,
+      (gltf) => {
+        // 在场景中添加模型
+        model = gltf.scene
+        models.push(model)
+        scene.add(model)
+        console.log(files)
+        loadval.loadingshow = false
+        Array.from(files)
+          .filter(file => file.name.endsWith('.gltf') || file.name.endsWith('.glb'))
+          .map(file => {
+            model.name = file.name
+          })
+
+      },
+      (xhr) => {
+        const percent = parseInt((xhr.loaded / xhr.total) * 100)
+        loadval.loadingvalue = percent
+      },
+      (error) => console.error('模型加载出错', error)
+    )
+  }
+  fileReader.readAsArrayBuffer(gltfFile)
+
   return { loadModelScen }
 }
+
 
 // 删除模型
 export const deleteModel = (name) => {

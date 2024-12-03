@@ -7,3 +7,6 @@ export default pinia
 
 export * from '@/stores/camerapoint.js'
 export * from '@/stores/par.js'
+export * from '@/stores/upload.js'
+export * from '@/stores/loading.js'
+export * from '@/stores/showhidden.js'

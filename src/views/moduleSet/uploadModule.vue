@@ -1,26 +1,37 @@
 <script setup>
-import { ref } from 'vue'
 import { loadModelScen, deleteModel, pointMoodel, wireframeMoodel } from '../../../public/three/mainScene'
-import { uploadCounterStore } from '@/stores/upload'
+import { uploadCounterStore, loadingCounterStore, showhiddenCounterStore } from '@/stores'
+
+const loadval = loadingCounterStore()
 
 let filename = uploadCounterStore()
 
 // 处理文件上传
 const handleFileChange = event => {
-  const file = event.target.files[0]
-  if (file) {
-    // 检查并删除空的 name 项
-    filename.uploadvalue = filename.uploadvalue.filter(item => item.name !== '')
-    const modelData = {
-      name: file.name,
-      x: 0,
-      y: 0,
-      z: 0,
-      s: 1 // 默认缩放值
-    }
-    filename.uploadvalue.push(modelData)
-    loadModelScen(file)  // 使用loadModel加载模型
-  }
+
+  const file = event.target.files
+  // 检查并删除空的 name 项
+  filename.uploadvalue = filename.uploadvalue.filter(item => item.name !== '')
+
+  Array.from(file)
+    .filter(file => file.name.endsWith('.gltf') || file.name.endsWith('.glb'))
+    .map(file => {
+
+      const modelData = {
+        name: file.name,
+        x: 0,
+        y: 0,
+        z: 0,
+        s: 1 // 默认缩放值
+      }
+      filename.uploadvalue.push(modelData)
+    })
+
+  loadval.loadingshow = true
+  loadModelScen(file)  // 使用loadModel加载模型
+
+  console.log(filename.uploadvalue)
+
 }
 
 // 删除模型
@@ -65,10 +76,10 @@ const restoremoodel = name => {
 }
 
 // 隐藏模型
-const vision = ref(true)
+const vision = showhiddenCounterStore()
 const wireframemoodel = name => {
-  vision.value = !vision.value // 切换 vision 的值
-  wireframeMoodel(name, vision.value)
+  vision.showhiddenmodel = !vision.showhiddenmodel // 切换 vision 的值
+  wireframeMoodel(name, vision.showhiddenmodel)
 }
 </script>
 
@@ -76,7 +87,7 @@ const wireframemoodel = name => {
   <div id="uploadmodule">
     <label class="custom-file-upload">
       上传模型
-      <input type="file" id="fileInput" @change="handleFileChange" />
+      <input type="file" id="fileInput" multiple @change="handleFileChange" />
     </label>
 
     <ul>
@@ -90,9 +101,9 @@ const wireframemoodel = name => {
 
           </label>
         </div>
-        <button @click=" deletemodel(item.name)">删除</button>
+        <button @click="deletemodel(item.name)">删除</button>
         <button @click="restoremoodel(item.name)">还原</button>
-        <button @click="wireframemoodel(item.name)">{{ vision ? '隐藏' : '显示' }}</button>
+        <button @click="wireframemoodel(item.name)">{{ vision.showhiddenmodel ? '隐藏' : '显示' }}</button>
       </li>
     </ul>
 
@@ -110,6 +121,9 @@ const wireframemoodel = name => {
   width: 100%;
   height: 100%;
   color: #fff;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-width: none;
 
   input[type="file"] {
     display: none;
@@ -145,6 +159,7 @@ const wireframemoodel = name => {
 
       label {
         display: flex;
+        align-items: baseline;
 
         span {
           font-size: rem(16px);
