@@ -109,7 +109,7 @@ function changeper() {
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 18px;
+      font-size: rem(18px);
 
       label {
         cursor: pointer;
@@ -121,20 +121,20 @@ function changeper() {
 
       &:nth-child(1) span,
       &:nth-child(7) span {
-        font-size: 16px;
+        font-size: rem(16px);
       }
 
       &:nth-child(4) span {
-        font-size: 20px;
+        font-size: rem(20px);
       }
 
       &:nth-child(5) span {
-        font-size: 12px;
+        font-size: rem(12px);
       }
 
       &:nth-child(8) span,
       &:nth-child(9) span {
-        font-size: 20px;
+        font-size: rem(20px);
       }
     }
   }

@@ -10,7 +10,8 @@ export const uploadCounterStore = defineStore('upload', () => {
         x: 0,
         y: 0,
         z: 0,
-        s: 1
+        s: 1,
+        showhidden: true
       }
     ]
   )

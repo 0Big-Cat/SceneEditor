@@ -1,6 +1,6 @@
 <script setup>
 import { loadModelScen, deleteModel, pointMoodel, wireframeMoodel } from '../../../public/three/mainScene'
-import { uploadCounterStore, loadingCounterStore, showhiddenCounterStore } from '@/stores'
+import { uploadCounterStore, loadingCounterStore } from '@/stores'
 
 const loadval = loadingCounterStore()
 
@@ -22,11 +22,13 @@ const handleFileChange = event => {
         x: 0,
         y: 0,
         z: 0,
-        s: 1 // 默认缩放值
+        s: 1,
+        showhidden: true // 显示隐藏模型
       }
       filename.uploadvalue.push(modelData)
     })
 
+  loadval.loadingvalue = 0
   loadval.loadingshow = true
   loadModelScen(file)  // 使用loadModel加载模型
 
@@ -76,10 +78,12 @@ const restoremoodel = name => {
 }
 
 // 隐藏模型
-const vision = showhiddenCounterStore()
 const wireframemoodel = name => {
-  vision.showhiddenmodel = !vision.showhiddenmodel // 切换 vision 的值
-  wireframeMoodel(name, vision.showhiddenmodel)
+  const model = filename.uploadvalue.find(item => item.name === name)
+  if (model) {
+    model.showhidden = !model.showhidden
+    wireframeMoodel(name, model.showhidden)
+  }
 }
 </script>
 
@@ -89,7 +93,7 @@ const wireframemoodel = name => {
       上传模型
       <input type="file" id="fileInput" multiple @change="handleFileChange" />
     </label>
-
+    <h6>Tips: gltf 需与.bin 纹理一同上传</h6>
     <ul>
       <li v-for="item in filename.uploadvalue" :key="item.name">
         <span>模型名称: {{ item.name }}</span>
@@ -103,7 +107,7 @@ const wireframemoodel = name => {
         </div>
         <button @click="deletemodel(item.name)">删除</button>
         <button @click="restoremoodel(item.name)">还原</button>
-        <button @click="wireframemoodel(item.name)">{{ vision.showhiddenmodel ? '隐藏' : '显示' }}</button>
+        <button @click="wireframemoodel(item.name)">{{ item.showhidden ? '隐藏' : '显示' }}</button>
       </li>
     </ul>
 
@@ -124,6 +128,13 @@ const wireframemoodel = name => {
   overflow-y: scroll;
   overflow-x: hidden;
   scrollbar-width: none;
+
+  h6 {
+    font-size: rem(10px);
+    color: yellow;
+    margin-top: vh(5px);
+    font-weight: 400;
+  }
 
   input[type="file"] {
     display: none;
