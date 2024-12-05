@@ -6,10 +6,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 // 引入gltf解析器（压缩过的模型要使用解析器！！！）
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
+// 引入hdr加载器
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 // 引入帧率查看器
 import Stats from 'three/addons/libs/stats.module.js'
 // 引入相机位置+旋转中心位置模块变量
-import { pointCounterStore, loadingCounterStore, lightCounterStore } from '@/stores'
+import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore } from '@/stores'
 
 
 // 将关键变量提出
@@ -406,4 +408,84 @@ export const changeLightStrength = (lightname, strengthvalue) => {
     default:
       break
   }
+}
+
+
+
+let rgbeloader
+// 天空球模块
+export const skyballHDR = (value) => {
+  const loadval = loadingCounterStore()
+  const skyurl = skyCounterStore()
+
+  if (value) {
+    loadval.loadingshow = true
+    loadval.loadingvalue = 0
+
+    // 加载HDR贴图
+    rgbeloader = new RGBELoader()
+    rgbeloader.load(skyurl.skyhdrurl, (envMap) => {
+      envMap.mapping = THREE.EquirectangularReflectionMapping
+      scene.background = envMap
+      scene.environment = envMap
+      loadval.loadingshow = false
+    }, (xhr) => {
+      const percent = Math.round((xhr.loaded / xhr.total) * 100)
+      loadval.loadingvalue = percent
+    })
+    return
+  }
+
+  // 清空场景背景
+  scene.background = ''
+  scene.environment = ''
+}
+
+// 切换天空球
+export const changeskyHDR = (id, value) => {
+  if (value) {
+    const skyurl = skyCounterStore()
+    const hdrUrl = skyurl.getSkyhdrById(id)
+    if (hdrUrl) {
+      skyurl.skyhdrurl = hdrUrl
+      skyballHDR(true)
+    }
+  }
+}
+
+
+
+let gridHelper
+// 地面模块
+export const ground = value => {
+  console.log(value)
+
+  if (value) {
+    gridHelper = new THREE.GridHelper(300, 25, '#ccc', '#ccc')
+    scene.add(gridHelper)
+    return
+  }
+
+  scene.remove(gridHelper)
+}
+
+
+
+// 雾霾模块
+// 线性雾
+export const linearfog = value => {
+  if (value) {
+    scene.fog = new THREE.Fog(0xcccccc, 1, 50) //（颜色，,距离到50的时候完全被雾笼罩）
+    return
+  }
+  scene.fog = ''
+}
+
+// 指数雾
+export const indexfogexp2 = value => {
+  if (value) {
+    scene.fog = new THREE.FogExp2(0xcccccc, 0.02)//（颜色，雾的浓度） 
+    return
+  }
+  scene.fog = ''
 }

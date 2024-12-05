@@ -2,6 +2,10 @@
 // 每个功能的详细操作页面
 import { particularsCounterStore } from '@/stores'
 
+defineOptions({
+  name: 'FogModel'
+})
+
 const pares = particularsCounterStore()
 
 function changeper() {
