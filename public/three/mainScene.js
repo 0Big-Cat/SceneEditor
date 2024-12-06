@@ -10,12 +10,16 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 // 引入帧率查看器
 import Stats from 'three/addons/libs/stats.module.js'
+// 引入后期库
+// import { EffectComposer, UnrealBloomPass } from 'postprocessing'
 // 引入相机位置+旋转中心位置模块变量
-import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore } from '@/stores'
+import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, animateCounterStore } from '@/stores'
 
 
 // 将关键变量提出
 let scene, camera, render, controls, gltfLoader
+// let demovalue = false
+// composer
 // 导出三维场景函数
 export const initThreeScene = () => {
 
@@ -70,10 +74,15 @@ export const initThreeScene = () => {
     camera.updateProjectionMatrix()
   })
 
+  // 创建EffectComposer
+  // composer = new EffectComposer(render)
 
   // 帧率查看器
   const stats = new Stats()
   // document.body.appendChild(stats.domElement)
+
+  // 创建一个时钟对象来计算时间差
+  const clock = new THREE.Clock()
 
   // 创建渲染函数
   const animate = () => {
@@ -82,6 +91,20 @@ export const initThreeScene = () => {
     point.updateCameraPosition(camera.position.x, camera.position.y, camera.position.z)
     point.updateControlPoint(controls.target.x, controls.target.y, controls.target.z)
     stats.update()
+    // console.log(mixers)
+
+    // composer.render()
+    // if (demovalue) {
+    //   mixer.update(0.01) // 更新动画混合器
+    // }
+    // 更新每个mixer
+    // mixers.forEach((mixer) => mixer.update(clock.getDelta()));
+
+    // 让 mixer.update 调用共享相同的时间增量！
+    const delta = clock.getDelta()
+    // 更新每个 AnimationMixer
+    mixers.forEach(mixer => mixer.update(delta))
+
     render.render(scene, camera)
     controls.update()
   }
@@ -94,12 +117,18 @@ export const initThreeScene = () => {
 }
 
 
-let models = [] // 储存模型
+
+
 let model // 当前传入的模型
+// let mixer
+let models = [] // 储存模型
+let actions = [] // 动画的控制列表
+const mixers = []
 // 上传模型
 export const loadModelScen = files => {
 
   const loadval = loadingCounterStore()
+  const animateal = animateCounterStore()
 
   const fileMap = {}
 
@@ -110,14 +139,38 @@ export const loadModelScen = files => {
 
   // 查找 .gltf 文件
   const gltfFile = Object.values(fileMap).find(file => file.name.endsWith('.gltf'))
+
+  // 非GLTF模型
   if (!gltfFile) {
-    // console.error('GLTF 文件未找到')
     gltfLoader.load(URL.createObjectURL(files[0]), gltf => {
+      // demovalue = true
       model = gltf.scene
       models.push(model)
       scene.add(model)
       model.name = files[0].name
       loadval.loadingshow = false
+      // 设置动画
+      // mixer = new THREE.AnimationMixer(model)
+      const mixer = new THREE.AnimationMixer(model)
+      mixers.push(mixer)
+      // 获取动画动作
+      actions = gltf.animations.map((clip) => mixer.clipAction(clip))
+
+      console.log(actions)
+
+      // 播放所有动画
+      if (actions && actions.length > 0) {
+        actions.forEach(action => action.play())
+      }
+      // animateal.animatevalue = gltf.animations
+      animateal.animatevalue.push({
+        animateData: gltf.animations,
+        modelName: model.name,
+        startandstop: true,
+        pauserecovery: false,
+        positivenegative: false
+      })
+
     }, (xhr) => {
       const percent = parseInt((xhr.loaded / xhr.total) * 100)
       loadval.loadingvalue = percent
@@ -125,8 +178,8 @@ export const loadModelScen = files => {
     return
   }
 
+  // GLTF模型
   const fileReader = new FileReader()
-
   fileReader.onload = () => {
     const arrayBuffer = fileReader.result // 获取读取的 ArrayBuffer
     const gltfBlob = new Blob([arrayBuffer], { type: 'model/gltf+json' })
@@ -147,17 +200,33 @@ export const loadModelScen = files => {
       gltfUrl,
       (gltf) => {
         // 在场景中添加模型
+        // demovalue = true
         model = gltf.scene
         models.push(model)
         scene.add(model)
-        console.log(files)
         loadval.loadingshow = false
         Array.from(files)
           .filter(file => file.name.endsWith('.gltf') || file.name.endsWith('.glb'))
           .map(file => {
             model.name = file.name
           })
-
+        // 设置动画
+        const mixer = new THREE.AnimationMixer(model)
+        mixers.push(mixer)
+        // 获取动画动作
+        actions = gltf.animations.map((clip) => mixer.clipAction(clip))
+        // 播放所有动画
+        if (actions && actions.length > 0) {
+          actions.forEach((action) => action.play())
+        }
+        // animateal.animatevalue = gltf.animations
+        animateal.animatevalue.push({
+          animateData: gltf.animations,
+          modelName: model.name,
+          startandstop: true,
+          pauserecovery: false,
+          positivenegative: false
+        })
       },
       (xhr) => {
         const percent = parseInt((xhr.loaded / xhr.total) * 100)
@@ -471,7 +540,7 @@ export const ground = value => {
 
 
 
-// 雾霾模块
+
 // 线性雾
 export const linearfog = value => {
   if (value) {
@@ -488,4 +557,73 @@ export const indexfogexp2 = value => {
     return
   }
   scene.fog = ''
+}
+
+
+
+// let bloomPass
+// 辉光效果
+export const anaphaseBloom = value => {
+  console.log(value)
+
+  if (value) {
+    // bloomPass = new UnrealBloomPass(
+    //   new THREE.Vector2(window.innerWidth, window.innerHeight),
+    //   10,   // 强度
+    //   10,   // 半径
+    //   0.85   // 阈值
+    // )
+    // composer.addPass(bloomPass)
+
+    return
+  }
+  // composer.passes = composer.passes.filter(pass => pass !== bloomPass)
+}
+
+// 景深效果
+
+// 胶片颗粒效果
+
+
+
+
+// 动画模块
+// 播放、停止指定动画
+export const playAnimation = (index, value) => {
+  console.log(index)
+  console.log(value)
+
+  if (value) {
+    actions[index].play()  // 开始播放
+    // 播放第一个模型的动画
+    // mixers[0].clipAction(gltf.animations[0]).play()
+    return
+  }
+  actions[index].stop()  // 开始播放
+}
+
+// 暂停指定动画
+export const pauseAnimation = (index, value) => {
+  console.log(index)
+  console.log(value)
+
+  if (actions[index] && value) {
+    actions[index].paused = true
+    return
+  }
+  actions[index].paused = false
+}
+
+// 继续指定动画
+export const normalPlayAnimation = (index, value) => {
+  console.log(index)
+  console.log(value)
+
+  if (actions[index] && value) {
+    // 正放
+    actions[index].timeScale = 1
+    return
+  }
+  // 倒放
+  actions[index].timeScale = -1
 }
