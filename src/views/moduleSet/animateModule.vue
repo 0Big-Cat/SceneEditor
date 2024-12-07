@@ -1,35 +1,16 @@
 <script setup>
 // 动画模块
 
-import { ref } from 'vue'
-import { playAnimation, pauseAnimation, normalPlayAnimation } from '../../../public/three/mainScene'
+import { playAnimation, pauseAnimation, normalPlayAnimation, animatecishu } from '../../../public/three/mainScene'
 import { animateCounterStore } from '@/stores'
 
 // 这两个还是写到store里面吧，让pinia全局管理
-// const animatevalue = ref(false)
+
 const { animatevalue } = animateCounterStore()
+const schedule = animateCounterStore()
+const loop = animateCounterStore()
 
-// console.log(animatevalue)
-
-
-// const animateShow = animateCounterStore()
-
-// 用于存储每个动画的独立状态
-const animationStates = ref([])
-
-// 初始化独立状态（基于 animatevalue）
-const initializeStates = () => {
-  animationStates.value = animatevalue.map(item => {
-    return item.animateData.map(() => ({
-      startandstop: item.startandstop,
-      pauserecovery: item.pauserecovery,
-      positivenegative: item.positivenegative
-    }))
-  })
-}
-
-// 初始化
-initializeStates()
+console.log(animatevalue)
 
 </script>
 
@@ -37,24 +18,36 @@ initializeStates()
   <div id="animatemodule">
     <!-- 遍历 animatevalue 外层 -->
     <ul v-for="(itemex, indexex) in animatevalue" :key="indexex">
+      <h4>模型名称:{{ itemex.modelName }}</h4>
       <!-- 遍历 animateData 子属性 -->
-      <li v-for="(animation, index) in itemex.animateData" :key="animation.uuid">
+      <li v-for="animation in itemex.animateData" :key="animation.uuid">
         <h4>动画名称: {{ animation.name }}</h4>
 
         <!-- 播放/停止 -->
-        <el-checkbox v-model="animationStates[indexex][index].startandstop"
-          :label="animationStates[indexex][index].startandstop ? '停止' : '播放'" size="large"
-          @change="playAnimation(index, animationStates[indexex][index].startandstop)" />
+        <el-checkbox v-model="animation.startandstop" :label="animation.startandstop ? '播放' : '停止'" size="large"
+          @change="playAnimation(animation.uuid, animation.startandstop, animatevalue[indexex].serialnumber)" />
 
         <!-- 暂停/恢复 -->
-        <el-checkbox v-model="animationStates[indexex][index].pauserecovery"
-          :label="animationStates[indexex][index].pauserecovery ? '恢复' : '暂停'" size="large"
-          @change="pauseAnimation(index, animationStates[indexex][index].pauserecovery)" />
+        <el-checkbox v-model="animation.pauserecovery" :label="animation.pauserecovery ? '恢复' : '暂停'" size="large"
+          @change="pauseAnimation(animation.uuid, animation.pauserecovery, animatevalue[indexex].serialnumber)" />
 
         <!-- 正放/倒放 -->
-        <el-checkbox v-model="animationStates[indexex][index].positivenegative"
-          :label="animationStates[indexex][index].positivenegative ? '正放' : '倒放'" size="large"
-          @change="normalPlayAnimation(index, animationStates[indexex][index].positivenegative)" />
+        <el-checkbox v-model="animation.positivenegative" :label="animation.positivenegative ? '正放' : '倒放'" size="large"
+          @change="normalPlayAnimation(animation.uuid, animation.positivenegative, animatevalue[indexex].serialnumber)" />
+
+        <!-- 动画运行时间 -->
+        <div>
+          <span>动画进度:</span>
+          <span>{{ schedule.animateschedule.toFixed(2) }}%</span>
+        </div>
+
+        <div>
+          <span>播放次数:</span>
+          <!-- 问题：loop.animateloop 会所有动画共享，还是得加到哪个对象里面去 -->
+          <el-input-number v-model="loop.animateloop" size="small"
+            @change="animatecishu(animation.uuid, loop.animateloop, animatevalue[indexex].serialnumber)" />
+        </div>
+
       </li>
     </ul>
 
@@ -70,5 +63,16 @@ initializeStates()
   overflow-y: scroll;
   overflow-x: hidden;
   scrollbar-width: none;
+
+  h4 {
+    font-size: rem(16px);
+    font-weight: 400;
+    overflow: hidden;
+    /* 超出隐藏 */
+    text-overflow: ellipsis;
+    /* 超出部分显示省略号 */
+    white-space: nowrap;
+    /* 强制不换行 */
+  }
 }
 </style>

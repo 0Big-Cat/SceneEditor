@@ -98,12 +98,15 @@ export const initThreeScene = () => {
     //   mixer.update(0.01) // 更新动画混合器
     // }
     // 更新每个mixer
-    // mixers.forEach((mixer) => mixer.update(clock.getDelta()));
+    // mixers.forEach((mixer) => mixer.update(clock.getDelta()))
 
     // 让 mixer.update 调用共享相同的时间增量！
     const delta = clock.getDelta()
     // 更新每个 AnimationMixer
     mixers.forEach(mixer => mixer.update(delta))
+
+    // 更新动画进度数据
+    logProgress()
 
     render.render(scene, camera)
     controls.update()
@@ -120,6 +123,7 @@ export const initThreeScene = () => {
 
 
 let model // 当前传入的模型
+let modelnumber = -1 // 用于记录上传的第几个模型
 // let mixer
 let models = [] // 储存模型
 let actions = [] // 动画的控制列表
@@ -143,38 +147,46 @@ export const loadModelScen = files => {
   // 非GLTF模型
   if (!gltfFile) {
     gltfLoader.load(URL.createObjectURL(files[0]), gltf => {
-      // demovalue = true
       model = gltf.scene
       models.push(model)
       scene.add(model)
       model.name = files[0].name
       loadval.loadingshow = false
+
       // 设置动画
-      // mixer = new THREE.AnimationMixer(model)
       const mixer = new THREE.AnimationMixer(model)
       mixers.push(mixer)
+
       // 获取动画动作
       actions = gltf.animations.map((clip) => mixer.clipAction(clip))
 
-      console.log(actions)
+      // 为 gltf.animations 的每个动画对象添加一个响应式变量
+      const animationsWithControl = gltf.animations.map((animation) => ({
+        ...animation, // 保留原始动画对象的属性
+        startandstop: true,
+        pauserecovery: false,
+        positivenegative: true
+      }))
 
       // 播放所有动画
       if (actions && actions.length > 0) {
         actions.forEach(action => action.play())
+        // actions[0].play() //播放单个
       }
-      // animateal.animatevalue = gltf.animations
-      animateal.animatevalue.push({
-        animateData: gltf.animations,
-        modelName: model.name,
-        startandstop: true,
-        pauserecovery: false,
-        positivenegative: false
-      })
 
+      modelnumber += 1 // 上传一次，计数就+1
+
+      animateal.animatevalue.push({
+        animateData: animationsWithControl,
+        modelName: model.name,
+        serialnumber: modelnumber
+      })
     }, (xhr) => {
       const percent = parseInt((xhr.loaded / xhr.total) * 100)
       loadval.loadingvalue = percent
-    })
+    },
+      (error) => console.error('模型加载出错', error)
+    )
     return
   }
 
@@ -200,32 +212,43 @@ export const loadModelScen = files => {
       gltfUrl,
       (gltf) => {
         // 在场景中添加模型
-        // demovalue = true
         model = gltf.scene
         models.push(model)
         scene.add(model)
-        loadval.loadingshow = false
         Array.from(files)
           .filter(file => file.name.endsWith('.gltf') || file.name.endsWith('.glb'))
           .map(file => {
             model.name = file.name
           })
+        loadval.loadingshow = false
+
         // 设置动画
         const mixer = new THREE.AnimationMixer(model)
         mixers.push(mixer)
+
         // 获取动画动作
         actions = gltf.animations.map((clip) => mixer.clipAction(clip))
+
+        // 为 gltf.animations 的每个动画对象添加一个响应式变量
+        const animationsWithControl = gltf.animations.map((animation) => ({
+          ...animation, // 保留原始动画对象的属性
+          startandstop: true,
+          pauserecovery: false,
+          positivenegative: true
+        }))
+
         // 播放所有动画
         if (actions && actions.length > 0) {
           actions.forEach((action) => action.play())
+          // actions[0].play() //播放单个
         }
-        // animateal.animatevalue = gltf.animations
+
+        modelnumber += 1 // 上传一次，计数就+1
+
         animateal.animatevalue.push({
-          animateData: gltf.animations,
+          animateData: animationsWithControl,
           modelName: model.name,
-          startandstop: true,
-          pauserecovery: false,
-          positivenegative: false
+          serialnumber: modelnumber
         })
       },
       (xhr) => {
@@ -240,15 +263,32 @@ export const loadModelScen = files => {
 
 // 删除模型
 export const deleteModel = (name) => {
-  models.forEach((item, index) => {
-    if (item.name === name) {
-      // 删除指定模型
-      scene.remove(item)
-      // 删除数组中对应的元素
-      models.splice(index, 1)
+  const animateal = animateCounterStore()
+  const index = models.findIndex((item) => item.name === name)
+
+  if (index !== -1) {
+    // 删除指定模型
+    scene.remove(models[index])
+    // 删除数组中对应的元素
+    models.splice(index, 1)
+    // 删除数组中对应的模型动画
+    mixers.splice(index, 1)
+    // 删除数组中对应的模型动画
+    animateal.animatevalue.splice(index, 1)
+    // 如果删除的是最后一个模型，设置 modelnumber 为 -1
+    if (models.length === 0) {
+      modelnumber = -1
+    } else {
+      // 调整后续元素的 serialnumber
+      animateal.animatevalue.slice(index).forEach((item) => {
+        if (item.serialnumber !== undefined) {
+          item.serialnumber -= 1
+        }
+      })
     }
-  })
+  }
 }
+
 
 // 修改模型位置
 export const pointMoodel = (name, point) => {
@@ -586,44 +626,77 @@ export const anaphaseBloom = value => {
 
 
 
-
 // 动画模块
 // 播放、停止指定动画
-export const playAnimation = (index, value) => {
-  console.log(index)
-  console.log(value)
+export const playAnimation = (uuid, value, number) => {
+  console.log(mixers)
 
-  if (value) {
-    actions[index].play()  // 开始播放
-    // 播放第一个模型的动画
-    // mixers[0].clipAction(gltf.animations[0]).play()
-    return
+  const action = mixers[number]._actions.find((item) => {
+    console.log(item) // 输出每个 action 的信息
+    return item._clip.uuid === uuid // 比较 _clip.uuid 是否与传入的 uuid 匹配
+  })
+  if (action) {
+    if (value) {
+      action.play()
+    } else {
+      action.stop()
+    }
   }
-  actions[index].stop()  // 开始播放
 }
 
 // 暂停指定动画
-export const pauseAnimation = (index, value) => {
-  console.log(index)
-  console.log(value)
-
-  if (actions[index] && value) {
-    actions[index].paused = true
-    return
+export const pauseAnimation = (uuid, value, number) => {
+  const action = mixers[number]._actions.find((item) => {
+    console.log(item)
+    return item._clip.uuid === uuid
+  })
+  if (action) {
+    if (value) {
+      action.paused = true
+    } else {
+      action.paused = false
+    }
   }
-  actions[index].paused = false
 }
 
 // 继续指定动画
-export const normalPlayAnimation = (index, value) => {
-  console.log(index)
-  console.log(value)
-
-  if (actions[index] && value) {
-    // 正放
-    actions[index].timeScale = 1
-    return
+export const normalPlayAnimation = (uuid, value, number) => {
+  const action = mixers[number]._actions.find((item) => {
+    console.log(item)
+    return item._clip.uuid === uuid
+  })
+  if (action) {
+    if (value) {
+      action.timeScale = 1
+    } else {
+      action.timeScale = -1
+    }
   }
-  // 倒放
-  actions[index].timeScale = -1
+}
+
+// 动画进度
+const logProgress = () => {
+  const animateal = animateCounterStore()
+  actions.forEach((action) => {
+    const clip = action.getClip() // 获取对应的 AnimationClip
+    const currentTime = action.time // 当前播放时间
+    const totalDuration = clip.duration // 动画总时长
+    const progress = (currentTime / totalDuration) * 100 // 计算进度百分比
+    animateal.animateschedule = progress
+  })
+}
+
+// 动画次数(在最开始的时候调用一次)
+export const animatecishu = (uuid, value, number) => {
+  const action = mixers[number]._actions.find((item) => {
+    console.log(item)
+    return item._clip.uuid === uuid
+  })
+  if (action) {
+    if (value === 0) {
+      action.setLoop(THREE.LoopRepeat, Infinity)
+    } else {
+      action.setLoop(THREE.LoopRepeat, value)
+    }
+  }
 }

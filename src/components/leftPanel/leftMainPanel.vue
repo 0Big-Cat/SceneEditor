@@ -23,9 +23,9 @@ const items = [
   { name: '天空', url: '/sky', icon: 'icon-tiankong', action: 'sky' },
   { name: '地面', url: '/ground', icon: 'icon-dimian', action: 'ground' },
   { name: '雾霾', url: '/fog', icon: 'icon-wu', action: 'fog' },
-  { name: '后期', url: '/anaphase', icon: 'icon-houqi', action: 'postProcessing' },
   { name: '动画', url: '/nimate', icon: 'icon-donghua', action: 'animation' },
-  { name: '点位', url: '/point', icon: 'icon-web-icon-', action: 'waypoints' }
+  { name: '点位', url: '/point', icon: 'icon-web-icon-', action: 'waypoints' },
+  { name: '后期', url: '/anaphase', icon: 'icon-houqi', action: 'postProcessing' }
 ]
 
 // onMounted(() => {
