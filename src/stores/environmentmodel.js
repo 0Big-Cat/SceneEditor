@@ -7,54 +7,54 @@ export const skyCounterStore = defineStore('sky', () => {
   const skyvalue = ref(true)
 
   // 默认天空球
-  const skyhdrurl = ref('public/textures/hdrs/1.hdr')
+  const skyhdrurl = ref('textures/hdrs/1.hdr')
 
   // 本地HDR资源路径合集
   const skyimgs = ref([
     {
       id: 1101,
-      url: 'public/textures/hdrs/1.jpg',
-      hdrurl: 'public/textures/hdrs/1.hdr'
+      url: 'textures/hdrs/1.jpg',
+      hdrurl: 'textures/hdrs/1.hdr'
     },
     {
       id: 1102,
-      url: 'public/textures/hdrs/2.jpg',
-      hdrurl: 'public/textures/hdrs/2.hdr'
+      url: 'textures/hdrs/2.jpg',
+      hdrurl: 'textures/hdrs/2.hdr'
     },
     {
       id: 1103,
-      url: 'public/textures/hdrs/3.jpg',
-      hdrurl: 'public/textures/hdrs/3.hdr'
+      url: 'textures/hdrs/3.jpg',
+      hdrurl: 'textures/hdrs/3.hdr'
     },
     {
       id: 1104,
-      url: 'public/textures/hdrs/4.jpg',
-      hdrurl: 'public/textures/hdrs/4.hdr'
+      url: 'textures/hdrs/4.jpg',
+      hdrurl: 'textures/hdrs/4.hdr'
     },
     {
       id: 1105,
-      url: 'public/textures/hdrs/5.jpg',
-      hdrurl: 'public/textures/hdrs/5.hdr'
+      url: 'textures/hdrs/5.jpg',
+      hdrurl: 'textures/hdrs/5.hdr'
     },
     {
       id: 1106,
-      url: 'public/textures/hdrs/6.jpg',
-      hdrurl: 'public/textures/hdrs/6.hdr'
+      url: 'textures/hdrs/6.jpg',
+      hdrurl: 'textures/hdrs/6.hdr'
     },
     {
       id: 1107,
-      url: 'public/textures/hdrs/7.jpg',
-      hdrurl: 'public/textures/hdrs/7.hdr'
+      url: 'textures/hdrs/7.jpg',
+      hdrurl: 'textures/hdrs/7.hdr'
     },
     {
       id: 1108,
-      url: 'public/textures/hdrs/8.jpg',
-      hdrurl: 'public/textures/hdrs/8.hdr'
+      url: 'textures/hdrs/8.jpg',
+      hdrurl: 'textures/hdrs/8.hdr'
     },
     {
       id: 1109,
-      url: 'public/textures/hdrs/9.jpg',
-      hdrurl: 'public/textures/hdrs/9.hdr'
+      url: 'textures/hdrs/9.jpg',
+      hdrurl: 'textures/hdrs/9.hdr'
     }
   ])
 
