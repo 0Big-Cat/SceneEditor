@@ -4,13 +4,10 @@
 import { playAnimation, pauseAnimation, normalPlayAnimation, animatecishu } from '../../../public/three/mainScene'
 import { animateCounterStore } from '@/stores'
 
-// 这两个还是写到store里面吧，让pinia全局管理
-
 const { animatevalue } = animateCounterStore()
-const schedule = animateCounterStore()
-const loop = animateCounterStore()
 
 console.log(animatevalue)
+
 
 </script>
 
@@ -21,31 +18,33 @@ console.log(animatevalue)
       <h4>模型名称:{{ itemex.modelName }}</h4>
       <!-- 遍历 animateData 子属性 -->
       <li v-for="animation in itemex.animateData" :key="animation.uuid">
-        <h4>动画名称: {{ animation.name }}</h4>
+        <h4>动画名称:{{ animation.name }}</h4>
 
-        <!-- 播放/停止 -->
-        <el-checkbox v-model="animation.startandstop" :label="animation.startandstop ? '播放' : '停止'" size="large"
-          @change="playAnimation(animation.uuid, animation.startandstop, animatevalue[indexex].serialnumber)" />
+        <div>
+          <!-- 播放/停止 -->
+          <el-checkbox v-model="animation.startandstop" :label="animation.startandstop ? '播放' : '停止'" size="large"
+            @change="playAnimation(animation.uuid, animation.startandstop, animatevalue[indexex].serialnumber)" />
 
-        <!-- 暂停/恢复 -->
-        <el-checkbox v-model="animation.pauserecovery" :label="animation.pauserecovery ? '恢复' : '暂停'" size="large"
-          @change="pauseAnimation(animation.uuid, animation.pauserecovery, animatevalue[indexex].serialnumber)" />
+          <!-- 暂停/恢复 -->
+          <el-checkbox v-model="animation.pauserecovery" :label="animation.pauserecovery ? '恢复' : '暂停'" size="large"
+            @change="pauseAnimation(animation.uuid, animation.pauserecovery, animatevalue[indexex].serialnumber)" />
 
-        <!-- 正放/倒放 -->
-        <el-checkbox v-model="animation.positivenegative" :label="animation.positivenegative ? '正放' : '倒放'" size="large"
-          @change="normalPlayAnimation(animation.uuid, animation.positivenegative, animatevalue[indexex].serialnumber)" />
+          <!-- 正放/倒放 -->
+          <el-checkbox v-model="animation.positivenegative" :label="animation.positivenegative ? '正放' : '倒放'"
+            size="large"
+            @change="normalPlayAnimation(animation.uuid, animation.positivenegative, animatevalue[indexex].serialnumber)" />
+        </div>
 
-        <!-- 动画运行时间 -->
+        <!-- 动画进度 -->
         <div>
           <span>动画进度:</span>
-          <span>{{ schedule.animateschedule.toFixed(2) }}%</span>
+          <span>{{ animation.progress.toFixed(0) }}%</span>
         </div>
 
         <div>
           <span>播放次数:</span>
-          <!-- 问题：loop.animateloop 会所有动画共享，还是得加到哪个对象里面去 -->
-          <el-input-number v-model="loop.animateloop" size="small"
-            @change="animatecishu(animation.uuid, loop.animateloop, animatevalue[indexex].serialnumber)" />
+          <el-input-number v-model="animation.animateloop" size="small" min="1"
+            @change="animatecishu(animation.uuid, animation.animateloop, animatevalue[indexex].serialnumber)" />
         </div>
 
       </li>
@@ -63,6 +62,7 @@ console.log(animatevalue)
   overflow-y: scroll;
   overflow-x: hidden;
   scrollbar-width: none;
+  padding: 0 vw(20px);
 
   h4 {
     font-size: rem(16px);
@@ -73,6 +73,32 @@ console.log(animatevalue)
     /* 超出部分显示省略号 */
     white-space: nowrap;
     /* 强制不换行 */
+  }
+
+  ul {
+    margin-top: vh(17px);
+    width: 100%;
+
+    li {
+      margin-bottom: vh(40px);
+      padding-bottom: vh(10px);
+      line-height: vh(40px);
+
+      /* 设置透明的边框，确保只有下边框有渐变效果 */
+      border-top: 1px solid transparent;
+      border-left: 1px solid transparent;
+      border-right: 1px solid transparent;
+
+      /* 创建渐变的下边框 */
+      background-image: linear-gradient(to right, #0ab0b7, #fff);
+      background-position: bottom left;
+      background-repeat: no-repeat;
+      background-size: 100% 2px;
+
+      span {
+        margin-right: vw(5px);
+      }
+    }
   }
 }
 </style>

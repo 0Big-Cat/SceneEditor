@@ -83,15 +83,29 @@ const controlspoint = () => {
   position: absolute;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   height: 100%;
   color: #fff;
   font-size: rem(16px);
+  padding: 0 vw(20px);
 
   h4 {
+    font-size: rem(18px);
     font-weight: 400;
     margin: vh(17px) 0;
+    width: 100%;
+    height: vh(30px);
+    /* 设置透明的边框，确保只有下边框有渐变效果 */
+    border-top: 1px solid transparent;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+
+    /* 创建渐变的下边框 */
+    background-image: linear-gradient(to right, #0ab0b7, #fff);
+    background-position: bottom left;
+    background-repeat: no-repeat;
+    background-size: 100% 2px;
   }
 
   div {
@@ -100,21 +114,30 @@ const controlspoint = () => {
 
   span {
     margin-right: vw(5px);
+    font-size: rem(18px);
   }
 
   input {
     width: vw(100px);
+
+    &:focus {
+      outline: none;
+      /* 去掉焦点时的外部轮廓 */
+      border: none;
+      /* 去掉焦点时的边框 */
+    }
+
   }
 
   button {
-    margin-bottom: vh(37px);
+    margin-bottom: vh(30px);
     margin-right: vw(5px);
-    width: vw(65px);
-    height: vh(32px);
+    width: vw(84px);
+    height: vh(42px);
     line-height: vh(32px);
     color: #fff;
-    border: 1px solid skyblue;
-    background-color: transparent;
+    border: none;
+    background: url('../../assets/imgs/buttonback.png') no-repeat center/100% 100%;
     cursor: pointer;
   }
 }

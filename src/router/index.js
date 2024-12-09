@@ -16,17 +16,17 @@ const router = createRouter({
       component: () => import('@/views/moduleSet/lightModule.vue')
     },
     {
-      path: '/sky',
-      component: () => import('@/views/moduleSet/skyModule.vue')
+      path: '/environmentmodel',
+      component: () => import('@/views/moduleSet/environmentmodelModule.vue')
     },
-    {
-      path: '/ground',
-      component: () => import('@/views/moduleSet/groundModule.vue')
-    },
-    {
-      path: '/fog',
-      component: () => import('@/views/moduleSet/fogModule.vue')
-    },
+    // {
+    //   path: '/ground',
+    //   component: () => import('@/views/moduleSet/groundModule.vue')
+    // },
+    // {
+    //   path: '/fog',
+    //   component: () => import('@/views/moduleSet/fogModule.vue')
+    // },
     {
       path: '/anaphase',
       component: () => import('@/views/moduleSet/anaphaseModule.vue')

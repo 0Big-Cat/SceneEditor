@@ -26,3 +26,65 @@ a{
   color: #fff;
   text-decoration: none;
 }
+
+/* 自定义滑块条的选中部分 */
+.el-slider__bar {
+  background-color: #0ab0b7 !important;
+}
+/* 自定义滑块按钮的颜色 */
+.el-slider__button {
+  background-color: #0ab0b7 !important;
+  border-color:#0ab0b7!important;
+}
+
+/* 调整拖动的圆圈（滑块按钮）的大小 */
+.el-slider__button {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background-color: #0ab0b7 !important;
+}
+
+
+
+// 修改复选框样式
+.el-checkbox__input.is-checked {
+  border-color: #0ab0b7 !important;
+  // background-color: #0ab0b7 !important;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: #0ab0b7 !important;  /* 设置选中时复选框的背景颜色 */
+  border-color: #0ab0b7 !important;     /* 确保选中时复选框的边框颜色与背景颜色一致 */
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner::before {
+  border-color: #fff !important;  /* 设置勾选标记的颜色 */
+}
+
+// 修改文字颜色
+.el-checkbox__input.is-checked + .el-checkbox__label {
+  color: #0ab0b7 !important;
+}
+
+
+
+/* 修改增加按钮 */
+.el-input-number .el-input-number__increase {
+  background-color: #0ab0b7 !important; /* 设置按钮背景颜色 */
+  border: none !important; /* 去掉按钮的边框 */
+  color: white !important; /* 设置按钮文本颜色 */
+}
+
+/* 修改减少按钮 */
+.el-input-number .el-input-number__decrease {
+  background-color: #0ab0b7 !important; /* 设置减少按钮的背景颜色 */
+  border: none !important; /* 去掉按钮的边框 */
+  color: white !important; /* 设置按钮文本颜色 */
+}
+
+/* 修改 .el-input-number 外部的边框颜色 */
+.el-input-number .el-input__inner {
+  border-color: #0ab0b7 !important; /* 修改为你想要的颜色 */
+}
+

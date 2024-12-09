@@ -3,7 +3,17 @@
 </script>
 
 <template>
-  <div>点位模块</div>
+  <div id="modelpoint">点位模块</div>
 </template>
 
-<style scoped></style>
+<style lang="scss" scoped>
+#modelpoint {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+}
+</style>

@@ -89,25 +89,28 @@ const wireframemoodel = name => {
 
 <template>
   <div id="uploadmodule">
-    <label class="custom-file-upload">
-      上传模型
-      <input type="file" id="fileInput" multiple @change="handleFileChange" />
-    </label>
-    <h6>Tips: gltf 需与.bin 纹理一同上传</h6>
+    <div>
+      <label class="custom-file-upload">
+        上传模型
+        <input type="file" id="fileInput" multiple @change="handleFileChange" />
+      </label>
+      <h6>Tips: gltf 需与.bin 纹理一同上传</h6>
+    </div>
     <ul>
       <li v-for="item in filename.uploadvalue" :key="item.name">
-        <span>模型名称: {{ item.name }}</span>
+        <div class="modelName">模型名称:{{ item.name }}</div>
         <div v-for="axis in ['x', 'y', 'z', 's']" :key="axis">
           <label>
             <span>{{ axis }}:</span>
-            <el-slider type="range" step="0.1" :min="axis === 's' ? 1 : -100" :max="axis === 's' ? 100 : 100"
+            <el-slider type="range" step="0.5" :min="axis === 's' ? 1 : -100" :max="axis === 's' ? 100 : 100"
               v-model="item[axis]" @input="pointmodel(item.name, { x: item.x, y: item.y, z: item.z, s: item.s })" />
-
           </label>
         </div>
-        <button @click="deletemodel(item.name)">删除</button>
-        <button @click="restoremoodel(item.name)">还原</button>
-        <button @click="wireframemoodel(item.name)">{{ item.showhidden ? '隐藏' : '显示' }}</button>
+        <div>
+          <button @click="deletemodel(item.name)">删除</button>
+          <button @click="restoremoodel(item.name)">还原</button>
+          <button @click="wireframemoodel(item.name)">{{ item.showhidden ? '隐藏' : '显示' }}</button>
+        </div>
       </li>
     </ul>
 
@@ -118,7 +121,6 @@ const wireframemoodel = name => {
 <style lang="scss" scoped>
 #uploadmodule {
   position: absolute;
-  top: vh(17px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -129,43 +131,65 @@ const wireframemoodel = name => {
   overflow-x: hidden;
   scrollbar-width: none;
 
-  h6 {
-    font-size: rem(10px);
-    color: yellow;
-    margin-top: vh(5px);
-    font-weight: 400;
-  }
+  div {
 
-  input[type="file"] {
-    display: none;
-  }
+    input[type="file"] {
+      display: none;
+    }
 
-  .custom-file-upload {
-    display: inline-block;
-    width: vw(159px);
-    height: vh(38px);
-    line-height: vh(38px);
-    color: skyblue;
-    border: 1px solid skyblue;
-    border-radius: 5px;
-    text-align: center;
-    font-size: rem(18px);
-    cursor: pointer;
+    .custom-file-upload {
+      display: inline-block;
+      width: vw(159px);
+      height: vh(58px);
+      line-height: vh(70px);
+      background: url('../../assets/imgs/upload.png') no-repeat center/100% 100%;
+      border-radius: 5px;
+      text-align: center;
+      font-size: rem(18px);
+      cursor: pointer;
+
+      &:hover {
+        color: #0ab0b7;
+      }
+    }
+
+    h6 {
+      font-size: rem(12px);
+      color: yellow;
+      margin-top: vh(5px);
+      font-weight: 400;
+      text-align: center;
+    }
   }
 
   ul {
-    display: flex;
-    flex-direction: column;
-    font-size: rem(16px);
-
     li {
-      margin-top: vh(20px);
-      padding-top: vh(20px);
-      border-top: 5px solid #3d3d3d;
-      ;
+      font-size: rem(16px);
+      margin: vh(50px) 0;
 
       input {
         margin-top: vh(10px);
+      }
+
+      .modelName {
+        position: relative;
+        bottom: 5px;
+        width: 100%;
+        height: vh(30px);
+        line-height: vh(26px);
+        font-size: rem(18px);
+        padding-bottom: vh(5px);
+        /* 设置透明的边框，确保只有下边框有渐变效果 */
+        border-top: 1px solid transparent;
+        border-left: 1px solid transparent;
+        border-right: 1px solid transparent;
+
+        /* 创建渐变的下边框 */
+        background-image: linear-gradient(to right, #0ab0b7, #fff);
+        background-position: bottom left;
+        background-repeat: no-repeat;
+        background-size: 100% 2px;
+
       }
 
       label {
@@ -173,7 +197,7 @@ const wireframemoodel = name => {
         align-items: baseline;
 
         span {
-          font-size: rem(16px);
+          font-size: rem(18px);
           margin-right: vw(10px);
         }
       }
@@ -181,13 +205,17 @@ const wireframemoodel = name => {
       button {
         margin-top: vh(15px);
         margin-right: vw(10px);
-        width: vw(40px);
-        height: vh(32px);
-        line-height: vh(32px);
+        width: vw(60px);
+        height: vh(36px);
+        line-height: vh(36px);
         color: #fff;
-        border: 1px solid skyblue;
-        background-color: transparent;
+        border: none;
+        background: url('../../assets/imgs/buttonback.png') no-repeat center/100% 100%;
         cursor: pointer;
+
+        &:hover {
+          color: #0ab0b7;
+        }
       }
     }
   }

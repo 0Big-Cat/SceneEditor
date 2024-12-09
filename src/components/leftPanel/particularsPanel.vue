@@ -20,7 +20,7 @@ function changeper() {
       <keep-alive>
         <router-view></router-view>
       </keep-alive>
-      <div class="packupbtn" @click="changeper"></div>
+      <div class="packupbtn iconfont icon-shouqi-" @click="changeper"></div>
     </div>
   </transition>
 </template>
@@ -30,7 +30,7 @@ function changeper() {
   position: absolute;
   top: 0;
   left: vw(130px);
-  width: vw(200px);
+  width: vw(250px);
   height: 100%;
   z-index: 1;
   background-color: #0d0d0d;
@@ -41,21 +41,27 @@ function changeper() {
     right: -100%;
     transform: translate(0, -50%);
     width: vw(30px);
-    height: vh(100px);
+    height: vh(60px);
+    line-height: vh(60px);
+    border-radius: 10px;
     background-color: #0d0d0d;
+    color: #0ab0b7;
+    text-align: center;
+    font-size: rem(24px);
+    cursor: pointer;
   }
 }
 
 // 组件动画
 .particulars-enter-active,
 .particulars-leave-active {
-  transition: transform 0.5s ease;
   /* 只保留平移效果 */
+  transition: transform 0.5s ease;
 }
 
 .particulars-enter-from,
 .particulars-leave-to {
-  transform: translateX(-100%);
   /* 初始位置设定为左侧 100% */
+  transform: translateX(-100%);
 }
 </style>
