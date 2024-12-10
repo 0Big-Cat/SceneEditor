@@ -123,8 +123,6 @@ const controlspoint = () => {
     &:focus {
       outline: none;
       /* 去掉焦点时的外部轮廓 */
-      border: none;
-      /* 去掉焦点时的边框 */
     }
 
   }

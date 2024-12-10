@@ -24,21 +24,36 @@ export const lightCounterStore = defineStore('light', () => {
       lightname: 'pointlight',
       lightshow: false,
       lightcolor: '#fff',
-      lightstrength: 1
+      lightstrength: 1,
+      lightadd: {},
+      lightshodow: false,
+      x: 0,
+      y: 0,
+      Z: 0
     },
     {
       lightlabel: '平行光',
       lightname: 'directionallight',
       lightshow: false,
       lightcolor: '#fff',
-      lightstrength: 1
+      lightstrength: 1,
+      lightadd: {},
+      lightshodow: false,
+      x: 5,
+      y: 1,
+      Z: 0
     },
     {
       lightlabel: '聚光灯',
       lightname: 'spotlight',
       lightshow: false,
       lightcolor: '#fff',
-      lightstrength: 1
+      lightstrength: 1,
+      lightadd: {},
+      lightshodow: false,
+      x: 5,
+      y: 1,
+      Z: 0
     },
     {
       lightlabel: '半球光',

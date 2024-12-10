@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 // 天空球模块
 export const skyCounterStore = defineStore('sky', () => {
   // 是否显示/隐藏
-  const skyvalue = ref(true)
+  const skyvalue = ref(false)
 
   // 默认天空球
   const skyhdrurl = ref('textures/hdrs/1.hdr')
@@ -75,20 +75,33 @@ export const skyCounterStore = defineStore('sky', () => {
 // 地面模块
 export const groundCounterStore = defineStore('ground', () => {
   // 是否显示/隐藏
-  const groundvalue = ref(false)
+  const grounddata = ref({
+    showvalue: true,
+    sizevalue: 100,
+    divisionsvalue: 25
+  })
 
   return {
-    groundvalue
+    grounddata
   }
 })
 
 // 雾模块
 export const fogCounterStore = defineStore('fog', () => {
-  const fogvalue = ref(false)
-  const fogexp2value = ref(false)
+  const fogdata = ref({
+    show: false,
+    near: 1,
+    far: 100,
+    color: '#fff'
+  })
+  const fogexp2data = ref({
+    show: false,
+    density: 0.1,
+    color: '#fff'
+  })
 
   return {
-    fogvalue,
-    fogexp2value
+    fogdata,
+    fogexp2data
   }
 })

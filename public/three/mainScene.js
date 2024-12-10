@@ -8,6 +8,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 // 引入hdr加载器
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
+// 引入拖拽控件
+// import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
+// import { DragControls } from 'three/examples/js/controls/DragControls'
 // 引入帧率查看器
 import Stats from 'three/addons/libs/stats.module.js'
 // 引入后期库
@@ -45,6 +49,13 @@ export const initThreeScene = () => {
   })
   render.setSize(window.innerWidth, window.innerHeight)
   document.body.appendChild(render.domElement)
+  // 启用渲染器的阴影
+  render.shadowMap.enabled = true
+  // 渲染器背景色
+  render.setClearColor('#000', 1)
+  // 设置渲染器的色彩空间
+  render.outputEncoding = THREE.SRGBColorSpace
+
 
 
   // 初始化轨道控制器
@@ -55,11 +66,84 @@ export const initThreeScene = () => {
   controls.dampingFactor = 0.05
 
 
+
+
+  if (directionallight) {
+    // // 创建一个空的 Object3D 作为光源的父对象
+    // const lightGroup = new THREE.Object3D()
+    // scene.add(lightGroup)
+    // // 添加 TransformControls 用来控制光源
+    // const transformControls = new TransformControls(camera, render.domElement)
+    // // 将光源和辅助器添加到父对象中
+    // lightGroup.add(directionallight)
+    // lightGroup.add(directionallightHelper)
+    // // 设置 TransformControls 的模式
+    // transformControls.setMode('translate')  // 可以是 'rotate' 或 'scale'
+    // transformControls.attach(lightGroup)  // 将 TransformControls 绑定到光源的父对象上
+    // // 将目标点设置为光源的父对象
+    // transformControls.target = lightGroup.position
+    // scene.add(transformControls)
+    // // 监听 objectChange 事件，更新光源位置
+    // transformControls.addEventListener('objectChange', () => {
+    //   directionallight.position.copy(lightGroup.position)  // 同步光源位置
+    //   directionallightHelper.update()  // 更新光源辅助器的位置
+    // })
+    // // 监听鼠标事件以启用 TransformControls
+    // window.addEventListener('mousedown', () => {
+    //   transformControls.enabled = true
+    //   console.log('启用')
+    // })
+    // window.addEventListener('mouseup', () => {
+    //   transformControls.enabled = false
+    //   console.log('禁用')
+    // })
+    // console.log('TransformControls enabled:', transformControls.enabled)
+
+  }
+  // 添加地面
+  const planeGeometry = new THREE.PlaneGeometry(10, 10)
+  const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide })
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial)
+  plane.rotation.x = -Math.PI / 2
+  scene.add(plane)
+
+  // 添加光源（点光源）
+  const pointLight = new THREE.PointLight(0xffffff, 1, 100)
+  pointLight.position.set(0, 2, 0)
+  scene.add(pointLight)
+
+  // 添加光源辅助器
+  const lightHelper = new THREE.PointLightHelper(pointLight, 0.2)
+  scene.add(lightHelper)
+
+  // 添加 TransformControls 控制光源
+  const transformControls = new TransformControls(camera, render.domElement)
+  transformControls.attach(pointLight) // 绑定到光源
+  scene.add(transformControls)
+
+  // 添加 OrbitControls（用于自由移动相机）
+  // const orbitControls = new OrbitControls(camera, render.domElement)
+  // orbitControls.enableDamping = true
+
+  // 确保 TransformControls 激活时禁用 OrbitControls
+  transformControls.addEventListener('dragging-changed', (event) => {
+    controls.enabled = !event.value
+  })
+
+  // 动态更新光源辅助器位置
+  transformControls.addEventListener('change', () => {
+    lightHelper.update() // 必须调用 update 方法刷新辅助器位置
+  })
+
+
+
+
+
+
   const textureloader = new THREE.TextureLoader()
   let texture = textureloader.load('./textures/imgs/skyback.jpg', () => {
     // 开启色彩空间
     texture.colorSpace = THREE.SRGBColorSpace
-    // scene.background = texture
   })
 
 
@@ -103,6 +187,12 @@ export const initThreeScene = () => {
     // 动画进度
     logProgress()
 
+    // 实时反馈光源坐标
+    lightcoordinatesFun()
+
+    // 更新光源辅助器的位置
+
+
     render.render(scene, camera)
     controls.update()
   }
@@ -142,6 +232,7 @@ export const loadModelScen = files => {
   if (!gltfFile) {
     gltfLoader.load(URL.createObjectURL(files[0]), gltf => {
       model = gltf.scene
+      model.castShadow = true  // 使模型投射阴影
       models.push(model)
       scene.add(model)
       model.name = files[0].name
@@ -353,6 +444,8 @@ export const assistDeviceFun = () => {
       if (!pointLightHelper) {
         pointLightHelper = new THREE.PointLightHelper(pointLight)
         scene.add(pointLightHelper)
+
+
       }
       anyLightEnabled = true // 至少有一个光源启用
     } else {
@@ -371,6 +464,7 @@ export const assistDeviceFun = () => {
       if (!directionallightHelper) {
         directionallightHelper = new THREE.DirectionalLightHelper(directionallight)
         scene.add(directionallightHelper)
+
       }
       anyLightEnabled = true // 至少有一个光源启用
     } else {
@@ -430,11 +524,14 @@ export const lightPointFun = () => {
   if (!pointLight) {
     pointLight = new THREE.PointLight('#fff', 1, 100)
     pointLight.position.set(0, 0, 0)
+    pointLight.castShadow = true // 开启阴影
   }
   if (lightSet[1].lightshow) {
     scene.add(pointLight)
   } else {
     scene.remove(pointLight)
+    scene.remove(plane) // 移除阴影地面
+    lightSet[1].lightshodow = false // 取消勾选阴影
   }
   // 在这里调用辅助器函数，确保启用或禁用光源时自动更新辅助器
   assistDeviceFun()
@@ -445,12 +542,18 @@ export const directionalLightFun = () => {
   const { lightSet } = lightCounterStore()
   if (!directionallight) {
     directionallight = new THREE.DirectionalLight('#fff', 1)
-    directionallight.position.set(5, 0, 0)
+    directionallight.position.set(5, 5, 0)
+    directionallight.castShadow = true // 开启阴影
+    lightSet[2].x = directionallight.position.x
+    lightSet[2].y = directionallight.position.y
+    lightSet[2].z = directionallight.position.z
   }
   if (lightSet[2].lightshow) {
     scene.add(directionallight)
   } else {
     scene.remove(directionallight)
+    scene.remove(plane) // 移除阴影地面
+    lightSet[2].lightshodow = false // 取消勾选阴影
   }
   assistDeviceFun()
 }
@@ -459,13 +562,16 @@ export const directionalLightFun = () => {
 export const spotLightFun = () => {
   const { lightSet } = lightCounterStore()
   if (!spotlight) {
-    spotlight = new THREE.SpotLight('#fff', 10)
-    spotlight.position.set(2, 2, 2)
+    spotlight = new THREE.SpotLight('#fff', 50)
+    spotlight.position.set(0, 2, 0)
+    spotlight.castShadow = true // 开启阴影
   }
   if (lightSet[3].lightshow) {
     scene.add(spotlight)
   } else {
     scene.remove(spotlight)
+    scene.remove(plane) // 移除阴影地面
+    lightSet[3].lightshodow = false // 取消勾选阴影
   }
   assistDeviceFun()
 }
@@ -530,6 +636,40 @@ export const changeLightStrength = (lightname, strengthvalue) => {
   }
 }
 
+// 阴影
+let plane
+export const lightShdow = value => {
+  if (value) {
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true // 允许模型投射阴影
+        child.receiveShadow = true // 如果模型需要接收阴影（例如模型自身上投影）
+      }
+    })
+    // 创建地面并使其接收阴影
+    const planeGeometry = new THREE.PlaneGeometry(100, 100)
+    const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
+    plane = new THREE.Mesh(planeGeometry, planeMaterial)
+    plane.rotation.x = - Math.PI / 2
+    plane.position.y = -0.01
+    plane.receiveShadow = true  // 使地面接收阴影
+    scene.add(plane)
+
+    return
+  }
+  scene.remove(plane)
+}
+
+// 实时反馈光源坐标
+const lightcoordinatesFun = () => {
+  // 平行光坐标
+  if (directionallight) {
+    const { lightSet } = lightCounterStore()
+    lightSet[2].x = directionallight.position.x
+    lightSet[2].y = directionallight.position.y
+    lightSet[2].z = directionallight.position.z
+  }
+}
 
 
 let rgbeloader
@@ -576,38 +716,106 @@ export const changeskyHDR = (id, value) => {
 
 
 let gridHelper
+let currentSize = 10  // 初始大小
+let currentDivisions = 10  // 初始格子数
 // 地面模块
-export const ground = value => {
-  console.log(value)
-
+export const ground = (value, size, divisions) => {
   if (value) {
-    gridHelper = new THREE.GridHelper(100, 25, '#37373d', '#37373d')
-    scene.add(gridHelper)
+    if (!gridHelper) {  // 确保只在没有初始化时创建 gridHelper
+      gridHelper = new THREE.GridHelper(size, divisions, '#37373d', '#37373d')
+      scene.add(gridHelper)
+      currentSize = size
+      currentDivisions = divisions
+    }
     return
   }
-
-  scene.remove(gridHelper)
+  // 引出网格地面
+  if (gridHelper) {
+    scene.remove(gridHelper)
+    gridHelper = null  // 删除后，设置为 null，避免后续出错
+  }
 }
+// 尺寸函数
+export const sizeFun = size => {
+  if (gridHelper) {
+    scene.remove(gridHelper)  // 移除当前网格
+    currentSize = size  // 保存新的尺寸
+    gridHelper = new THREE.GridHelper(currentSize, currentDivisions, '#37373d', '#37373d')  // 创建新的 GridHelper
+    scene.add(gridHelper)  // 添加新的网格到场景
+  }
+}
+// 格子数量函数
+export const divisionsFun = divisions => {
+  if (gridHelper) {
+    scene.remove(gridHelper)  // 移除当前网格
+    currentDivisions = divisions  // 保存新的 divisions
+    gridHelper = new THREE.GridHelper(currentSize, currentDivisions, '#37373d', '#37373d')  // 创建新的 GridHelper
+    scene.add(gridHelper)  // 添加新的网格到场景
+  }
+}
+
 
 
 
 
 // 线性雾
-export const linearfog = value => {
+let fognear = 1  // 开始距离
+let fogfar = 100  // 结束距离
+let fogcolor = '' // 初始颜色
+export const linearfog = (value, near, far, color) => {
   if (value) {
-    scene.fog = new THREE.Fog(0xcccccc, 1, 50) //（颜色，,距离到50的时候完全被雾笼罩）
+    scene.fog = new THREE.Fog(color, near, far) //（颜色，,距离到50的时候完全被雾笼罩）
+    fognear = near
+    fogfar = far
+    fogcolor = color
     return
   }
-  scene.fog = ''
+  // 移除雾
+  scene.fog = null
+}
+export const nearFun = near => {
+  // 移除雾
+  scene.fog = null
+  fognear = near
+  scene.fog = new THREE.Fog(fogcolor, fognear, fogfar)
+}
+export const farFun = far => {
+  // 移除雾
+  scene.fog = null
+  fogfar = far
+  scene.fog = new THREE.Fog(fogcolor, fognear, fogfar)
+}
+export const colorFun = color => {
+  // 移除雾
+  scene.fog = null
+  fogcolor = color
+  scene.fog = new THREE.Fog(fogcolor, fognear, fogfar)
 }
 
 // 指数雾
-export const indexfogexp2 = value => {
+let fogexp2density = 0.1  // 初始浓度
+let fogexp2color = '' // 初始颜色
+export const indexfogexp2 = (value, color, density) => {
   if (value) {
-    scene.fog = new THREE.FogExp2(0xcccccc, 0.02)//（颜色，雾的浓度） 
+    scene.fog = new THREE.FogExp2(color, density)//（颜色，雾的浓度）
+    fogexp2color = color
+    fogexp2density = density
     return
   }
-  scene.fog = ''
+  // 移除雾
+  scene.fog = null
+}
+export const densityFun = density => {
+  // 移除雾
+  scene.fog = null
+  fogexp2density = density
+  scene.fog = new THREE.FogExp2(fogexp2color, fogexp2density)//（颜色，雾的浓度）
+}
+export const color2Fun = color => {
+  // 移除雾
+  scene.fog = null
+  fogexp2color = color
+  scene.fog = new THREE.FogExp2(fogexp2color, fogexp2density)//（颜色，雾的浓度）
 }
 
 

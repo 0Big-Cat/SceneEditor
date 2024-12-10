@@ -1,7 +1,7 @@
 <script setup>
 // 天空模块
 import { ref } from 'vue'
-import { skyballHDR, changeskyHDR, ground, linearfog, indexfogexp2 } from '../../../public/three/mainScene'
+import { skyballHDR, changeskyHDR, ground, linearfog, indexfogexp2, sizeFun, divisionsFun, nearFun, farFun, colorFun, densityFun, color2Fun } from '../../../public/three/mainScene'
 import { skyCounterStore, groundCounterStore, fogCounterStore } from '@/stores'
 
 // 天空模块
@@ -16,10 +16,10 @@ const handleImageClick = (id) => {
 }
 
 // 地面模块
-const grounddata = groundCounterStore()
+const { grounddata } = groundCounterStore()
 
 // 雾模块
-const fogdata = fogCounterStore()
+const { fogdata, fogexp2data } = fogCounterStore()
 
 </script>
 
@@ -38,15 +38,33 @@ const fogdata = fogCounterStore()
 
     <!-- 地面 -->
     <div class="groundboc">
-      <el-checkbox v-model="grounddata.groundvalue" label="网格地面" size="large"
-        @change="ground(grounddata.groundvalue)" />
+      <el-checkbox v-model="grounddata.showvalue" label="网格地面" size="large"
+        @change="ground(grounddata.showvalue, grounddata.sizevalue, grounddata.divisionsvalue)" />
+      <div>
+        <input type="text" v-model="grounddata.sizevalue" @input="sizeFun(grounddata.sizevalue)">
+        <input type="text" v-model="grounddata.divisionsvalue" @input="divisionsFun(grounddata.divisionsvalue)">
+      </div>
     </div>
 
     <!-- 雾 -->
     <div class="fogbox">
-      <el-checkbox v-model="fogdata.fogvalue" label="线性雾" size="large" @change="linearfog(fogdata.fogvalue)" />
-      <el-checkbox v-model="fogdata.fogexp2value" label="指数雾" size="large"
-        @change="indexfogexp2(fogdata.fogexp2value)" />
+      <div>
+        <el-checkbox v-model="fogdata.show" label="线性雾" size="large"
+          @change="linearfog(fogdata.show, fogdata.near, fogdata.far, fogdata.color)" />
+        <div>
+          <input type="text" v-model="fogdata.near" @input="nearFun(fogdata.near)">
+          <input type="text" v-model="fogdata.far" @input="farFun(fogdata.far)">
+          <input type="color" v-model="fogdata.color" @input="colorFun(fogdata.color)">
+        </div>
+      </div>
+      <div>
+        <el-checkbox v-model="fogexp2data.show" label="指数雾" size="large"
+          @change="indexfogexp2(fogexp2data.show, fogexp2data.color, fogexp2data.density)" />
+        <div>
+          <input type="text" v-model="fogexp2data.density" @input="densityFun(fogexp2data.density)">
+          <input type="color" v-model="fogexp2data.color" @input="color2Fun(fogexp2data.color)">
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -99,6 +117,22 @@ const fogdata = fogCounterStore()
 
   // 地面模块
   .groundboc {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    input {
+      width: vw(30px);
+      height: vh(19px);
+      text-align: center;
+      margin-left: vw(5px);
+
+      &:focus {
+        outline: none;
+        /* 去掉焦点时的外部轮廓 */
+      }
+    }
+
     /* 设置透明的边框，确保只有下边框有渐变效果 */
     border-top: 1px solid transparent;
     border-left: 1px solid transparent;
@@ -113,6 +147,26 @@ const fogdata = fogCounterStore()
 
   // 雾模块
   .fogbox {
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      input {
+        width: vw(30px);
+        height: vh(19px);
+        text-align: center;
+        margin-left: vw(5px);
+
+        &:focus {
+          outline: none;
+          /* 去掉焦点时的外部轮廓 */
+        }
+      }
+
+    }
+
+
     /* 设置透明的边框，确保只有下边框有渐变效果 */
     border-top: 1px solid transparent;
     border-left: 1px solid transparent;
