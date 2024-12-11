@@ -25,8 +25,9 @@ export const lightCounterStore = defineStore('light', () => {
       lightshow: false,
       lightcolor: '#fff',
       lightstrength: 1,
-      lightadd: {},
+      lightadd: [], // 存储新增光源
       lightshodow: false,
+      lightxyz: true, // 用于显示坐标
       x: 0,
       y: 0,
       Z: 0
@@ -37,10 +38,11 @@ export const lightCounterStore = defineStore('light', () => {
       lightshow: false,
       lightcolor: '#fff',
       lightstrength: 1,
-      lightadd: {},
+      lightadd: [],
       lightshodow: false,
-      x: 5,
-      y: 1,
+      lightxyz: true, // 用于显示坐标
+      x: 0,
+      y: 0,
       Z: 0
     },
     {
@@ -49,10 +51,11 @@ export const lightCounterStore = defineStore('light', () => {
       lightshow: false,
       lightcolor: '#fff',
       lightstrength: 1,
-      lightadd: {},
+      lightadd: [],
       lightshodow: false,
-      x: 5,
-      y: 1,
+      lightxyz: true, // 用于显示坐标
+      x: 0,
+      y: 0,
       Z: 0
     },
     {
