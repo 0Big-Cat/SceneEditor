@@ -1,22 +1,28 @@
 <script setup>
 // 右侧面板主体
-import { ref, onMounted } from 'vue'
+import { removeOutline } from '../../../public/three/mainScene'
+import { uploadCounterStore } from '@/stores'
 
 // 面板显示隐藏变量
-let panelValue = ref(false)
+let data = uploadCounterStore()
 
-onMounted(() => {
-  // 挂载完成显示左侧面板
-  panelValue.value = true
-})
+function changeper() {
+  data.panelValue = false
+  removeOutline(data.currentOutline)
+}
 
 </script>
 
 <template>
-  <!-- <transition name="right"> -->
-  <!-- v-if="panelValue" -->
-  <div id="rightmainpanel"></div>
-  <!-- </transition> -->
+  <transition name="right">
+    <div v-if="data.panelValue" id="rightmainpanel">
+      <div>子网格名称:</div>
+      <div>
+        <span>{{ data.modelchildName }}</span>
+      </div>
+      <div class="iconfont icon-shouqi-" @click="changeper"></div>
+    </div>
+  </transition>
 </template>
 
 <style lang="scss" scoped>
@@ -24,25 +30,59 @@ onMounted(() => {
   position: absolute;
   top: 0;
   right: 0;
-  width: vw(300px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: vw(250px);
   height: 100%;
   z-index: 1;
-  background-color: skyblue;
-  opacity: 0.5;
+  background-color: #0d0d0d;
+  color: #fff;
+
+  &>div:nth-of-type(2) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: vw(230px);
+    height: vh(115px);
+    border: 1px solid #3d3d3d;
+
+    span {
+      width: 100%;
+      text-align: center;
+      word-wrap: break-word;
+    }
+
+  }
+
+  &>div:nth-of-type(3) {
+    position: absolute;
+    top: 50%;
+    left: -12%;
+    transform: translateY(-50%) rotate(180deg);
+    // transform: rotate(180deg);
+    width: vw(30px);
+    height: vh(60px);
+    line-height: vh(60px);
+    border-radius: 10px;
+    background-color: #0d0d0d;
+    color: #0ab0b7;
+    text-align: center;
+    font-size: rem(24px);
+    cursor: pointer;
+  }
 }
 
 // 组件动画
-// .right-enter-active,
-// .right-leave-active {
-//   transition: opacity 1s, transform 1s;
-// }
+.right-enter-active,
+.right-leave-active {
+  /* 只保留平移效果 */
+  transition: transform 0.5s ease;
+}
 
-// .right-enter-from {
-//   opacity: 0;
-//   transform: translateX(100px);
-// }
-
-// .right-leave-to {
-//   opacity: 0;
-//   transform: translateX(100px);
-// }</style>
+.right-enter-from,
+.right-leave-to {
+  /* 初始位置设定为左侧 100% */
+  transform: translateX(100%);
+}
+</style>

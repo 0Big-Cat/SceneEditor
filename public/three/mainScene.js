@@ -8,18 +8,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 // 引入hdr加载器
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
-// 引入拖拽控件
-// import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
-// import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
-// import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
-
-// import { DragControls } from 'three/examples/js/controls/DragControls'
 // 引入帧率查看器
 import Stats from 'three/addons/libs/stats.module.js'
 // 引入后期库
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
+
 // 引入相机位置+旋转中心位置模块变量
-import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, animateCounterStore } from '@/stores'
+import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, animateCounterStore, uploadCounterStore } from '@/stores'
 
 
 // 将关键变量提出
@@ -89,6 +84,9 @@ export const initThreeScene = () => {
     camera.updateProjectionMatrix()
   })
 
+
+
+
   // 创建EffectComposer
   // composer = new EffectComposer(render)
 
@@ -123,9 +121,18 @@ export const initThreeScene = () => {
   // 辅助坐标系
   const axesHelper = new THREE.AxesHelper(10)
   scene.add(axesHelper)
+
+  // 创建渲染器
+  // const composer = new EffectComposer(render)
+  // composer.addPass(new RenderPass(scene, camera))
+  // // 设置描边效果
+  // const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera)
+  // outlinePass.edgeStrength = 10 // 描边强度
+  // outlinePass.edgeGlow = 0.5 // 描边发光效果
+  // outlinePass.visibleEdgeColor.set(0xff0000) // 可见边颜色
+  // outlinePass.hiddenEdgeColor.set(0x000000) // 隐藏边颜色
+  // composer.addPass(outlinePass)
 }
-
-
 
 
 let model // 当前传入的模型
@@ -313,11 +320,19 @@ export const deleteModel = (name) => {
   }
 }
 
-// 修改模型位置
+// 模型坐标
 export const pointMoodel = (name, point) => {
   models.forEach(item => {
     if (item.name === name) {
       item.position.set(point.x, point.y, point.z)
+    }
+  })
+}
+
+// 模型缩放
+export const scaleMoodel = (name, point) => {
+  models.forEach(item => {
+    if (item.name === name) {
       item.scale.set(point.s, point.s, point.s)
     }
   })
@@ -751,7 +766,7 @@ export const lightaddFun = (lightName) => {
     }) // 新建光源存入数组管理
     // 新增的光源辅助器，先存到数组中，暂不添加到场景中，由辅助器那块统一管理
     const spotlightHelper = new THREE.SpotLightHelper(spotlight)
-    scene.add(spotlightHelper)
+    scene.add(spotlight)
     if (lightSet[0].lightshow) {
       scene.add(spotlightHelper)
     }
@@ -807,38 +822,45 @@ export const changenewlight = (indexmin, changevalue, lightname) => {
 export const newlightXFun = (indexmin, xvalue, lightname) => {
   if (lightname === 'pointlight') {
     lightaddArry[indexmin].position.x = xvalue  // 点光源
+    lightaddArry[indexmin].update()
   }
   if (lightname === 'directionallight') {
     directionalArry[indexmin].position.x = xvalue  // 平行光
-    // directionallightHelper.update()  // 更新辅助器位
-    //  directionalArry[indexmin].directionallightHelper.update() 明天试试这个
+    directionalHelperArry[indexmin].update()
   }
   if (lightname === 'spotlight') {
     spotArry[indexmin].position.x = xvalue  // 聚光灯
+    spotHelperArry[indexmin].update()
   }
 }
 // Y坐标
 export const newlightYFun = (indexmin, xvalue, lightname) => {
   if (lightname === 'pointlight') {
     lightaddArry[indexmin].position.y = xvalue  // 点光源
+    lightaddArry[indexmin].update()
   }
   if (lightname === 'directionallight') {
     directionalArry[indexmin].position.y = xvalue  // 平行光
+    directionalHelperArry[indexmin].update()
   }
   if (lightname === 'spotlight') {
     spotArry[indexmin].position.y = xvalue  // 聚光灯
+    spotHelperArry[indexmin].update()
   }
 }
 // Z坐标
 export const newlightZFun = (indexmin, xvalue, lightname) => {
   if (lightname === 'pointlight') {
     lightaddArry[indexmin].position.z = xvalue  // 点光源
+    lightaddArry[indexmin].update()
   }
   if (lightname === 'directionallight') {
     directionalArry[indexmin].position.z = xvalue  // 平行光
+    directionalHelperArry[indexmin].update()
   }
   if (lightname === 'spotlight') {
     spotArry[indexmin].position.z = xvalue  // 聚光灯
+    spotHelperArry[indexmin].update()
   }
 }
 
@@ -1104,4 +1126,91 @@ export const animatecishu = (uuid, value, number) => {
       action.setLoop(THREE.LoopRepeat, value)
     }
   }
+}
+
+
+// 创建 Raycaster 和鼠标向量
+const raycaster = new THREE.Raycaster()
+const mouse = new THREE.Vector2()
+// 存储当前描边的物体
+// let currentOutline = null
+
+// 定义监听器函数
+const handleClick = event => {
+  let childname = uploadCounterStore()
+
+  // 计算鼠标位置归一化设备坐标 (-1 to +1)
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+
+  // 使用摄像机和鼠标位置更新射线
+  raycaster.setFromCamera(mouse, camera)
+
+  // 检测与场景中物体的交互
+  const intersects = raycaster.intersectObjects(scene.children, true).filter(
+    intersect =>
+      !(intersect.object instanceof THREE.LineSegments) && // 排除描边
+      !(intersect.object instanceof THREE.GridHelper)     // 排除网格辅助线
+  )
+
+
+
+  if (intersects.length > 0) {
+    // 获取第一个被点击的对象
+    const clickedObject = intersects[0].object
+
+    // 仅点击模型生效
+    if (clickedObject.isMesh) {
+      console.log(clickedObject.name)
+
+      // 将子网格名称传递给右侧面板展示
+      childname.modelchildName = clickedObject.name
+
+      // 如果已经有描边的物体不同于当前点击的物体，移除上一个描边
+      if (childname.currentOutline && childname.currentOutline !== clickedObject) {
+        removeOutline(childname.currentOutline)
+      }
+
+      // 如果该物体没有描边，则添加描边
+      // if (!currentOutline || currentOutline !== clickedObject) {
+      //   addOutline(clickedObject)
+      //   currentOutline = clickedObject // 设置当前描边物体
+      // }
+
+      // 立即为该物体添加描边
+      addOutline(clickedObject)
+
+      // 更新当前描边的物体
+      childname.currentOutline = clickedObject
+
+    }
+  }
+}
+
+// 为物体添加描边
+function addOutline(object) {
+  // 先移除已有描边（防止重复添加）
+  removeOutline(object)
+  const edges = new THREE.EdgesGeometry(object.geometry)
+  const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: '#0ab0b7' }))
+  object.add(line) // 将描边添加到物体中
+}
+
+// 为物体移除描边
+export const removeOutline = (object) => {
+  const outline = object.children.find(child => child instanceof THREE.LineSegments)
+  if (outline) {
+    object.remove(outline)
+  }
+}
+
+// 添加/移除监听事件
+export const clickListener = value => {
+  let childname = uploadCounterStore()
+  if (value) {
+    window.addEventListener('click', handleClick)
+    return
+  }
+  window.removeEventListener('click', handleClick)
+  removeOutline(childname.currentOutline)
 }

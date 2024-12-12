@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 // 模型上传模块
 export const uploadCounterStore = defineStore('upload', () => {
+  // 模型相关数据
   const uploadvalue = ref(
     [
       {
@@ -16,8 +17,19 @@ export const uploadCounterStore = defineStore('upload', () => {
     ]
   )
 
-  return {
-    uploadvalue
+  // 隐藏显示右侧面板
+  const panelValue = ref(false)
 
+  // 子网格名称
+  const modelchildName = ref('')
+
+  // 显示or取消子网格描边
+  const currentOutline = ref(null)
+
+  return {
+    uploadvalue,
+    panelValue,
+    modelchildName,
+    currentOutline
   }
 })

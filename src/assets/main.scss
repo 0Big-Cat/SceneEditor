@@ -88,3 +88,8 @@ a{
   border-color: #0ab0b7 !important; /* 修改为你想要的颜色 */
 }
 
+
+.el-switch {
+  --el-switch-on-color: #0ab0b7 !important; 
+  --el-switch-off-color: #333 !important; 
+}

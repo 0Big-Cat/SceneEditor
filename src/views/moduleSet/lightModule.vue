@@ -222,6 +222,10 @@ const deleatlight = (index, lightname, indexmin) => {
             cursor: pointer;
           }
         }
+
+        li:nth-of-type(3) {
+          margin-top: vh(10px);
+        }
       }
 
       .newlight span:nth-of-type(2) {

@@ -1,5 +1,5 @@
 <script setup>
-import { loadModelScen, deleteModel, pointMoodel, wireframeMoodel } from '../../../public/three/mainScene'
+import { loadModelScen, deleteModel, pointMoodel, scaleMoodel, wireframeMoodel, clickListener } from '../../../public/three/mainScene'
 import { uploadCounterStore, loadingCounterStore } from '@/stores'
 
 const loadval = loadingCounterStore()
@@ -53,15 +53,23 @@ const deletemodel = name => {
   }
 }
 
-// 修改模型位置
+// 模型坐标
 const pointmodel = (name, point) => {
   const model = filename.uploadvalue.find(item => item.name === name)
   if (model) {
     model.x = Number(point.x)
     model.y = Number(point.y)
     model.z = Number(point.z)
+    pointMoodel(name, { x: model.x, y: model.y, z: model.z })
+  }
+}
+
+// 模型缩放
+const scalemodel = (name, point) => {
+  const model = filename.uploadvalue.find(item => item.name === name)
+  if (model) {
     model.s = Number(point.s)
-    pointMoodel(name, { x: model.x, y: model.y, z: model.z, s: model.s })
+    scaleMoodel(name, { s: model.s })
   }
 }
 
@@ -73,7 +81,8 @@ const restoremoodel = name => {
     model.y = 0
     model.z = 0
     model.s = 1
-    pointMoodel(name, { x: model.x, y: model.y, z: model.z, s: model.s }) // 更新模型位置
+    pointMoodel(name, { x: model.x, y: model.y, z: model.z }) // 更新模型位置
+    scaleMoodel(name, { s: model.s })
   }
 }
 
@@ -89,6 +98,7 @@ const wireframemoodel = name => {
 
 <template>
   <div id="uploadmodule">
+    <!-- 模型上传按钮 -->
     <div>
       <label class="custom-file-upload">
         上传模型
@@ -96,15 +106,23 @@ const wireframemoodel = name => {
       </label>
       <h6>Tips: gltf 需与.bin 纹理一同上传</h6>
     </div>
+    <!-- 模型坐标、缩放、删除等 -->
     <ul>
       <li v-for="item in filename.uploadvalue" :key="item.name">
         <div class="modelName">模型名称:{{ item.name }}</div>
-        <div v-for="axis in ['x', 'y', 'z', 's']" :key="axis">
-          <label>
-            <span>{{ axis }}:</span>
-            <el-slider type="range" step="0.5" :min="axis === 's' ? 1 : -100" :max="axis === 's' ? 100 : 100"
-              v-model="item[axis]" @input="pointmodel(item.name, { x: item.x, y: item.y, z: item.z, s: item.s })" />
-          </label>
+        <div>
+          <span>坐标:</span>
+          <input v-for="axis in ['x', 'y', 'z']" :key="axis" type="text" v-model="item[axis]"
+            @input="pointmodel(item.name, { x: item.x, y: item.y, z: item.z })">
+        </div>
+        <div>
+          <span>缩放:</span>
+          <input type="text" v-model="item['s']" @input="scalemodel(item.name, { s: item.s })">
+        </div>
+        <div>
+          <el-switch v-model="filename.panelValue" class="ml-2" inline-prompt style="--el-switch-on-color: #13ce66; 
+            --el-switch-off-color: #ff4949" active-text="选中子网格" inactive-text="选中子网格"
+            @change="clickListener(filename.panelValue)" />
         </div>
         <div>
           <button @click="deletemodel(item.name)">删除</button>
@@ -113,7 +131,6 @@ const wireframemoodel = name => {
         </div>
       </li>
     </ul>
-
   </div>
 </template>
 
@@ -169,6 +186,15 @@ const wireframemoodel = name => {
 
       input {
         margin-top: vh(10px);
+        width: 40px;
+        height: 19px;
+        margin-right: vw(5px);
+        text-align: center;
+
+        &:focus {
+          outline: none;
+          /* 去掉焦点时的外部轮廓 */
+        }
       }
 
       .modelName {
@@ -192,18 +218,13 @@ const wireframemoodel = name => {
 
       }
 
-      label {
-        display: flex;
-        align-items: baseline;
-
-        span {
-          font-size: rem(18px);
-          margin-right: vw(10px);
-        }
+      span {
+        font-size: rem(14px);
+        margin-right: vw(5px);
       }
 
       button {
-        margin-top: vh(15px);
+        margin-top: vh(5px);
         margin-right: vw(10px);
         width: vw(60px);
         height: vh(36px);
@@ -216,6 +237,10 @@ const wireframemoodel = name => {
         &:hover {
           color: #0ab0b7;
         }
+      }
+
+      &>div:nth-of-type(4) {
+        margin-top: vh(5px);
       }
     }
   }
