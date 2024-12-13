@@ -27,8 +27,8 @@ const items = [
   { name: '灯光', url: '/light', icon: 'icon-dengguang', action: 'light' },
   { name: '场景', url: '/environmentmodel', icon: 'icon-tiankong', action: 'environmentmodel' },
   { name: '动画', url: '/nimate', icon: 'icon-donghua1', action: 'animation' },
-  { name: '点位', url: '/point', icon: 'icon-web-icon-', action: 'waypoints' },
-  { name: '后期', url: '/anaphase', icon: 'icon-houqi', action: 'postProcessing' }
+  { name: '点位', url: '/point', icon: 'icon-web-icon-', action: 'waypoints' }
+  // { name: '后期', url: '/anaphase', icon: 'icon-houqi', action: 'postProcessing' }
 ]
 
 function changeper() {

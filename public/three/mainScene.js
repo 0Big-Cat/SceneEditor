@@ -12,9 +12,8 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import Stats from 'three/addons/libs/stats.module.js'
 // 引入后期库
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
-
 // 引入相机位置+旋转中心位置模块变量
-import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, animateCounterStore, uploadCounterStore } from '@/stores'
+import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, animateCounterStore, uploadCounterStore, pointlabelCounterStore } from '@/stores'
 
 
 // 将关键变量提出
@@ -49,7 +48,7 @@ export const initThreeScene = () => {
   // 启用渲染器的阴影
   render.shadowMap.enabled = true
   // 渲染器背景色
-  render.setClearColor('#000', 1)
+  // render.setClearColor('#000', 1)
   // 设置渲染器的色彩空间
   render.outputEncoding = THREE.SRGBColorSpace
 
@@ -294,6 +293,7 @@ export const loadModelScen = files => {
 export const deleteModel = (name) => {
   const animateal = animateCounterStore()
   const index = models.findIndex((item) => item.name === name)
+  let data = uploadCounterStore()
 
   if (index !== -1) {
     // 删除指定模型
@@ -316,6 +316,10 @@ export const deleteModel = (name) => {
           item.serialnumber -= 1
         }
       })
+    }
+    data.allChildName.splice(index, 1)
+    if (data.allChildName.length === 0) {
+      data.checkedValue = false
     }
   }
 }
@@ -356,9 +360,6 @@ export const cameraPoint = () => {
 export const controlsPoint = () => {
   controls.target.set(0, 0, 0)
 }
-
-
-
 
 
 let pointLight // 点光源
@@ -694,6 +695,7 @@ export const lightcoordinatesZFun = (lightName, lightZValue) => {
   }
 }
 
+
 // 新增光源
 const lightaddArry = [] // 点光源
 const lightaddHelperArry = []
@@ -865,8 +867,6 @@ export const newlightZFun = (indexmin, xvalue, lightname) => {
 }
 
 
-
-
 let rgbeloader
 // 天空球模块
 export const skyballHDR = (value) => {
@@ -909,7 +909,6 @@ export const changeskyHDR = (id, value) => {
 }
 
 
-
 let gridHelper
 let currentSize = 10  // 初始大小
 let currentDivisions = 10  // 初始格子数
@@ -948,9 +947,6 @@ export const divisionsFun = divisions => {
     scene.add(gridHelper)  // 添加新的网格到场景
   }
 }
-
-
-
 
 
 // 线性雾
@@ -1014,7 +1010,6 @@ export const color2Fun = color => {
 }
 
 
-
 // let bloomPass
 // 辉光效果
 export const anaphaseBloom = value => {
@@ -1037,7 +1032,6 @@ export const anaphaseBloom = value => {
 // 景深效果
 
 // 胶片颗粒效果
-
 
 
 // 动画模块
@@ -1089,8 +1083,6 @@ export const normalPlayAnimation = (uuid, value, number) => {
 }
 
 
-
-
 // 动画进度
 const logProgress = () => {
   let progressArray = []
@@ -1132,57 +1124,36 @@ export const animatecishu = (uuid, value, number) => {
 // 创建 Raycaster 和鼠标向量
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
-// 存储当前描边的物体
-// let currentOutline = null
 
 // 定义监听器函数
-const handleClick = event => {
+export const handleClick = event => {
   let childname = uploadCounterStore()
-
   // 计算鼠标位置归一化设备坐标 (-1 to +1)
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
-
   // 使用摄像机和鼠标位置更新射线
   raycaster.setFromCamera(mouse, camera)
-
   // 检测与场景中物体的交互
   const intersects = raycaster.intersectObjects(scene.children, true).filter(
     intersect =>
       !(intersect.object instanceof THREE.LineSegments) && // 排除描边
       !(intersect.object instanceof THREE.GridHelper)     // 排除网格辅助线
   )
-
-
-
   if (intersects.length > 0) {
     // 获取第一个被点击的对象
     const clickedObject = intersects[0].object
-
     // 仅点击模型生效
     if (clickedObject.isMesh) {
-      console.log(clickedObject.name)
-
       // 将子网格名称传递给右侧面板展示
       childname.modelchildName = clickedObject.name
-
       // 如果已经有描边的物体不同于当前点击的物体，移除上一个描边
       if (childname.currentOutline && childname.currentOutline !== clickedObject) {
         removeOutline(childname.currentOutline)
       }
-
-      // 如果该物体没有描边，则添加描边
-      // if (!currentOutline || currentOutline !== clickedObject) {
-      //   addOutline(clickedObject)
-      //   currentOutline = clickedObject // 设置当前描边物体
-      // }
-
       // 立即为该物体添加描边
       addOutline(clickedObject)
-
       // 更新当前描边的物体
       childname.currentOutline = clickedObject
-
     }
   }
 }
@@ -1192,7 +1163,7 @@ function addOutline(object) {
   // 先移除已有描边（防止重复添加）
   removeOutline(object)
   const edges = new THREE.EdgesGeometry(object.geometry)
-  const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: '#0ab0b7' }))
+  const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: '#0ab0b7', linewidth: 5 }))
   object.add(line) // 将描边添加到物体中
 }
 
@@ -1204,7 +1175,7 @@ export const removeOutline = (object) => {
   }
 }
 
-// 添加/移除监听事件
+// 添加/移除子网格监听事件
 export const clickListener = value => {
   let childname = uploadCounterStore()
   if (value) {
@@ -1213,4 +1184,147 @@ export const clickListener = value => {
   }
   window.removeEventListener('click', handleClick)
   removeOutline(childname.currentOutline)
+}
+
+// 是否展示所有子网格名称
+export const allModelChildName = (value) => {
+  const dataName = uploadCounterStore() // 获取状态管理实例
+
+  if (value) {
+    models.forEach((model) => {
+      const nameArray = []
+      model.traverse((child) => {
+        if (child.isMesh) {
+          // 缓存子网格的原始透明属性和透明度
+          if (!child.userData.originalMaterial) {
+            child.userData.originalMaterial = {
+              transparent: child.material.transparent,
+              opacity: child.material.opacity
+            }
+          }
+          // 存储子网格名称
+          nameArray.push(child.name)
+        }
+      })
+      // 将当前模型的所有子网格名称存储
+      dataName.allChildName.push([...nameArray])
+    })
+    clickListener(false) // 移除监听
+    return
+  }
+
+  // 恢复所有子网格材质属性
+  dataName.allChildName.forEach((nameArray, index) => {
+    models[index].traverse((child) => {
+      if (child.isMesh) {
+        const original = child.userData.originalMaterial
+        if (original) {
+          child.material.transparent = original.transparent
+          child.material.opacity = original.opacity
+        }
+      }
+    })
+  })
+  removeOutline(lastOutlinedMesh)
+  dataName.allChildName = []
+  clickListener(true) // 开启监听
+}
+
+// 根据点击的子网格名称给予对应网格高亮效果
+let lastOutlinedMesh = null
+export const childMesh = (name) => {
+  models.forEach((item) => {
+    item.traverse((child) => {
+      if (child.isMesh) {
+        if (child.name === name) {
+          // 如果有上一个被描边的 Mesh，移除描边效果并恢复原始材质
+          if (lastOutlinedMesh && lastOutlinedMesh !== child) {
+            const original = lastOutlinedMesh.userData.originalMaterial
+            if (original) {
+              lastOutlinedMesh.material.transparent = original.transparent
+              lastOutlinedMesh.material.opacity = original.opacity
+            }
+            removeOutline(lastOutlinedMesh)
+          }
+
+          // 设置当前匹配的子网格为不透明并添加描边效果
+          child.material.transparent = false
+          child.material.opacity = 1.0
+          addOutline(child)
+
+          // 更新最后一个被描边的 Mesh
+          lastOutlinedMesh = child
+        } else {
+          // 设置不匹配的子网格为透明，但不改变其透明材质本身
+          child.material.transparent = true
+          child.material.opacity = 0.2 // 透明度可根据需求调整
+        }
+      }
+    })
+  })
+}
+
+
+// 点位获取监听
+export const pointClick = event => {
+  let data = pointlabelCounterStore()
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+  // 使用摄像机和鼠标位置更新射线
+  raycaster.setFromCamera(mouse, camera)
+  // 检测与场景中物体的交互
+  const intersects = raycaster.intersectObjects(scene.children, true).filter(
+    intersect =>
+      !(intersect.object instanceof THREE.LineSegments) && // 排除描边
+      !(intersect.object instanceof THREE.GridHelper)     // 排除网格辅助线
+  )
+  if (intersects.length > 0) {
+    // 获取第一个被点击的对象
+    const clickedObject = intersects[0].object
+    // 仅点击模型生效
+    if (clickedObject.isMesh) {
+      const point = intersects[0].point
+      data.pointcoordinate = point
+
+      // 删除旧的倒锥体
+      if (currentConeMarker) {
+        scene.remove(currentConeMarker)
+        currentConeMarker.geometry.dispose()
+        currentConeMarker.material.dispose()
+      }
+      // 创建新的倒锥体并记录
+      currentConeMarker = createConeMarker(point)
+    }
+  }
+}
+
+// 创建一个倒椎体的函数
+let currentConeMarker = null // 用于存储当前的倒锥体
+const createConeMarker = (position) => {
+  const height = 0.2 // 锥体的高度
+  const geometry = new THREE.ConeGeometry(0.1, height, 4) // 半径0.1，高0.2，4分段
+  const material = new THREE.MeshStandardMaterial({
+    color: '#0ab0b7',        // 主颜色
+    emissive: '#00ffff',    // 自发光颜色
+    emissiveIntensity: 1    // 发光强度
+  })
+  const cone = new THREE.Mesh(geometry, material)
+  // 倒转锥体，使尖端朝下
+  cone.rotation.x = Math.PI
+  // 设置位置，并向上偏移高度的一半
+  cone.position.copy(position)
+  cone.position.y += height / 2
+  scene.add(cone)
+  return cone // 返回创建的锥体
+}
+
+
+
+// 添加/移除点位监听事件
+export const poinyListener = value => {
+  if (value) {
+    window.addEventListener('click', pointClick) // dblclick双击
+    return
+  }
+  window.removeEventListener('click', pointClick)
 }

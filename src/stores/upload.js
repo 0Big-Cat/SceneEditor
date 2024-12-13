@@ -26,10 +26,18 @@ export const uploadCounterStore = defineStore('upload', () => {
   // 显示or取消子网格描边
   const currentOutline = ref(null)
 
+  // 存储模型所有子网格名称
+  const allChildName = ref([])
+
+  // 是否获取所有子网格
+  const checkedValue = ref(false)
+
   return {
     uploadvalue,
     panelValue,
     modelchildName,
-    currentOutline
+    currentOutline,
+    allChildName,
+    checkedValue
   }
 })
