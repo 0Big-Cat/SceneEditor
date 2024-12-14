@@ -1265,7 +1265,9 @@ export const childMesh = (name) => {
 }
 
 
-// 点位获取监听
+
+let points = [] // 存储点位
+let lines = []  // 存储线段
 export const pointClick = event => {
   let data = pointlabelCounterStore()
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
@@ -1294,6 +1296,19 @@ export const pointClick = event => {
       }
       // 创建新的倒锥体并记录
       currentConeMarker = createConeMarker(point)
+
+      // 如果点的数量大于1，连接之前的点
+      if (data.pathlabel) {
+        // 将点添加到记录数组
+        points.push(point)
+        const material = new THREE.LineBasicMaterial({ color: 0x00ff00 })
+        const geometry = new THREE.BufferGeometry().setFromPoints([points[points.length - 2], points[points.length - 1]])
+        const line = new THREE.Line(geometry, material)
+        scene.add(line)
+
+        // 将新生成的线段保存到 lines 数组中
+        lines.push(line)
+      }
     }
   }
 }
@@ -1301,8 +1316,8 @@ export const pointClick = event => {
 // 创建一个倒椎体的函数
 let currentConeMarker = null // 用于存储当前的倒锥体
 const createConeMarker = (position) => {
-  const height = 0.2 // 锥体的高度
-  const geometry = new THREE.ConeGeometry(0.1, height, 4) // 半径0.1，高0.2，4分段
+  const height = 1 // 锥体的高度
+  const geometry = new THREE.ConeGeometry(0.5, height, 4) // 半径0.1，高0.2，4分段
   const material = new THREE.MeshStandardMaterial({
     color: '#0ab0b7',        // 主颜色
     emissive: '#00ffff',    // 自发光颜色
@@ -1318,7 +1333,43 @@ const createConeMarker = (position) => {
   return cone // 返回创建的锥体
 }
 
+// 导出点和连线信息的 JSON 文件
+export const exportPointsToJson = () => {
+  const jsonData = points.map(point => ({
+    x: point.x,
+    y: point.y,
+    z: point.z
+  }))
+  const jsonString = JSON.stringify(jsonData, null, 2)
+  const blob = new Blob([jsonString], { type: 'application/json' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = 'pointCollection.json'
+  link.click()
+}
 
+// 清空所有的点和线
+export const clearPointsAndLines = () => {
+  points = []  // 清空记录的点
+  lines.forEach(line => {
+    scene.remove(line)      // 删除所有线段
+    line.geometry.dispose()  // 释放几何体资源
+    line.material.dispose()  // 释放材质资源
+  })
+  lines = []  // 清空线段数组
+}
+
+// 删除上一段线段
+export const clearLastLine = () => {
+  if (lines.length > 0) {
+    const lastLine = lines.pop()  // 获取并移除最后一条线段
+    scene.remove(lastLine)        // 从场景中移除线段
+    lastLine.geometry.dispose()   // 释放几何体资源
+    lastLine.material.dispose()   // 释放材质资源
+    // 移除点数组中的最后一个点
+    points.pop()
+  }
+}
 
 // 添加/移除点位监听事件
 export const poinyListener = value => {
@@ -1327,4 +1378,5 @@ export const poinyListener = value => {
     return
   }
   window.removeEventListener('click', pointClick)
+  scene.remove(currentConeMarker) // 移除椎体
 }

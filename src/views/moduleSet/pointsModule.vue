@@ -1,6 +1,6 @@
 <script setup>
 // 点位模块
-import { poinyListener } from '../../../public/three/mainScene'
+import { poinyListener, clearPointsAndLines, clearLastLine, exportPointsToJson } from '../../../public/three/mainScene'
 import { pointlabelCounterStore } from '@/stores'
 
 let data = pointlabelCounterStore()
@@ -32,6 +32,7 @@ const copypoint = (itemx, itemy, itemz) => {
 <template>
   <div id="modelpoint">
     <el-checkbox v-model="data.pointlabel" label="标点" size="large" @change="poinyListener(data.pointlabel)" />
+
     <div>
       <span>坐标:</span>
       <span>{{ formatToThreeDecimals(data.pointcoordinate.x) }}</span>
@@ -42,7 +43,14 @@ const copypoint = (itemx, itemy, itemz) => {
         formatToThreeDecimals(data.pointcoordinate.y),
         formatToThreeDecimals(data.pointcoordinate.z)
       )">复制</button>
+    </div>
 
+    <el-checkbox v-model="data.pathlabel" label="路径" size="large" />
+
+    <div>
+      <button @click="clearPointsAndLines()">全部清除</button>
+      <button @click="clearLastLine()">回退</button>
+      <button @click="exportPointsToJson()">json格式导出</button>
     </div>
   </div>
 </template>
@@ -57,7 +65,7 @@ const copypoint = (itemx, itemy, itemz) => {
   color: #fff;
   padding: 0 vw(20px);
 
-  div {
+  >div:nth-of-type(1) {
     display: flex;
     align-items: center;
 
@@ -87,5 +95,25 @@ const copypoint = (itemx, itemy, itemz) => {
       cursor: pointer;
     }
   }
+
+  >div:nth-of-type(2) {
+    button {
+      margin-bottom: vh(10px);
+      // margin-right: vw(10px);
+      width: vw(120px);
+      height: vh(36px);
+      line-height: vh(36px);
+      color: #fff;
+      border: none;
+      background: url('../../assets/imgs/buttonback.png') no-repeat center/100% 100%;
+      cursor: pointer;
+
+      &:hover {
+        color: #0ab0b7;
+      }
+    }
+  }
+
+
 }
 </style>

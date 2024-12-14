@@ -3,8 +3,10 @@ import { defineStore } from 'pinia'
 
 // 点位模块
 export const pointlabelCounterStore = defineStore('pointlabel', () => {
-  // 是否显示/隐藏详细操作模块
+  // 是否开启点位标注
   const pointlabel = ref(false)
+  // 是否开启路径标注
+  const pathlabel = ref(false)
 
   // 点位坐标
   const pointcoordinate = ref({
@@ -15,6 +17,7 @@ export const pointlabelCounterStore = defineStore('pointlabel', () => {
 
   return {
     pointlabel,
+    pathlabel,
     pointcoordinate
   }
 })

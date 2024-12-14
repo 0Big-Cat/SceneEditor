@@ -90,13 +90,13 @@ const { fogdata, fogexp2data } = fogCounterStore()
     place-items: center;
 
     /* 设置透明的边框，确保只有下边框有渐变效果 */
-    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
     border-left: 1px solid transparent;
     border-right: 1px solid transparent;
 
     /* 创建渐变的下边框 */
     background-image: linear-gradient(to right, #0ab0b7, #fff);
-    background-position: bottom left;
+    background-position: top left;
     background-repeat: no-repeat;
     background-size: 100% 2px;
 

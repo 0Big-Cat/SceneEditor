@@ -55,6 +55,11 @@ export const skyCounterStore = defineStore('sky', () => {
       id: 1109,
       url: 'textures/hdrs/9.jpg',
       hdrurl: 'textures/hdrs/9.hdr'
+    },
+    {
+      id: 1110,
+      url: 'textures/hdrs/10.jpg',
+      hdrurl: 'textures/hdrs/10.hdr'
     }
   ])
 
