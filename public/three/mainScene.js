@@ -258,13 +258,15 @@ export const loadModelScen = files => {
           startandstop: true,
           pauserecovery: false,
           positivenegative: true,
-          progress: 0
+          progress: 0, // 动画进度
+          animateloop: 0 // 动画运行次数
         }))
 
         // 播放所有动画
         if (actions && actions.length > 0) {
           actions.forEach(item => {
             item.forEach(action => {
+              action.loop = THREE.LoopOnce // 播放一次后停止
               action.play()
               // actions[0].play() //播放单个
             })
