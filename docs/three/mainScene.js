@@ -172,7 +172,7 @@ export const loadModelScen = files => {
       // 获取动画动作
       actions.push(gltf.animations.map((clip) => mixer.clipAction(clip)))
 
-      console.log(actions)
+      // console.log(actions)
 
       // 为 gltf.animations 的每个动画对象添加一个响应式变量
       const animationsWithControl = gltf.animations.map((animation) => ({
@@ -1015,7 +1015,7 @@ export const color2Fun = color => {
 // let bloomPass
 // 辉光效果
 export const anaphaseBloom = value => {
-  console.log(value)
+  // console.log(value)
 
   if (value) {
     // bloomPass = new UnrealBloomPass(
@@ -1039,10 +1039,10 @@ export const anaphaseBloom = value => {
 // 动画模块
 // 播放、停止指定动画
 export const playAnimation = (uuid, value, number) => {
-  console.log(mixers)
+  // console.log(mixers)
 
   const action = mixers[number]._actions.find((item) => {
-    console.log(item) // 输出每个 action 的信息
+    // console.log(item) // 输出每个 action 的信息
     return item._clip.uuid === uuid // 比较 _clip.uuid 是否与传入的 uuid 匹配
   })
   if (action) {
@@ -1057,7 +1057,7 @@ export const playAnimation = (uuid, value, number) => {
 // 暂停指定动画
 export const pauseAnimation = (uuid, value, number) => {
   const action = mixers[number]._actions.find((item) => {
-    console.log(item)
+    // console.log(item)
     return item._clip.uuid === uuid
   })
   if (action) {
@@ -1072,7 +1072,7 @@ export const pauseAnimation = (uuid, value, number) => {
 // 继续指定动画
 export const normalPlayAnimation = (uuid, value, number) => {
   const action = mixers[number]._actions.find((item) => {
-    console.log(item)
+    // console.log(item)
     return item._clip.uuid === uuid
   })
   if (action) {
@@ -1112,7 +1112,7 @@ const logProgress = () => {
 // 动画次数
 export const animatecishu = (uuid, value, number) => {
   const action = mixers[number]._actions.find((item) => {
-    console.log(item)
+    // console.log(item)
     return item._clip.uuid === uuid
   })
   if (action) {
