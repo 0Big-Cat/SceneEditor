@@ -20,15 +20,32 @@ const toggleChild = (index) => {
 const setActive = (index, childname) => {
   activeIndex.value = index
   childMesh(childname)
+  data.modelchildName = childname
 }
-
+// 复制文本的方法
+const copyText = () => {
+  // 格式化相机坐标为字符串
+  const cameraString = data.modelchildName
+  // 使用 Clipboard API 将相机坐标复制到剪贴板
+  navigator.clipboard.writeText(cameraString).then(() => {
+    ElMessage({
+      message: '复制成功',
+      type: 'success'
+    })
+  }).catch(() => {
+    ElMessage({
+      message: '复制失败',
+      type: 'warning'
+    })
+  })
+}
 </script>
 
 <template>
   <transition name="right">
     <div v-if="data.panelValue" id="rightmainpanel">
       <div>子网格名称:</div>
-      <div>
+      <div @dblclick="copyText">
         <span>{{ data.modelchildName }}</span>
       </div>
       <div>
@@ -77,6 +94,7 @@ const setActive = (index, childname) => {
     width: vw(230px);
     height: vh(115px);
     border: 1px solid #3d3d3d;
+    cursor: pointer;
 
     span {
       width: 100%;
@@ -86,23 +104,6 @@ const setActive = (index, childname) => {
     }
 
   }
-
-  // &>div:nth-of-type(3) {
-  //   position: absolute;
-  //   top: 50%;
-  //   left: -12%;
-  //   transform: translateY(-50%) rotate(180deg);
-  //   // transform: rotate(180deg);
-  //   width: vw(30px);
-  //   height: vh(60px);
-  //   line-height: vh(60px);
-  //   border-radius: 10px;
-  //   background-color: #0d0d0d;
-  //   color: #0ab0b7;
-  //   text-align: center;
-  //   font-size: rem(24px);
-  //   cursor: pointer;
-  // }
 
   &>div:nth-of-type(4) {
     width: vw(230px);

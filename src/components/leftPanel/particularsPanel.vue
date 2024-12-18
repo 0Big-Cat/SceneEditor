@@ -52,6 +52,7 @@ function changeper() {
   }
 }
 
+
 // 组件动画
 .particulars-enter-active,
 .particulars-leave-active {

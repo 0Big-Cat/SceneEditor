@@ -1,6 +1,6 @@
 <template>
   <div id="leftmainpanel">
-    <div class="logobox">logo</div>
+    <div class="logobox"></div>
     <div class="routerbox">
       <router-link v-for="(item, index) in items" :key="index" @click="changeper" :to="item.url" class="routerlink">
         <label>
@@ -49,13 +49,11 @@ function changeper() {
   border-right: 1px solid #3d3d3d;
 
   .logobox {
+    position: relative;
+    width: vw(130px);
     height: vh(55px);
-    line-height: vh(55px);
-    background-color: #0ab0b7;
-    text-align: center;
-    font-size: rem(20px);
-    font-weight: 700;
-    border-right: none;
+    overflow: hidden;
+    padding: 0 vw(13px);
   }
 
   .routerbox {

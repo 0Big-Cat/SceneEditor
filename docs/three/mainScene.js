@@ -83,15 +83,20 @@ export const initThreeScene = () => {
     camera.updateProjectionMatrix()
   })
 
-
-
-
   // 创建EffectComposer
   // composer = new EffectComposer(render)
 
   // 帧率查看器
   const stats = new Stats()
-  // document.body.appendChild(stats.domElement)
+  const container = document.querySelector('.logobox')
+  container.appendChild(stats.dom)
+  stats.dom.style.width = '100%' // 宽度占满容器
+  stats.dom.style.height = '100%' // 高度占满容器
+  stats.dom.style.position = 'relative' // 如果需要定位
+  stats.dom.style.left = '0'
+  stats.dom.style.top = '0'
+  stats.dom.style.transform = 'scale(1.3)' // 按比例缩小
+  stats.dom.style.transformOrigin = 'top left' // 缩放的基点
 
   // 创建一个时钟对象来计算时间差
   const clock = new THREE.Clock()
@@ -1265,6 +1270,7 @@ export const childMesh = (name) => {
     })
   })
 }
+
 
 
 
