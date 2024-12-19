@@ -32,7 +32,7 @@ const handleFileChange = event => {
   loadval.loadingshow = true
   loadModelScen(file)  // 使用loadModel加载模型
 
-  console.log(filename.uploadvalue)
+  // console.log(filename.uploadvalue)
 
 }
 
@@ -113,11 +113,11 @@ const wireframemoodel = name => {
         <div>
           <span>坐标:</span>
           <input v-for="axis in ['x', 'y', 'z']" :key="axis" type="text" v-model="item[axis]"
-            @input="pointmodel(item.name, { x: item.x, y: item.y, z: item.z })">
+            @change="pointmodel(item.name, { x: item.x, y: item.y, z: item.z })">
         </div>
         <div>
           <span>缩放:</span>
-          <input type="text" v-model="item['s']" @input="scalemodel(item.name, { s: item.s })">
+          <input type="text" v-model="item['s']" @change="scalemodel(item.name, { s: item.s })">
         </div>
         <div>
           <el-switch v-model="filename.panelValue" class="ml-2" inline-prompt style="--el-switch-on-color: #13ce66; 

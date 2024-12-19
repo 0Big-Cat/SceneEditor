@@ -54,7 +54,7 @@ const deleatlight = (index, lightname, indexmin) => {
         <!-- 光照强度 -->
         <div v-if="item.lightcolor && item.lightshow" class="lightvalue">
           <span>强度:</span>
-          <el-slider v-model="item.lightstrength" :precision="2" :step="0.1" :max="100" :min="1"
+          <el-slider v-model="item.lightstrength" :precision="2" :step="0.1" :max="200" :min="1"
             @input="changeLightStrength(item.lightname, item.lightstrength)" />
         </div>
         <!-- 光源坐标 -->
@@ -75,7 +75,7 @@ const deleatlight = (index, lightname, indexmin) => {
             <ul v-for="(itemmin, indexmin) in item.lightadd" :key="itemmin">
               <li>
                 <span>强度:</span>
-                <el-slider v-model="itemmin.lightstrength" :precision="2" :step="0.1" :max="100" :min="1"
+                <el-slider v-model="itemmin.lightstrength" :precision="2" :step="0.1" :max="200" :min="1"
                   @input="changenewlight(indexmin, itemmin.lightstrength, itemmin.lightname)" />
               </li>
               <li>

@@ -10,6 +10,8 @@ $default-root-font-size: 16px;
 // 根据屏幕分辨率调整的宽度和高度
 $designWidth: $default-design-width;
 $designHeight: $default-design-height;
+// 根据屏幕大小调整根字体大小
+$designSize: $default-root-font-size;
 
 // px 转为 vw 的函数
 @function vw($px) {
@@ -23,9 +25,10 @@ $designHeight: $default-design-height;
 
 // rem 转换函数
 // $base: 指定根字体大小，默认是 16px
-@function rem($px, $base: $default-root-font-size) {
+@function rem($px, $base: $designSize) {
   @return math.div($px, $base) * 1rem;
 }
+
 
 // 根据屏幕分辨率调整设计稿尺寸
 @media (max-width: 3840px) and (max-height: 2160px) {

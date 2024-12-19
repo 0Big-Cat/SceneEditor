@@ -50,7 +50,7 @@ export const lightCounterStore = defineStore('light', () => {
       lightname: 'spotlight',
       lightshow: false,
       lightcolor: '#fff',
-      lightstrength: 1,
+      lightstrength: 50,
       lightadd: [],
       lightshodow: false,
       lightxyz: true, // 用于显示坐标

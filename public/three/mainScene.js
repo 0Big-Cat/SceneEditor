@@ -14,7 +14,8 @@ import Stats from 'three/addons/libs/stats.module.js'
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
 // 引入相机位置+旋转中心位置模块变量
 import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, animateCounterStore, uploadCounterStore, pointlabelCounterStore } from '@/stores'
-
+import JSZip from 'jszip'
+import { saveAs } from 'file-saver'
 
 // 将关键变量提出
 let scene, camera, render, controls, gltfLoader
@@ -33,7 +34,7 @@ export const initThreeScene = () => {
     75,
     window.innerWidth / window.innerHeight,
     0.1,
-    1000
+    100000
   )
   camera.position.set(15, 15, 15)
 
@@ -542,6 +543,7 @@ export const spotLightFun = () => {
   if (!spotlight) {
     spotlight = new THREE.SpotLight('#fff', 50)
     spotlight.position.set(0, 5, 0)
+    // spotlight.distance = 100 // 聚光灯的影响范围
     spotlight.castShadow = true // 开启阴影
     spotlight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     spotlight.shadow.mapSize.height = 2048
@@ -621,6 +623,8 @@ export const changeLightStrength = (lightname, strengthvalue) => {
 
 // 阴影
 let plane
+let planeGeometry // 地面几何体
+let planeMaterial // 地面材质
 export const lightShdow = value => {
   if (value) {
     model.traverse((child) => {
@@ -630,8 +634,8 @@ export const lightShdow = value => {
       }
     })
     // 创建地面并使其接收阴影
-    const planeGeometry = new THREE.PlaneGeometry(100, 100)
-    const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
+    planeGeometry = new THREE.PlaneGeometry(currentSize, currentSize)
+    planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
     plane = new THREE.Mesh(planeGeometry, planeMaterial)
     plane.rotation.x = - Math.PI / 2
     plane.position.y = -0.01
@@ -917,8 +921,8 @@ export const changeskyHDR = (id, value) => {
 
 
 let gridHelper
-let currentSize = 10  // 初始大小
-let currentDivisions = 10  // 初始格子数
+let currentSize = 100  // 初始大小
+let currentDivisions = 25  // 初始格子数
 // 地面模块
 export const ground = (value, size, divisions) => {
   if (value) {
@@ -940,9 +944,18 @@ export const ground = (value, size, divisions) => {
 export const sizeFun = size => {
   if (gridHelper) {
     scene.remove(gridHelper)  // 移除当前网格
+    scene.remove(plane) // 移除当前接收阴影的地面
     currentSize = size  // 保存新的尺寸
     gridHelper = new THREE.GridHelper(currentSize, currentDivisions, '#37373d', '#37373d')  // 创建新的 GridHelper
     scene.add(gridHelper)  // 添加新的网格到场景
+    // 创建新的地面并使其接收阴影
+    planeGeometry = new THREE.PlaneGeometry(currentSize, currentSize)
+    planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
+    plane = new THREE.Mesh(planeGeometry, planeMaterial)
+    plane.rotation.x = - Math.PI / 2
+    plane.position.y = -0.01
+    plane.receiveShadow = true  // 使地面接收阴影
+    scene.add(plane)
   }
 }
 // 格子数量函数
@@ -1387,4 +1400,128 @@ export const poinyListener = value => {
   }
   window.removeEventListener('click', pointClick)
   scene.remove(currentConeMarker) // 移除椎体
+}
+
+
+
+// 导出场景功能模块
+
+export const sceneDataFun = () => {
+  // 获取场景数据
+  const sceneData = scene.toJSON()
+  const jsonStr = JSON.stringify(sceneData, null, 2)
+
+  // 创建一个 Blob 对象，用于保存 JSON 数据
+  const blob = new Blob([jsonStr], { type: 'application/json' })
+  const sceneJsonFile = new File([blob], 'scene.json')
+
+  // 获取纹理资源（如果有）
+  const resources = []
+  scene.traverse((object) => {
+    if (object.material && object.material.map) {
+      const texture = object.material.map
+      if (texture.isTexture && texture.image && texture.image.src) {
+        resources.push(texture.image.src)  // 纹理路径
+      }
+    }
+  })
+
+  // 如果有纹理资源，输出资源路径
+  if (resources.length > 0) {
+    console.log('需要导出的资源文件:', resources)
+  } else {
+    console.log('没有找到纹理资源')
+  }
+
+  // 创建 ZIP 文件
+  createZipFile([sceneJsonFile, ...resources])
+}
+
+const createZipFile = (files) => {
+  const zip = new JSZip()
+
+  // 添加场景 JSON 文件
+  zip.file('scene.json', files[0])
+
+  // 加载所有纹理资源并添加到压缩包
+  const texturePromises = files.slice(1).map((texturePath, index) => {
+    return fetch(texturePath)
+      .then(response => response.blob())
+      .then(blob => {
+        zip.file(`assets/texture${index + 1}.jpg`, blob)
+      })
+  })
+
+  // 等待所有纹理加载完成后生成 ZIP 文件
+  Promise.all(texturePromises).then(() => {
+    // 添加 HTML 文件
+    zip.file('index.html', generateHtmlFile())
+
+    // 打包 ZIP
+    zip.generateAsync({ type: 'blob' })
+      .then(function (content) {
+        saveAs(content, 'scene-package.zip')
+      })
+      .catch((error) => {
+        console.error('生成 ZIP 文件失败:', error)
+      })
+  }).catch((error) => {
+    console.error('纹理资源加载失败:', error)
+  })
+}
+
+const generateHtmlFile = () => {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Three.js Scene</title>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    </head>
+    <body>
+      <script>
+        // 加载场景数据
+        fetch('scene.json')
+          .then(response => response.json())
+          .then(sceneData => {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const loader = new THREE.ObjectLoader();
+            loader.parse(sceneData, (object) => {
+              scene.add(object);
+            });
+
+            // 加载纹理资源
+            scene.traverse((object) => {
+              if (object.material && object.material.map) {
+                const textureURL = 'assets/texture1.jpg'; // 确保纹理路径正确
+                const textureLoader = new THREE.TextureLoader();
+                textureLoader.load(textureURL, (texture) => {
+                  object.material.map = texture;
+                  object.material.needsUpdate = true;
+                });
+              }
+            });
+
+            camera.position.z = 5;
+
+            const animate = () => {
+              requestAnimationFrame(animate);
+              renderer.render(scene, camera);
+            };
+            animate();
+          })
+          .catch(error => {
+            console.error('加载场景数据失败:', error);
+          });
+      </script>
+    </body>
+    </html>
+  `
 }

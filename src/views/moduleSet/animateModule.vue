@@ -6,7 +6,7 @@ import { animateCounterStore } from '@/stores'
 
 const { animatevalue } = animateCounterStore()
 
-console.log(animatevalue)
+// console.log(animatevalue)
 
 
 </script>

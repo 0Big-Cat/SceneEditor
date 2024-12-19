@@ -1,20 +1,7 @@
-<template>
-  <div id="leftmainpanel">
-    <div class="logobox"></div>
-    <div class="routerbox">
-      <router-link v-for="(item, index) in items" :key="index" @click="changeper" :to="item.url" class="routerlink">
-        <label>
-          <span class="iconfont" :class="item.icon"></span>{{ item.name }}
-        </label>
-      </router-link>
-    </div>
-  </div>
-  <particularsPanel></particularsPanel>
-</template>
-
 <script setup>
 // 引入详细操作组件
 import particularsPanel from './particularsPanel.vue'
+// import { sceneDataFun } from '../../../public/three/mainScene'
 // 是否显示详细操作页面变量模块
 import { particularsCounterStore } from '@/stores'
 
@@ -27,7 +14,8 @@ const items = [
   { name: '灯光', url: '/light', icon: 'icon-dengguang', action: 'light' },
   { name: '场景', url: '/environmentmodel', icon: 'icon-tiankong', action: 'environmentmodel' },
   { name: '动画', url: '/nimate', icon: 'icon-donghua1', action: 'animation' },
-  { name: '点位', url: '/point', icon: 'icon-web-icon-', action: 'waypoints' }
+  { name: '点位', url: '/point', icon: 'icon-web-icon-', action: 'waypoints' },
+  { name: '特效', url: '/specialeffects', icon: 'icon-donghua', action: 'specialeffects' }
   // { name: '后期', url: '/anaphase', icon: 'icon-houqi', action: 'postProcessing' }
 ]
 
@@ -35,6 +23,21 @@ function changeper() {
   pares.parvalue = true
 }
 </script>
+
+<template>
+  <div id="leftmainpanel">
+    <div class="logobox"></div>
+    <div class="routerbox">
+      <router-link v-for="(item, index) in items" :key="index" @click="changeper" :to="item.url" class="routerlink">
+        <label>
+          <span class="iconfont" :class="item.icon"></span>{{ item.name }}
+        </label>
+      </router-link>
+    </div>
+    <!-- <div class="derive" @click="sceneDataFun()">一键导出</div> -->
+  </div>
+  <particularsPanel></particularsPanel>
+</template>
 
 <style lang="scss" scoped>
 #leftmainpanel {
@@ -103,6 +106,24 @@ function changeper() {
       border: 1px solid #0ab0b7;
     }
 
+  }
+
+  .derive {
+    position: absolute;
+    bottom: 0;
+    width: 85%;
+    height: vh(40px);
+    border: 1px solid #3d3d3d;
+    margin: vh(20px) vw(10px);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+      color: #0ab0b7;
+      border: 1px solid #0ab0b7;
+    }
   }
 
 }

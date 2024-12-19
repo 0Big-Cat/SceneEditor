@@ -38,6 +38,10 @@ const router = createRouter({
     {
       path: '/point',
       component: () => import('@/views/moduleSet/pointsModule.vue')
+    },
+    {
+      path: '/specialeffects',
+      component: () => import('@/views/moduleSet/specialeffectsModule.vue')
     }
   ]
 })
