@@ -18,7 +18,7 @@ import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
 
 // 将关键变量提出
-let scene, camera, render, controls, gltfLoader
+let scene, camera, render, controls, gltfLoader, axesHelper
 
 // 导出三维场景函数
 export const initThreeScene = () => {
@@ -124,7 +124,7 @@ export const initThreeScene = () => {
   animate()
 
   // 辅助坐标系
-  const axesHelper = new THREE.AxesHelper(10)
+  axesHelper = new THREE.AxesHelper(10)
   scene.add(axesHelper)
 
   // 创建渲染器
@@ -966,6 +966,15 @@ export const divisionsFun = divisions => {
     gridHelper = new THREE.GridHelper(currentSize, currentDivisions, '#37373d', '#37373d')  // 创建新的 GridHelper
     scene.add(gridHelper)  // 添加新的网格到场景
   }
+}
+
+// 坐标辅助器
+export const axeshelperFun = value => {
+  if (value) {
+    scene.remove(axesHelper)
+    return
+  }
+  scene.add(axesHelper)
 }
 
 

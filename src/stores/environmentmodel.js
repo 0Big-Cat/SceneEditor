@@ -82,6 +82,7 @@ export const groundCounterStore = defineStore('ground', () => {
   // 是否显示/隐藏
   const grounddata = ref({
     showvalue: true,
+    axeshelper: true,//坐标辅助器
     sizevalue: 100,
     divisionsvalue: 25
   })

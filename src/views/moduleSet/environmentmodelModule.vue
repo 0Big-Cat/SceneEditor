@@ -1,7 +1,7 @@
 <script setup>
 // 天空模块
 import { ref } from 'vue'
-import { skyballHDR, changeskyHDR, ground, linearfog, indexfogexp2, sizeFun, divisionsFun, nearFun, farFun, colorFun, densityFun, color2Fun } from '../../../public/three/mainScene'
+import { skyballHDR, changeskyHDR, ground, linearfog, indexfogexp2, sizeFun, divisionsFun, nearFun, farFun, colorFun, densityFun, color2Fun, axeshelperFun } from '../../../public/three/mainScene'
 import { skyCounterStore, groundCounterStore, fogCounterStore } from '@/stores'
 
 // 天空模块
@@ -44,6 +44,12 @@ const { fogdata, fogexp2data } = fogCounterStore()
         <input type="text" v-model="grounddata.sizevalue" @input="sizeFun(grounddata.sizevalue)">
         <input type="text" v-model="grounddata.divisionsvalue" @input="divisionsFun(grounddata.divisionsvalue)">
       </div>
+    </div>
+
+    <!-- 坐标辅助器 -->
+    <div class="axeshelper">
+      <el-checkbox v-model="grounddata.axeshelper" label="坐标辅助器" size="large"
+        @click="axeshelperFun(grounddata.axeshelper)" />
     </div>
 
     <!-- 雾 -->
@@ -133,6 +139,20 @@ const { fogdata, fogexp2data } = fogCounterStore()
       }
     }
 
+    /* 设置透明的边框，确保只有下边框有渐变效果 */
+    border-top: 1px solid transparent;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+
+    /* 创建渐变的下边框 */
+    background-image: linear-gradient(to right, #0ab0b7, #fff);
+    background-position: bottom left;
+    background-repeat: no-repeat;
+    background-size: 100% 2px;
+  }
+
+  // 坐标辅助器
+  .axeshelper {
     /* 设置透明的边框，确保只有下边框有渐变效果 */
     border-top: 1px solid transparent;
     border-left: 1px solid transparent;
