@@ -6,7 +6,7 @@
 
 body {
   overflow: hidden;
-  margin: 0px 
+  margin: 0px;
 }
 
 canvas {
@@ -15,7 +15,7 @@ canvas {
   left: 0; 
   top: 0; 
   width: 100vw; 
-  height: 100vh 
+  height: 100vh;
 }
 
 li{
@@ -27,9 +27,21 @@ a{
   text-decoration: none;
 }
 
-/* 自定义滑块条的选中部分 */
+
+/* 修改滑槽宽度 */
+.el-slider {
+  width: 60px !important; 
+}
+/* 修改滑槽高度、背景颜色 */
 .el-slider__bar {
-  background-color: #0ab0b7 !important;
+  // height: 20px !important;
+  // background-color: #0ab0b7 !important;
+}
+
+.el-slider__runway {
+  width: 60px !important; 
+  height: 20px !important;
+  border-radius: 0% !important;
 }
 /* 自定义滑块按钮的颜色 */
 .el-slider__button {
@@ -37,14 +49,55 @@ a{
   border-color:#0ab0b7!important;
 }
 
-/* 调整拖动的圆圈（滑块按钮）的大小 */
-.el-slider__button {
-  width: 18px !important;
-  height: 18px !important;
-  border-radius: 50% !important;
-  background-color: #0ab0b7 !important;
+ /* 去掉滑过区域的背景色 */
+ .el-slider__bar {
+  background-color: transparent !important; /* 设置为透明，去掉背景色 */
 }
 
+/* 调整拖动的圆圈（滑块按钮）的大小 */
+.el-slider__button {
+  width: 3px !important;
+  height: 20px !important;
+  border-radius: 0% !important;
+  background-color: #0ab0b7 !important;
+  border: none !important;
+}
+
+.el-slider__button-wrapper {
+  top: -12% !important;
+  width: 3px !important;
+  height:20px !important;
+}
+
+/* 取消鼠标移入滑块时的放大效果 */
+.el-slider__button {
+  transition: none !important; /* 去掉放大动画 */
+  transform: none !important; /* 防止变大 */
+}
+
+  /* 取消鼠标移入滑块时的小手样式 */
+  .el-slider__button:hover {
+    cursor: ew-resize !important; /* 改为左右双箭头 */
+  }
+
+  /* 去掉滑块轨道、按钮、运行轨道等元素的光标样式 */
+  .el-slider__runway:hover,
+  .el-slider__button-wrapper:hover,
+  .el-slider__bar:hover,
+  .el-slider:hover {
+    cursor: ew-resize !important; /* 改为左右双箭头 */
+  }
+
+  /* 防止鼠标拖动时出现小手 */
+  .el-slider__button:active,
+  .el-slider__button:focus {
+    cursor: ew-resize !important; /* 强制设置拖动时的光标为左右双箭头 */
+  }
+
+  /* 防止鼠标在滑块内移动时出现小手 */
+  .el-slider__button {
+    cursor: ew-resize !important; /* 防止滑块本身的光标变成小手 */
+  }
 
 
 // 修改复选框样式

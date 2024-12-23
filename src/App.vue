@@ -4,6 +4,7 @@ import { initThreeScene, ambientLightFun, ground } from '../public/three/mainSce
 import leftMainPanel from './components/leftPanel/leftMainPanel.vue'
 import rightMainPanel from './components/rightPanel/rightMainPanel.vue'
 import centerMainPanel from './components/centerPanel/centerMainPanel.vue'
+import rightLightPanel from './components/rightPanel/rightLightPanel.vue'
 import '../public/three/mainScene.js'
 onMounted(() => {
   initThreeScene()
@@ -17,6 +18,7 @@ onMounted(() => {
   <leftMainPanel></leftMainPanel>
   <centerMainPanel></centerMainPanel>
   <rightMainPanel></rightMainPanel>
+  <rightLightPanel></rightLightPanel>
 </template>
 
 <style scoped></style>

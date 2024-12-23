@@ -20,11 +20,25 @@ import { saveAs } from 'file-saver'
 // 将关键变量提出
 let scene, camera, render, controls, gltfLoader, axesHelper
 
-// 导出三维场景函数
+// 打印场景图函数
+function dumpObject(obj, lines = [], isLast = true, prefix = '') {
+  const localPrefix = isLast ? '└─' : '├─'
+  lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`)
+  const newPrefix = prefix + (isLast ? '  ' : '│ ')
+  const lastNdx = obj.children.length - 1
+  obj.children.forEach((child, ndx) => {
+    const isLast = ndx === lastNdx
+    dumpObject(child, lines, isLast, newPrefix)
+  })
+  return lines
+}
+
+// 主场景
 export const initThreeScene = () => {
 
   // 初始化三维场景
   scene = new THREE.Scene()
+  scene.background = new THREE.Color('#333')
 
 
   // 相机位置+旋转中心位置模块
@@ -36,7 +50,7 @@ export const initThreeScene = () => {
     0.1,
     100000
   )
-  camera.position.set(15, 15, 15)
+  camera.position.set(0, 15, 15)
 
 
   // 初始化渲染器
@@ -48,8 +62,6 @@ export const initThreeScene = () => {
   document.body.appendChild(render.domElement)
   // 启用渲染器的阴影
   render.shadowMap.enabled = true
-  // 渲染器背景色
-  // render.setClearColor('#000', 1)
   // 设置渲染器的色彩空间
   render.outputEncoding = THREE.SRGBColorSpace
 
@@ -140,6 +152,8 @@ export const initThreeScene = () => {
 }
 
 
+// 模型板块
+
 let model // 当前传入的模型
 let modelnumber = -1 // 用于记录上传的第几个模型
 let models = [] // 储存模型
@@ -168,6 +182,8 @@ export const loadModelScen = files => {
       // model.castShadow = true  // 使模型投射阴影
       models.push(model)
       scene.add(model)
+      // console.log(model)
+      console.log(dumpObject(model).join('\n'))
       model.name = files[0].name
       loadval.loadingshow = false
 
@@ -359,6 +375,9 @@ export const wireframeMoodel = (name, vision) => {
   })
 }
 
+
+// 相机板块
+
 // 还原相机坐标
 export const cameraPoint = () => {
   camera.position.set(15, 15, 15)
@@ -370,176 +389,71 @@ export const controlsPoint = () => {
 }
 
 
+// 灯光板块
+
 let pointLight // 点光源
-let pointLightHelper // 点光源辅助器
 let directionallight // 平行光
-let directionallightHelper // 点光源辅助器
 let spotlight // 聚光灯
-let spotlightHelper // 聚光灯辅助器
 let hemispherelight // 半球光
-let hemispherelightHelper // 半球光辅助器
 let ambientlight // 环境光
-// 光源辅助器函数
-export const assistDeviceFun = () => {
-  const { lightSet } = lightCounterStore()
-
-  let anyLightEnabled = false  // 用来检查是否至少有一个光源被启用
-
-  // 若启用点光源
-  if (pointLight) {
-    if (lightSet[0].lightshow && lightSet[1].lightshow) {
-      // 如果点光源已启用且未创建辅助器，则创建它
-      if (!pointLightHelper) {
-        pointLightHelper = new THREE.PointLightHelper(pointLight)
-        scene.add(pointLightHelper)
-        // 开启新增点光源的辅助器
-        lightaddHelperArry.forEach(item => {
-          scene.add(item)
-        })
-      }
-      pointLightHelper.update()  // 更新辅助器位
-      anyLightEnabled = true // 至少有一个光源启用
-    } else {
-      // 如果点光源未启用或辅助器已创建，则移除辅助器
-      if (pointLightHelper) {
-        scene.remove(pointLightHelper)
-        pointLightHelper = null
-        // 移除新增点光源的辅助器
-        lightaddHelperArry.forEach(item => {
-          scene.remove(item)
-        })
-      }
-    }
-  }
-
-  // 若启用平行光源
-  if (directionallight) {
-    if (lightSet[0].lightshow && lightSet[2].lightshow) {
-      // 如果平行光源已启用且未创建辅助器，则创建它
-      if (!directionallightHelper) {
-        directionallightHelper = new THREE.DirectionalLightHelper(directionallight)
-        scene.add(directionallightHelper)
-        // 开启新增平行光源的辅助器
-        directionalHelperArry.forEach(item => {
-          scene.add(item)
-        })
-      }
-      directionallightHelper.update()  // 更新辅助器位
-      anyLightEnabled = true // 至少有一个光源启用
-    } else {
-      // 如果平行光源未启用或辅助器已创建，则移除辅助器
-      if (directionallightHelper) {
-        scene.remove(directionallightHelper)
-        directionallightHelper = null
-        // 移除新增平行光源的辅助器
-        directionalHelperArry.forEach(item => {
-          scene.remove(item)
-        })
-      }
-    }
-  }
-
-  // 若启用聚光灯
-  if (spotlight) {
-    if (lightSet[0].lightshow && lightSet[3].lightshow) {
-      // 如果聚光灯已启用且未创建辅助器，则创建它
-      if (!spotlightHelper) {
-        spotlightHelper = new THREE.SpotLightHelper(spotlight)
-        scene.add(spotlightHelper)
-        // 开启新增聚光灯的辅助器
-        spotHelperArry.forEach(item => {
-          scene.add(item)
-        })
-      }
-      spotlightHelper.update()  // 更新辅助器位
-      anyLightEnabled = true // 至少有一个光源启用
-    } else {
-      // 如果聚光灯未启用或辅助器已创建，则移除辅助器
-      if (spotlightHelper) {
-        scene.remove(spotlightHelper)
-        spotlightHelper = null
-        // 移除新增聚光灯的辅助器
-        spotHelperArry.forEach(item => {
-          scene.remove(item)
-        })
-      }
-    }
-  }
-
-  // 若启用半球光
-  if (hemispherelight) {
-    if (lightSet[0].lightshow && lightSet[4].lightshow) {
-      // 如果聚光灯已启用且未创建辅助器，则创建它
-      if (!hemispherelightHelper) {
-        hemispherelightHelper = new THREE.HemisphereLightHelper(hemispherelight, 5)
-        scene.add(hemispherelightHelper)
-      }
-      anyLightEnabled = true // 至少有一个光源启用
-    } else {
-      // 如果聚光灯未启用或辅助器已创建，则移除辅助器
-      if (hemispherelightHelper) {
-        scene.remove(hemispherelightHelper)
-        hemispherelightHelper = null
-      }
-    }
-  }
-
-  // 如果没有任何光源被启用，则将 assistdevice 设置为 false
-  if (!anyLightEnabled) {
-    lightSet[0].lightshow = false
-  }
-}
-
 // 点光源函数
 export const lightPointFun = () => {
-  const { lightSet } = lightCounterStore()
-  if (!pointLight) {
+  const { lightpanel, lightSet } = lightCounterStore()
+  if (!pointLight && lightSet[2].lightshow) {
     pointLight = new THREE.PointLight('#fff', 1, 100)
     pointLight.position.set(0, 1, 0)
     pointLight.castShadow = true // 开启阴影
     pointLight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     pointLight.shadow.mapSize.height = 2048
-    lightSet[1].x = pointLight.position.x
-    lightSet[1].y = pointLight.position.y
-    lightSet[1].z = pointLight.position.z
+    lightSet[2].x = pointLight.position.x
+    lightSet[2].y = pointLight.position.y
+    lightSet[2].z = pointLight.position.z
   }
-  if (lightSet[1].lightshow) {
+  if (lightSet[2].lightshow) {
+    lightpanel.lightshow = true // 显示右侧灯光操作面板
+    lightSet[1].lightshow = true // 选中光源辅助器按钮
     scene.add(pointLight)
   } else {
+    // lightpanel.lightshow = false // 隐藏右侧灯光操作面板
     scene.remove(pointLight)
     scene.remove(plane) // 移除阴影地面
-    lightSet[1].lightshodow = false // 取消勾选阴影
+    lightSet[2].lightshodow = false // 取消勾选阴影
   }
   // 在这里调用辅助器函数，确保启用或禁用光源时自动更新辅助器
   assistDeviceFun()
+  cameraHelperFun()
 }
 
 // 平行光源函数
 export const directionalLightFun = () => {
-  const { lightSet } = lightCounterStore()
+  const { lightpanel, lightSet } = lightCounterStore()
   if (!directionallight) {
     directionallight = new THREE.DirectionalLight('#fff', 1)
     directionallight.position.set(5, 5, 0)
     directionallight.castShadow = true // 开启阴影
     directionallight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     directionallight.shadow.mapSize.height = 2048
-    lightSet[2].x = directionallight.position.x
-    lightSet[2].y = directionallight.position.y
-    lightSet[2].z = directionallight.position.z
+    lightSet[3].x = directionallight.position.x
+    lightSet[3].y = directionallight.position.y
+    lightSet[3].z = directionallight.position.z
   }
-  if (lightSet[2].lightshow) {
+  if (lightSet[3].lightshow) {
+    lightpanel.lightshow = true // 显示右侧灯光操作面板
     scene.add(directionallight)
+    lightSet[1].lightshow = true // 选中光源辅助器按钮
   } else {
+    // lightpanel.lightshow = false // 隐藏右侧灯光操作面板
     scene.remove(directionallight)
     scene.remove(plane) // 移除阴影地面
-    lightSet[2].lightshodow = false // 取消勾选阴影
+    lightSet[3].lightshodow = false // 取消勾选阴影
   }
   assistDeviceFun()
+  cameraHelperFun()
 }
 
 // 聚光灯函数
 export const spotLightFun = () => {
-  const { lightSet } = lightCounterStore()
+  const { lightpanel, lightSet } = lightCounterStore()
   if (!spotlight) {
     spotlight = new THREE.SpotLight('#fff', 50)
     spotlight.position.set(0, 5, 0)
@@ -547,28 +461,34 @@ export const spotLightFun = () => {
     spotlight.castShadow = true // 开启阴影
     spotlight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     spotlight.shadow.mapSize.height = 2048
-    lightSet[3].x = spotlight.position.x
-    lightSet[3].y = spotlight.position.y
-    lightSet[3].z = spotlight.position.z
+    lightSet[4].x = spotlight.position.x
+    lightSet[4].y = spotlight.position.y
+    lightSet[4].z = spotlight.position.z
   }
-  if (lightSet[3].lightshow) {
+  if (lightSet[4].lightshow) {
+    lightpanel.lightshow = true // 显示右侧灯光操作面板
     scene.add(spotlight)
+    lightSet[1].lightshow = true // 选中光源辅助器按钮
   } else {
+    // lightpanel.lightshow = false // 隐藏右侧灯光操作面板
     scene.remove(spotlight)
     scene.remove(plane) // 移除阴影地面
-    lightSet[3].lightshodow = false // 取消勾选阴影
+    lightSet[4].lightshodow = false // 取消勾选阴影
   }
   assistDeviceFun()
+  cameraHelperFun()
 }
 
 // 半球光函数
 export const hemisphereLightFun = () => {
-  const { lightSet } = lightCounterStore()
+  const { lightpanel, lightSet } = lightCounterStore()
   if (!hemispherelight) {
     hemispherelight = new THREE.HemisphereLight('#fff', '#000', 1)
   }
-  if (lightSet[4].lightshow) {
+  if (lightSet[5].lightshow) {
+    lightpanel.lightshow = true // 显示右侧灯光操作面板
     scene.add(hemispherelight)
+    lightSet[1].lightshow = true // 选中光源辅助器按钮
   } else {
     scene.remove(hemispherelight)
   }
@@ -577,12 +497,12 @@ export const hemisphereLightFun = () => {
 
 // 环境光函数
 export const ambientLightFun = () => {
-  const { lightSet } = lightCounterStore()
+  const { lightpanel, lightSet } = lightCounterStore()
   // 如果环境光未初始化，则初始化
   if (!ambientlight) {
     ambientlight = new THREE.AmbientLight(
-      lightSet[5].lightcolor, // 动态光照颜色
-      lightSet[5].lightstrength // 动态光照强度
+      lightSet[6].lightcolor, // 动态光照颜色
+      lightSet[6].lightstrength // 动态光照强度
     )
     // ambientlight = new THREE.AmbientLight(
     //   '#fff', // 动态光照颜色
@@ -590,7 +510,8 @@ export const ambientLightFun = () => {
     // )
   }
   // 根据环境光是否开启来添加或移除光源
-  if (lightSet[5].lightshow) {
+  if (lightSet[6].lightshow) {
+    lightpanel.lightshow = true // 显示右侧灯光操作面板
     scene.add(ambientlight)
   } else {
     scene.remove(ambientlight)
@@ -598,7 +519,185 @@ export const ambientLightFun = () => {
   assistDeviceFun()  // 其他设备功能调用
 }
 
-// 更新环境光强度
+let pointLightHelper // 点光源辅助器
+let directionallightHelper // 平行光源辅助器
+let spotlightHelper // 聚光灯辅助器
+let hemispherelightHelper // 半球光辅助器
+// 光源辅助器函数
+export const assistDeviceFun = () => {
+  const { lightSet } = lightCounterStore()
+
+  // 用于检查是否至少有一个光源被启用
+  let anyLightEnabled = false
+
+  // 处理每种光源的辅助器
+  const manageLightHelper = (light, helper, setIndex, helperClass, additionalHelpers = [], args = []) => {
+    if (light) {
+      if (lightSet[1].lightshow && lightSet[setIndex].lightshow) {
+        // 如果光源启用且辅助器未创建，则创建它
+        if (!helper) {
+          helper = args.length > 0 ? new helperClass(...args) : new helperClass(light)
+          scene.add(helper)
+          // 添加额外的辅助器
+          additionalHelpers.forEach((item) => scene.add(item))
+        }
+        if (helper.update) helper.update() // 更新辅助器位置（如果支持）
+        anyLightEnabled = true // 标记至少有一个光源启用
+      } else {
+        // 如果光源未启用或辅助器已创建，则移除辅助器
+        if (helper) {
+          scene.remove(helper)
+          helper = null
+          // 移除额外的辅助器
+          additionalHelpers.forEach((item) => scene.remove(item))
+        }
+      }
+    }
+    return helper // 返回最新的辅助器状态
+  }
+
+  // 处理点光源
+  pointLightHelper = manageLightHelper(
+    pointLight,
+    pointLightHelper,
+    2,
+    THREE.PointLightHelper,
+    lightaddHelperArry
+  )
+
+  // 处理平行光源
+  directionallightHelper = manageLightHelper(
+    directionallight,
+    directionallightHelper,
+    3,
+    THREE.DirectionalLightHelper,
+    directionalHelperArry
+  )
+
+  // 处理聚光灯
+  spotlightHelper = manageLightHelper(
+    spotlight,
+    spotlightHelper,
+    4,
+    THREE.SpotLightHelper,
+    spotHelperArry
+  )
+
+  // 处理半球光源
+  hemispherelightHelper = manageLightHelper(
+    hemispherelight,
+    hemispherelightHelper,
+    5,
+    THREE.HemisphereLightHelper,
+    [], // 无额外辅助器
+    [hemispherelight, 5] // 特殊参数
+  )
+
+  // 如果没有任何光源被启用，则关闭 assistdevice
+  if (!anyLightEnabled) {
+    lightSet[1].lightshow = false
+  }
+}
+
+// 阴影
+let plane
+let planeGeometry // 地面几何体
+let planeMaterial // 地面材质
+export const lightShdow = () => {
+  if (!plane) {
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true // 允许模型投射阴影
+        // child.receiveShadow = true // 如果模型需要接收阴影（例如模型自身上投影）
+      }
+    })
+    // 创建地面并使其接收阴影
+    planeGeometry = new THREE.PlaneGeometry(currentSize, currentSize)
+    planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
+    plane = new THREE.Mesh(planeGeometry, planeMaterial)
+    plane.rotation.x = - Math.PI / 2
+    plane.position.y = -0.01
+    plane.receiveShadow = true  // 使地面接收阴影
+    scene.add(plane)
+
+    return
+  }
+  scene.remove(plane)
+  plane = null
+}
+
+let pointLightCameraHelper // 点光源阴影相机辅助器
+let directionalLightCameraHelper // 平行光源阴影相机辅助器
+let spotLightCameraHelper // 聚光灯阴影相机辅助器
+// 阴影相机辅助器函数
+export const cameraHelperFun = () => {
+  const { lightSet } = lightCounterStore()
+
+  // 用于检查是否至少有一个光源被启用
+  let anyCameraEnabled = false
+
+  // 处理每种光源的阴影相机辅助器
+  const manageCameraHelper = (light, helper, setIndex) => {
+    if (light) {
+      if (lightSet[0].lightshow && lightSet[setIndex].lightshow) {
+        if (!helper) {
+          helper = new THREE.CameraHelper(light.shadow.camera)
+          scene.add(helper)
+        }
+        anyCameraEnabled = true
+      } else if (helper) {
+        scene.remove(helper)
+        helper = null
+      }
+    }
+    return helper
+  }
+
+  // 处理点光源
+  pointLightCameraHelper = manageCameraHelper(pointLight, pointLightCameraHelper, 2)
+
+  // 处理平行光
+  directionalLightCameraHelper = manageCameraHelper(directionallight, directionalLightCameraHelper, 3)
+
+  // 处理聚光灯
+  spotLightCameraHelper = manageCameraHelper(spotlight, spotLightCameraHelper, 4)
+
+  // 如果没有任何光源被启用，则关闭主开关
+  if (!anyCameraEnabled) {
+    lightSet[0].lightshow = false
+  }
+}
+
+// 更新光源颜色
+export const changeLightColor = (lightname, lightcolor) => {
+  switch (lightname) {
+    case 'pointlight':
+      pointLight.color.set(lightcolor) // 更新光照强
+      pointLightHelper.material.color.set(lightcolor) // 同步辅助器颜色
+      break
+    case 'directionallight':
+      directionallight.color.set(lightcolor) // 更新光照强
+      directionallightHelper.update()   // 更新辅助器几何数据
+      directionallightHelper.material.color.set(lightcolor) // 同步辅助器颜色
+      break
+    case 'spotlight':
+      spotlight.color.set(lightcolor) // 更新光照强
+      spotlightHelper.update()   // 更新辅助器几何数据
+      spotlightHelper.material.color.set(lightcolor) // 同步辅助器颜色
+      break
+    case 'hemispherelight':
+      hemispherelight.color.set(lightcolor) // 更新光照强
+      hemispherelightHelper.material.color.set(lightcolor) // 同步辅助器颜色
+      break
+    case 'ambientlight':
+      ambientlight.color.set(lightcolor) // 更新光照强
+      break
+    default:
+      break
+  }
+}
+
+// 更新光源强度
 export const changeLightStrength = (lightname, strengthvalue) => {
   switch (lightname) {
     case 'pointlight':
@@ -621,30 +720,27 @@ export const changeLightStrength = (lightname, strengthvalue) => {
   }
 }
 
-// 阴影
-let plane
-let planeGeometry // 地面几何体
-let planeMaterial // 地面材质
-export const lightShdow = value => {
-  if (value) {
-    model.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = true // 允许模型投射阴影
-        // child.receiveShadow = true // 如果模型需要接收阴影（例如模型自身上投影）
-      }
-    })
-    // 创建地面并使其接收阴影
-    planeGeometry = new THREE.PlaneGeometry(currentSize, currentSize)
-    planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
-    plane = new THREE.Mesh(planeGeometry, planeMaterial)
-    plane.rotation.x = - Math.PI / 2
-    plane.position.y = -0.01
-    plane.receiveShadow = true  // 使地面接收阴影
-    scene.add(plane)
-
-    return
+// 更新光源范围
+export const changeLightDistance = (lightname, lightdistance) => {
+  switch (lightname) {
+    case 'pointlight':
+      pointLight.distance = lightdistance // 更新光照强
+      break
+    case 'directionallight':
+      directionallight.distance = lightdistance // 更新光照强
+      break
+    case 'spotlight':
+      spotlight.distance = lightdistance // 更新光照强
+      break
+    case 'hemispherelight':
+      hemispherelight.distance = lightdistance // 更新光照强
+      break
+    case 'ambientlight':
+      ambientlight.distance = lightdistance // 更新光照强
+      break
+    default:
+      break
   }
-  scene.remove(plane)
 }
 
 // 修改光源坐标，反控光源位置
@@ -723,7 +819,7 @@ export const lightaddFun = (lightName) => {
     pointLight.castShadow = true // 开启阴影
     pointLight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     pointLight.shadow.mapSize.height = 2048
-    lightSet[1].lightadd.push({
+    lightSet[2].lightadd.push({
       lightname: 'pointlight',
       lightstrength: 1,
       x: pointLight.position.x,
@@ -733,7 +829,7 @@ export const lightaddFun = (lightName) => {
     // 新增的光源辅助器，先存到数组中，暂不添加到场景中，由辅助器那块统一管理
     const pointLightHelper = new THREE.PointLightHelper(pointLight)
     scene.add(pointLight)
-    if (lightSet[0].lightshow) {
+    if (lightSet[1].lightshow) {
       scene.add(pointLightHelper)
     }
     lightaddArry.push(pointLight)
@@ -746,7 +842,7 @@ export const lightaddFun = (lightName) => {
     directionallight.castShadow = true // 开启阴影
     directionallight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     directionallight.shadow.mapSize.height = 2048
-    lightSet[2].lightadd.push({
+    lightSet[3].lightadd.push({
       lightname: 'directionallight',
       lightstrength: 1,
       x: directionallight.position.x,
@@ -757,7 +853,7 @@ export const lightaddFun = (lightName) => {
     const directionallightHelper = new THREE.DirectionalLightHelper(directionallight)
 
     scene.add(directionallight)
-    if (lightSet[0].lightshow) {
+    if (lightSet[1].lightshow) {
       scene.add(directionallightHelper)
     }
     directionalArry.push(directionallight)
@@ -770,7 +866,7 @@ export const lightaddFun = (lightName) => {
     spotlight.castShadow = true // 开启阴影
     spotlight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     spotlight.shadow.mapSize.height = 2048
-    lightSet[3].lightadd.push({
+    lightSet[4].lightadd.push({
       lightname: 'spotlight',
       lightstrength: 1,
       x: spotlight.position.x,
@@ -780,7 +876,7 @@ export const lightaddFun = (lightName) => {
     // 新增的光源辅助器，先存到数组中，暂不添加到场景中，由辅助器那块统一管理
     const spotlightHelper = new THREE.SpotLightHelper(spotlight)
     scene.add(spotlight)
-    if (lightSet[0].lightshow) {
+    if (lightSet[1].lightshow) {
       scene.add(spotlightHelper)
     }
     spotArry.push(spotlight)
@@ -903,7 +999,7 @@ export const skyballHDR = (value) => {
   }
 
   // 清空场景背景
-  scene.background = ''
+  scene.background = new THREE.Color('#333')
   scene.environment = ''
 }
 
@@ -927,7 +1023,7 @@ let currentDivisions = 25  // 初始格子数
 export const ground = (value, size, divisions) => {
   if (value) {
     if (!gridHelper) {  // 确保只在没有初始化时创建 gridHelper
-      gridHelper = new THREE.GridHelper(size, divisions, '#37373d', '#37373d')
+      gridHelper = new THREE.GridHelper(size, divisions, 0x888888, 0x555555)
       scene.add(gridHelper)
       currentSize = size
       currentDivisions = divisions
@@ -946,16 +1042,18 @@ export const sizeFun = size => {
     scene.remove(gridHelper)  // 移除当前网格
     scene.remove(plane) // 移除当前接收阴影的地面
     currentSize = size  // 保存新的尺寸
-    gridHelper = new THREE.GridHelper(currentSize, currentDivisions, '#37373d', '#37373d')  // 创建新的 GridHelper
+    gridHelper = new THREE.GridHelper(currentSize, currentDivisions, 0x888888, 0x555555)  // 创建新的 GridHelper
     scene.add(gridHelper)  // 添加新的网格到场景
-    // 创建新的地面并使其接收阴影
-    planeGeometry = new THREE.PlaneGeometry(currentSize, currentSize)
-    planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
-    plane = new THREE.Mesh(planeGeometry, planeMaterial)
-    plane.rotation.x = - Math.PI / 2
-    plane.position.y = -0.01
-    plane.receiveShadow = true  // 使地面接收阴影
-    scene.add(plane)
+    if (plane) {
+      // 创建新的地面并使其接收阴影
+      planeGeometry = new THREE.PlaneGeometry(currentSize, currentSize)
+      planeMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 })
+      plane = new THREE.Mesh(planeGeometry, planeMaterial)
+      plane.rotation.x = - Math.PI / 2
+      plane.position.y = -0.01
+      plane.receiveShadow = true  // 使地面接收阴影
+      scene.add(plane)
+    }
   }
 }
 // 格子数量函数
@@ -963,7 +1061,7 @@ export const divisionsFun = divisions => {
   if (gridHelper) {
     scene.remove(gridHelper)  // 移除当前网格
     currentDivisions = divisions  // 保存新的 divisions
-    gridHelper = new THREE.GridHelper(currentSize, currentDivisions, '#37373d', '#37373d')  // 创建新的 GridHelper
+    gridHelper = new THREE.GridHelper(currentSize, currentDivisions, 0x888888, 0x555555)  // 创建新的 GridHelper
     scene.add(gridHelper)  // 添加新的网格到场景
   }
 }
@@ -1413,7 +1511,7 @@ export const poinyListener = value => {
 
 
 
-// 导出场景功能模块
+// 导出场景功能模块（暂未使用）
 
 export const sceneDataFun = () => {
   // 获取场景数据
