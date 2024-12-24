@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "39661595",
+      "name": "下拉",
+      "font_class": "xiala",
+      "unicode": "e6a6",
+      "unicode_decimal": 59046
+    },
+    {
       "icon_id": "11529566",
       "name": "动画",
       "font_class": "donghua1",

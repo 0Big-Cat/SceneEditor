@@ -33,7 +33,8 @@ export const lightCounterStore = defineStore('light', () => {
       lightxyz: true, // 用于显示坐标
       x: 0,
       y: 0,
-      Z: 0
+      Z: 0,
+      unflod: true // 用于控制操作面板的显示与隐藏
     },
     {
       lightlabel: '平行光',
@@ -46,7 +47,12 @@ export const lightCounterStore = defineStore('light', () => {
       lightxyz: true, // 用于显示坐标
       x: 0,
       y: 0,
-      Z: 0
+      Z: 0,
+      lighttarget: true, // 用于显示光源目标
+      tarx: 0,
+      tary: 0,
+      tarz: 0,
+      unflod: true // 用于控制操作面板的显示与隐藏
     },
     {
       lightlabel: '聚光灯',
@@ -61,7 +67,16 @@ export const lightCounterStore = defineStore('light', () => {
       lightxyz: true, // 用于显示坐标
       x: 0,
       y: 0,
-      Z: 0
+      Z: 0,
+      lighttarget: true, // 用于显示光源目标
+      tarx: 0,
+      tary: 0,
+      tarz: 0,
+      unflod: true, // 用于控制操作面板的显示与隐藏
+      llightangle: 60, // 光照范围的角度
+      lightpenumbra: 0, // 聚光追半影衰减百分比
+      penumbra: true, // 用于显示聚光追半影衰减百分比
+      lightdecay: 2 // 沿着光照的衰减量
     },
     {
       lightlabel: '半球光',
@@ -69,7 +84,7 @@ export const lightCounterStore = defineStore('light', () => {
       lightshow: false,
       lightcolor: '#ffffff',
       lightstrength: 1,
-      lightdistance: 0
+      unflod: true // 用于控制操作面板的显示与隐藏
     },
     {
       lightlabel: '环境光',
@@ -77,14 +92,19 @@ export const lightCounterStore = defineStore('light', () => {
       lightshow: false,
       lightcolor: '#ffffff',
       lightstrength: 1,
-      lightdistance: 0
+      unflod: true // 用于控制操作面板的显示与隐藏
     },
     {
       lightlabel: '矩形区域光',
-      lightname: 'zonelight',
+      lightname: 'rectanglelight',
       lightshow: false,
       lightcolor: '#ffffff',
-      lightstrength: 1
+      lightstrength: 1,
+      lightwidth: 10,
+      lightheight: 5,
+      lightshodow: false,
+      unflod: true, // 用于控制操作面板的显示与隐藏
+      lightadd: []
     }, {
       lightlabel: '阴影',
       lightname: 'shadow',

@@ -9,6 +9,7 @@ import {
   spotLightFun,
   hemisphereLightFun,
   ambientLightFun,
+  rectangleLightFun,
   lightShdow
 } from '../../../public/three/mainScene'
 
@@ -38,6 +39,9 @@ const toggleLight = (lightname) => {
       break
     case 'ambientlight':
       ambientLightFun()
+      break
+    case 'rectanglelight':
+      rectangleLightFun()
       break
     case 'shadow':
       lightShdow()

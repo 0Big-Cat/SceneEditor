@@ -54,15 +54,18 @@ function changeper() {
 
 
 // 组件动画
-.particulars-enter-active,
-.particulars-leave-active {
-  /* 只保留平移效果 */
-  transition: transform 0.5s ease;
-}
-
 .particulars-enter-from,
 .particulars-leave-to {
-  /* 初始位置设定为左侧 100% */
   transform: translateX(-100%);
+}
+
+.rightlight-enter-to,
+.rightlight-leave-from {
+  transform: translateX(0);
+}
+
+.particulars-enter-active,
+.particulars-leave-active {
+  transition: transform 0.3s linear;
 }
 </style>

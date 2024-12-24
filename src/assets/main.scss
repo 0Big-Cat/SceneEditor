@@ -30,18 +30,14 @@ a{
 
 /* 修改滑槽宽度 */
 .el-slider {
-  width: 60px !important; 
-}
-/* 修改滑槽高度、背景颜色 */
-.el-slider__bar {
-  // height: 20px !important;
-  // background-color: #0ab0b7 !important;
+  width: 80px !important; 
 }
 
 .el-slider__runway {
-  width: 60px !important; 
+  width: 80px !important; 
   height: 20px !important;
   border-radius: 0% !important;
+  background-color: #333 !important;
 }
 /* 自定义滑块按钮的颜色 */
 .el-slider__button {
@@ -56,7 +52,7 @@ a{
 
 /* 调整拖动的圆圈（滑块按钮）的大小 */
 .el-slider__button {
-  width: 3px !important;
+  width: 2px !important;
   height: 20px !important;
   border-radius: 0% !important;
   background-color: #0ab0b7 !important;
@@ -65,7 +61,7 @@ a{
 
 .el-slider__button-wrapper {
   top: -12% !important;
-  width: 3px !important;
+  width: 2px !important;
   height:20px !important;
 }
 

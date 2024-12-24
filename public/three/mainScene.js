@@ -10,6 +10,8 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 // 引入帧率查看器
 import Stats from 'three/addons/libs/stats.module.js'
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js'
+import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js'
 // 引入后期库
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
 // 引入相机位置+旋转中心位置模块变量
@@ -64,7 +66,7 @@ export const initThreeScene = () => {
   render.shadowMap.enabled = true
   // 设置渲染器的色彩空间
   render.outputEncoding = THREE.SRGBColorSpace
-
+  RectAreaLightUniformsLib.init()
 
 
   // 初始化轨道控制器
@@ -396,6 +398,7 @@ let directionallight // 平行光
 let spotlight // 聚光灯
 let hemispherelight // 半球光
 let ambientlight // 环境光
+let rectanglelight // 矩形区域光
 // 点光源函数
 export const lightPointFun = () => {
   const { lightpanel, lightSet } = lightCounterStore()
@@ -416,8 +419,8 @@ export const lightPointFun = () => {
   } else {
     // lightpanel.lightshow = false // 隐藏右侧灯光操作面板
     scene.remove(pointLight)
-    scene.remove(plane) // 移除阴影地面
-    lightSet[2].lightshodow = false // 取消勾选阴影
+    // scene.remove(plane) // 移除阴影地面
+    // lightSet[2].lightshodow = false // 取消勾选阴影
   }
   // 在这里调用辅助器函数，确保启用或禁用光源时自动更新辅助器
   assistDeviceFun()
@@ -429,7 +432,7 @@ export const directionalLightFun = () => {
   const { lightpanel, lightSet } = lightCounterStore()
   if (!directionallight) {
     directionallight = new THREE.DirectionalLight('#fff', 1)
-    directionallight.position.set(5, 5, 0)
+    directionallight.position.set(5, 5, 5)
     directionallight.castShadow = true // 开启阴影
     directionallight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     directionallight.shadow.mapSize.height = 2048
@@ -444,8 +447,8 @@ export const directionalLightFun = () => {
   } else {
     // lightpanel.lightshow = false // 隐藏右侧灯光操作面板
     scene.remove(directionallight)
-    scene.remove(plane) // 移除阴影地面
-    lightSet[3].lightshodow = false // 取消勾选阴影
+    // scene.remove(plane) // 移除阴影地面
+    // lightSet[3].lightshodow = false // 取消勾选阴影
   }
   assistDeviceFun()
   cameraHelperFun()
@@ -457,7 +460,6 @@ export const spotLightFun = () => {
   if (!spotlight) {
     spotlight = new THREE.SpotLight('#fff', 50)
     spotlight.position.set(0, 5, 0)
-    // spotlight.distance = 100 // 聚光灯的影响范围
     spotlight.castShadow = true // 开启阴影
     spotlight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     spotlight.shadow.mapSize.height = 2048
@@ -472,8 +474,8 @@ export const spotLightFun = () => {
   } else {
     // lightpanel.lightshow = false // 隐藏右侧灯光操作面板
     scene.remove(spotlight)
-    scene.remove(plane) // 移除阴影地面
-    lightSet[4].lightshodow = false // 取消勾选阴影
+    // scene.remove(plane) // 移除阴影地面
+    // lightSet[4].lightshodow = false // 取消勾选阴影
   }
   assistDeviceFun()
   cameraHelperFun()
@@ -500,14 +502,7 @@ export const ambientLightFun = () => {
   const { lightpanel, lightSet } = lightCounterStore()
   // 如果环境光未初始化，则初始化
   if (!ambientlight) {
-    ambientlight = new THREE.AmbientLight(
-      lightSet[6].lightcolor, // 动态光照颜色
-      lightSet[6].lightstrength // 动态光照强度
-    )
-    // ambientlight = new THREE.AmbientLight(
-    //   '#fff', // 动态光照颜色
-    //   1 // 动态光照强度
-    // )
+    ambientlight = new THREE.AmbientLight('#ffffff', 1)
   }
   // 根据环境光是否开启来添加或移除光源
   if (lightSet[6].lightshow) {
@@ -516,13 +511,36 @@ export const ambientLightFun = () => {
   } else {
     scene.remove(ambientlight)
   }
-  assistDeviceFun()  // 其他设备功能调用
+  assistDeviceFun()
+}
+
+// 矩形区域光
+export const rectangleLightFun = () => {
+  const { lightpanel, lightSet } = lightCounterStore()
+  // 如果矩形区域光未初始化，则初始化
+  if (!rectanglelight) {
+    rectanglelight = new THREE.RectAreaLight(0xffffff, 1, 10, 5)
+    rectanglelight.position.set(0, 5, 0)
+    rectanglelight.lookAt(0, 0, 0)
+  }
+  // 根据环境光是否开启来添加或移除光源
+  if (lightSet[7].lightshow) {
+    lightpanel.lightshow = true // 显示右侧灯光操作面板
+    lightSet[1].lightshow = true // 选中光源辅助器按钮
+    scene.add(rectanglelight)
+    // const rectLightHelper = new RectAreaLightHelper(rectanglelight)
+    // scene.add(rectLightHelper)
+  } else {
+    scene.remove(rectanglelight)
+  }
+  assistDeviceFun()
 }
 
 let pointLightHelper // 点光源辅助器
 let directionallightHelper // 平行光源辅助器
 let spotlightHelper // 聚光灯辅助器
 let hemispherelightHelper // 半球光辅助器
+let rectanglelightHelper // 矩形区域光辅助器
 // 光源辅助器函数
 export const assistDeviceFun = () => {
   const { lightSet } = lightCounterStore()
@@ -591,6 +609,15 @@ export const assistDeviceFun = () => {
     THREE.HemisphereLightHelper,
     [], // 无额外辅助器
     [hemispherelight, 5] // 特殊参数
+  )
+
+  // 矩形区域光辅助器
+  rectanglelightHelper = manageLightHelper(
+    rectanglelight,
+    rectanglelightHelper,
+    7,
+    RectAreaLightHelper,
+    rectanglelightHelperArry
   )
 
   // 如果没有任何光源被启用，则关闭 assistdevice
@@ -726,79 +753,90 @@ export const changeLightDistance = (lightname, lightdistance) => {
     case 'pointlight':
       pointLight.distance = lightdistance // 更新光照强
       break
-    case 'directionallight':
-      directionallight.distance = lightdistance // 更新光照强
-      break
     case 'spotlight':
       spotlight.distance = lightdistance // 更新光照强
-      break
-    case 'hemispherelight':
-      hemispherelight.distance = lightdistance // 更新光照强
-      break
-    case 'ambientlight':
-      ambientlight.distance = lightdistance // 更新光照强
       break
     default:
       break
   }
 }
 
-// 修改光源坐标，反控光源位置
-// X坐标
-export const lightcoordinatesXFun = (lightName, lightXValue) => {
-  switch (lightName) {
-    case 'pointlight':
-      pointLight.position.x = lightXValue
-      assistDeviceFun()
-      break
-    case 'directionallight':
-      directionallight.position.x = lightXValue
-      assistDeviceFun()
-      break
-    case 'spotlight':
-      spotlight.position.x = lightXValue
-      assistDeviceFun()
-      break
-    default:
-      break
+// 更新聚光灯独有的配置项
+export const changeSpotLightFun = (lightset, lightvalue) => {
+  if (lightset === 'llightangle') {
+    spotlight.angle = (lightvalue * Math.PI) / 180 // 弧度=角度 x π/180
+    spotlightHelper.update() // 更新辅助器
+  }
+  if (lightset === 'lightpenumbra') {
+    spotlight.penumbra = lightvalue
+    spotlightHelper.update()
+  }
+  if (lightset === 'lightdecay') {
+    spotlight.decay = lightvalue
+    spotlightHelper.update()
   }
 }
+
+// 修改光源坐标，反控光源位置
+// X坐标
+export const lightcoordinatesXFun = (lightName, lightXValue, positionclass) => {
+  const lightsMap = {
+    pointlight: pointLight,
+    directionallight: directionallight,
+    spotlight: spotlight
+  }
+  const light = lightsMap[lightName]
+  if (!light) return
+  const updatePosition = (target) => {
+    target.position.x = lightXValue
+    if (positionclass === 'target') target.updateMatrixWorld?.()
+    assistDeviceFun()
+  }
+  if (positionclass === 'position') {
+    updatePosition(light)
+  } else if (positionclass === 'target' && light.target) {
+    updatePosition(light.target)
+  }
+}
+
 // Y坐标
-export const lightcoordinatesYFun = (lightName, lightYValue) => {
-  switch (lightName) {
-    case 'pointlight':
-      pointLight.position.y = lightYValue
-      assistDeviceFun()
-      break
-    case 'directionallight':
-      directionallight.position.y = lightYValue
-      assistDeviceFun()
-      break
-    case 'spotlight':
-      spotlight.position.y = lightYValue
-      assistDeviceFun()
-      break
-    default:
-      break
+export const lightcoordinatesYFun = (lightName, lightYValue, positionclass) => {
+  const lightsMap = {
+    pointlight: pointLight,
+    directionallight: directionallight,
+    spotlight: spotlight
+  }
+  const light = lightsMap[lightName]
+  if (!light) return
+  const updatePosition = (target) => {
+    target.position.y = lightYValue
+    if (positionclass === 'target') target.updateMatrixWorld?.()
+    assistDeviceFun()
+  }
+  if (positionclass === 'position') {
+    updatePosition(light)
+  } else if (positionclass === 'target' && light.target) {
+    updatePosition(light.target)
   }
 }
 // Z坐标
-export const lightcoordinatesZFun = (lightName, lightZValue) => {
-  switch (lightName) {
-    case 'pointlight':
-      pointLight.position.z = lightZValue
-      assistDeviceFun()
-      break
-    case 'directionallight':
-      directionallight.position.z = lightZValue
-      assistDeviceFun()
-      break
-    case 'spotlight':
-      spotlight.position.z = lightZValue
-      assistDeviceFun()
-      break
-    default:
-      break
+export const lightcoordinatesZFun = (lightName, lightZValue, positionclass) => {
+  const lightsMap = {
+    pointlight: pointLight,
+    directionallight: directionallight,
+    spotlight: spotlight
+  }
+  const light = lightsMap[lightName]
+  if (!light) return
+  const updatePosition = (target) => {
+    target.position.z = lightZValue
+    if (positionclass === 'target') target.updateMatrixWorld?.()
+    assistDeviceFun()
+  }
+  if (positionclass === 'position') {
+    updatePosition(light)
+  } else if (positionclass === 'target' && light.target) {
+    updatePosition(light.target)
   }
 }
 
@@ -810,6 +848,7 @@ const directionalArry = [] // 平行光
 const directionalHelperArry = []
 const spotArry = [] // 聚光灯
 const spotHelperArry = []
+const rectanglelightHelperArry = []
 export const lightaddFun = (lightName) => {
   const { lightSet } = lightCounterStore()
   // 点光源
@@ -821,7 +860,11 @@ export const lightaddFun = (lightName) => {
     pointLight.shadow.mapSize.height = 2048
     lightSet[2].lightadd.push({
       lightname: 'pointlight',
+      lightcolor: '#ffffff',
       lightstrength: 1,
+      lightdistance: 0,
+      distance: true, // 用于显示光源范围调节
+      lightxyz: true, // 用于显示坐标
       x: pointLight.position.x,
       y: pointLight.position.y,
       z: pointLight.position.z
@@ -844,7 +887,9 @@ export const lightaddFun = (lightName) => {
     directionallight.shadow.mapSize.height = 2048
     lightSet[3].lightadd.push({
       lightname: 'directionallight',
+      lightcolor: '#ffffff',
       lightstrength: 1,
+      lightxyz: true, // 用于显示坐标
       x: directionallight.position.x,
       y: directionallight.position.y,
       z: directionallight.position.z
@@ -868,7 +913,11 @@ export const lightaddFun = (lightName) => {
     spotlight.shadow.mapSize.height = 2048
     lightSet[4].lightadd.push({
       lightname: 'spotlight',
-      lightstrength: 1,
+      lightcolor: '#ffffff',
+      lightstrength: 10,
+      lightdistance: 0,
+      distance: true, // 用于显示光源范围调节
+      lightxyz: true, // 用于显示坐标
       x: spotlight.position.x,
       y: spotlight.position.y,
       z: spotlight.position.z
@@ -910,6 +959,27 @@ export const lightremoveFun = (indexmin, lightname) => {
 
 }
 
+// 调节新增光源颜色
+export const changenewlightcolor = (indexmin, newlightcolor, lightname) => {
+  // 点光源
+  if (lightname === 'pointlight') {
+    lightaddArry[indexmin].color.set(newlightcolor) // 更新光照强
+    lightaddHelperArry[indexmin].material.color.set(newlightcolor) // 同步辅助器颜色
+  }
+  // 平行光
+  if (lightname === 'directionallight') {
+    directionalArry[indexmin].color.set(newlightcolor) // 更新光照强
+    directionalHelperArry[indexmin].update()   // 更新辅助器几何数据
+    directionalHelperArry[indexmin].material.color.set(newlightcolor) // 同步辅助器颜色
+  }
+  // 聚光灯
+  if (lightname === 'spotlight') {
+    spotArry[indexmin].color.set(newlightcolor) // 更新光照强
+    spotHelperArry[indexmin].update()   // 更新辅助器几何数据
+    spotHelperArry[indexmin].material.color.set(newlightcolor) // 同步辅助器颜色
+  }
+}
+
 // 调节新增光源强度
 export const changenewlight = (indexmin, changevalue, lightname) => {
   // 点光源
@@ -923,6 +993,18 @@ export const changenewlight = (indexmin, changevalue, lightname) => {
   // 聚光灯
   if (lightname === 'spotlight') {
     spotArry[indexmin].intensity = changevalue
+  }
+}
+
+// 调节新增光源范围
+export const changenewdistance = (indexmin, changevalue, lightname) => {
+  // 点光源
+  if (lightname === 'pointlight') {
+    lightaddArry[indexmin].distance = changevalue
+  }
+  // 聚光灯
+  if (lightname === 'spotlight') {
+    spotArry[indexmin].distance = changevalue
   }
 }
 
@@ -972,6 +1054,8 @@ export const newlightZFun = (indexmin, xvalue, lightname) => {
     spotHelperArry[indexmin].update()
   }
 }
+
+
 
 
 let rgbeloader
