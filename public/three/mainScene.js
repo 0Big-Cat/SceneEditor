@@ -16,8 +16,6 @@ import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
 // 引入相机位置+旋转中心位置模块变量
 import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, animateCounterStore, uploadCounterStore, pointlabelCounterStore } from '@/stores'
-import JSZip from 'jszip'
-import { saveAs } from 'file-saver'
 
 // 将关键变量提出
 let scene, camera, render, controls, gltfLoader, axesHelper
@@ -424,7 +422,7 @@ export const lightPointFun = () => {
   }
   // 在这里调用辅助器函数，确保启用或禁用光源时自动更新辅助器
   assistDeviceFun()
-  cameraHelperFun()
+  // cameraHelperFun()
 }
 
 // 平行光源函数
@@ -451,7 +449,7 @@ export const directionalLightFun = () => {
     // lightSet[3].lightshodow = false // 取消勾选阴影
   }
   assistDeviceFun()
-  cameraHelperFun()
+  // cameraHelperFun()
 }
 
 // 聚光灯函数
@@ -478,7 +476,7 @@ export const spotLightFun = () => {
     // lightSet[4].lightshodow = false // 取消勾选阴影
   }
   assistDeviceFun()
-  cameraHelperFun()
+  // cameraHelperFun()
 }
 
 // 半球光函数
@@ -522,6 +520,9 @@ export const rectangleLightFun = () => {
     rectanglelight = new THREE.RectAreaLight(0xffffff, 1, 10, 5)
     rectanglelight.position.set(0, 5, 0)
     rectanglelight.lookAt(0, 0, 0)
+    lightSet[7].x = rectanglelight.position.x
+    lightSet[7].y = rectanglelight.position.y
+    lightSet[7].z = rectanglelight.position.z
   }
   // 根据环境光是否开启来添加或移除光源
   if (lightSet[7].lightshow) {
@@ -667,6 +668,7 @@ export const cameraHelperFun = () => {
   const manageCameraHelper = (light, helper, setIndex) => {
     if (light) {
       if (lightSet[0].lightshow && lightSet[setIndex].lightshow) {
+        lightSet[setIndex].lightassist = true
         if (!helper) {
           helper = new THREE.CameraHelper(light.shadow.camera)
           scene.add(helper)
@@ -675,6 +677,7 @@ export const cameraHelperFun = () => {
       } else if (helper) {
         scene.remove(helper)
         helper = null
+        lightSet[setIndex].lightassist = false
       }
     }
     return helper
@@ -694,6 +697,59 @@ export const cameraHelperFun = () => {
     lightSet[0].lightshow = false
   }
 }
+
+// 更新阴影相机辅助器的配置项
+export const assistcaremaFun = (assistset, light, value) => {
+  console.log(value)
+
+  // 点光源
+  if (light === 'pointlight') {
+    if (assistset === 'near') {
+      pointLight.shadow.camera.near = value
+    } else if (assistset === 'far') {
+      pointLight.shadow.camera.far = value
+    } else if (assistset === 'zoom') {
+      pointLight.shadow.camera.zoom = value
+    }
+    pointLightCameraHelper.update()
+    pointLight.shadow.camera.updateProjectionMatrix() // 更新投影矩阵
+  }
+  // 平行光
+  if (light === 'directionallight') {
+    if (assistset === 'width') {
+      // 动态设置阴影相机的左右边界
+      directionallight.shadow.camera.left = -value / 2
+      directionallight.shadow.camera.right = value / 2
+    } else if (assistset === 'height') {
+      // 动态设置阴影相机的上下边界
+      directionallight.shadow.camera.top = value / 2
+      directionallight.shadow.camera.bottom = -value / 2
+    } else if (assistset === 'near') {
+      directionallight.shadow.camera.near = value
+    } else if (assistset === 'far') {
+      directionallight.shadow.camera.far = value
+    } else if (assistset === 'zoom') {
+      directionallight.shadow.camera.zoom = value
+    }
+    // 更新阴影相机辅助器
+    directionalLightCameraHelper.update()
+    // 更新投影矩阵
+    directionallight.shadow.camera.updateProjectionMatrix()
+  }
+  // 聚光灯
+  if (light === 'spotlight') {
+    if (assistset === 'near') {
+      spotlight.shadow.camera.near = value
+    } else if (assistset === 'far') {
+      spotlight.shadow.camera.far = value
+    } else if (assistset === 'zoom') {
+      spotlight.shadow.camera.zoom = value
+    }
+    spotLightCameraHelper.update()
+    spotlight.shadow.camera.updateProjectionMatrix() // 更新投影矩阵
+  }
+}
+
 
 // 更新光源颜色
 export const changeLightColor = (lightname, lightcolor) => {
@@ -715,6 +771,10 @@ export const changeLightColor = (lightname, lightcolor) => {
     case 'hemispherelight':
       hemispherelight.color.set(lightcolor) // 更新光照强
       hemispherelightHelper.material.color.set(lightcolor) // 同步辅助器颜色
+      break
+    case 'rectanglelight':
+      rectanglelight.color.set(lightcolor) // 更新光照强
+      rectanglelightHelper.material.color.set(lightcolor) // 同步辅助器颜色
       break
     case 'ambientlight':
       ambientlight.color.set(lightcolor) // 更新光照强
@@ -738,6 +798,9 @@ export const changeLightStrength = (lightname, strengthvalue) => {
       break
     case 'hemispherelight':
       hemispherelight.intensity = strengthvalue // 更新光照强
+      break
+    case 'rectanglelight':
+      rectanglelight.intensity = strengthvalue // 更新光照强
       break
     case 'ambientlight':
       ambientlight.intensity = strengthvalue // 更新光照强
@@ -765,25 +828,39 @@ export const changeLightDistance = (lightname, lightdistance) => {
 export const changeSpotLightFun = (lightset, lightvalue) => {
   if (lightset === 'llightangle') {
     spotlight.angle = (lightvalue * Math.PI) / 180 // 弧度=角度 x π/180
-    spotlightHelper.update() // 更新辅助器
+
   }
   if (lightset === 'lightpenumbra') {
     spotlight.penumbra = lightvalue
-    spotlightHelper.update()
   }
   if (lightset === 'lightdecay') {
     spotlight.decay = lightvalue
-    spotlightHelper.update()
+  }
+  spotlightHelper.update() // 更新辅助器
+  spotLightCameraHelper.update()
+  spotlight.shadow.camera.updateProjectionMatrix() // 更新投影矩阵
+}
+
+// 更新矩形区域光独有的宽高
+export const rectanglelightwhFun = (whname, value) => {
+  if (whname === 'width') {
+    rectanglelight.width = value
+    // rectanglelightHelper.update()
+  }
+  if (whname === 'height') {
+    rectanglelight.height = value
+    rectanglelightHelper.update()
   }
 }
 
-// 修改光源坐标，反控光源位置
+// 更新光源坐标以及光源照射目标坐标
 // X坐标
 export const lightcoordinatesXFun = (lightName, lightXValue, positionclass) => {
   const lightsMap = {
     pointlight: pointLight,
     directionallight: directionallight,
-    spotlight: spotlight
+    spotlight: spotlight,
+    rectanglelight: rectanglelight
   }
   const light = lightsMap[lightName]
   if (!light) return
@@ -792,19 +869,30 @@ export const lightcoordinatesXFun = (lightName, lightXValue, positionclass) => {
     if (positionclass === 'target') target.updateMatrixWorld?.()
     assistDeviceFun()
   }
-  if (positionclass === 'position') {
-    updatePosition(light)
-  } else if (positionclass === 'target' && light.target) {
-    updatePosition(light.target)
+
+  if (lightName === 'rectanglelight') {
+    if (positionclass === 'position') {
+      updatePosition(light)
+    } else if (positionclass === 'target') {
+      light.rotation.x = THREE.MathUtils.degToRad(lightXValue) // 转换为弧度
+      light.updateMatrixWorld(true)
+      assistDeviceFun()
+    }
+  } else {
+    if (positionclass === 'position') {
+      updatePosition(light)
+    } else if (positionclass === 'target' && light.target) {
+      updatePosition(light.target)
+    }
   }
 }
-
 // Y坐标
 export const lightcoordinatesYFun = (lightName, lightYValue, positionclass) => {
   const lightsMap = {
     pointlight: pointLight,
     directionallight: directionallight,
-    spotlight: spotlight
+    spotlight: spotlight,
+    rectanglelight: rectanglelight
   }
   const light = lightsMap[lightName]
   if (!light) return
@@ -813,10 +901,20 @@ export const lightcoordinatesYFun = (lightName, lightYValue, positionclass) => {
     if (positionclass === 'target') target.updateMatrixWorld?.()
     assistDeviceFun()
   }
-  if (positionclass === 'position') {
-    updatePosition(light)
-  } else if (positionclass === 'target' && light.target) {
-    updatePosition(light.target)
+  if (lightName === 'rectanglelight') {
+    if (positionclass === 'position') {
+      updatePosition(light)
+    } else if (positionclass === 'target') {
+      light.rotation.y = THREE.MathUtils.degToRad(lightYValue) // 转换为弧度
+      light.updateMatrixWorld(true)
+      assistDeviceFun()
+    }
+  } else {
+    if (positionclass === 'position') {
+      updatePosition(light)
+    } else if (positionclass === 'target' && light.target) {
+      updatePosition(light.target)
+    }
   }
 }
 // Z坐标
@@ -824,7 +922,8 @@ export const lightcoordinatesZFun = (lightName, lightZValue, positionclass) => {
   const lightsMap = {
     pointlight: pointLight,
     directionallight: directionallight,
-    spotlight: spotlight
+    spotlight: spotlight,
+    rectanglelight: rectanglelight
   }
   const light = lightsMap[lightName]
   if (!light) return
@@ -833,10 +932,20 @@ export const lightcoordinatesZFun = (lightName, lightZValue, positionclass) => {
     if (positionclass === 'target') target.updateMatrixWorld?.()
     assistDeviceFun()
   }
-  if (positionclass === 'position') {
-    updatePosition(light)
-  } else if (positionclass === 'target' && light.target) {
-    updatePosition(light.target)
+  if (lightName === 'rectanglelight') {
+    if (positionclass === 'position') {
+      updatePosition(light)
+    } else if (positionclass === 'target') {
+      light.rotation.z = THREE.MathUtils.degToRad(lightZValue) // 转换为弧度
+      light.updateMatrixWorld(true)
+      assistDeviceFun()
+    }
+  } else {
+    if (positionclass === 'position') {
+      updatePosition(light)
+    } else if (positionclass === 'target' && light.target) {
+      updatePosition(light.target)
+    }
   }
 }
 
@@ -854,17 +963,19 @@ export const lightaddFun = (lightName) => {
   // 点光源
   if (lightName === 'pointlight') {
     const pointLight = new THREE.PointLight('#fff', 1, 100)
-    pointLight.position.set(0, 1, 0)
+    pointLight.position.set(1, 1, 0)
     pointLight.castShadow = true // 开启阴影
     pointLight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     pointLight.shadow.mapSize.height = 2048
     lightSet[2].lightadd.push({
+      lightlabel: '点光源',
       lightname: 'pointlight',
       lightcolor: '#ffffff',
       lightstrength: 1,
       lightdistance: 0,
       distance: true, // 用于显示光源范围调节
       lightxyz: true, // 用于显示坐标
+      unflod: true, // 用于控制新增光源的显示与隐藏
       x: pointLight.position.x,
       y: pointLight.position.y,
       z: pointLight.position.z
@@ -886,10 +997,16 @@ export const lightaddFun = (lightName) => {
     directionallight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     directionallight.shadow.mapSize.height = 2048
     lightSet[3].lightadd.push({
+      lightlabel: '平行光',
       lightname: 'directionallight',
       lightcolor: '#ffffff',
       lightstrength: 1,
       lightxyz: true, // 用于显示坐标
+      unflod: true, // 用于控制新增光源的显示与隐藏
+      lighttarget: true, // 用于显示光源目标
+      tarx: 0,
+      tary: 0,
+      tarz: 0,
       x: directionallight.position.x,
       y: directionallight.position.y,
       z: directionallight.position.z
@@ -912,12 +1029,22 @@ export const lightaddFun = (lightName) => {
     spotlight.shadow.mapSize.width = 2048  // 设置阴影分辨率
     spotlight.shadow.mapSize.height = 2048
     lightSet[4].lightadd.push({
+      lightlabel: '聚光灯',
       lightname: 'spotlight',
       lightcolor: '#ffffff',
       lightstrength: 10,
       lightdistance: 0,
       distance: true, // 用于显示光源范围调节
       lightxyz: true, // 用于显示坐标
+      unflod: true, // 用于控制新增光源的显示与隐藏
+      llightangle: 60, // 光照范围的角度
+      lightpenumbra: 0, // 聚光追半影衰减百分比
+      penumbra: true, // 用于显示聚光追半影衰减百分比
+      lightdecay: 2, // 沿着光照的衰减量
+      lighttarget: true, // 用于显示光源目标
+      tarx: 0,
+      tary: 0,
+      tarz: 0,
       x: spotlight.position.x,
       y: spotlight.position.y,
       z: spotlight.position.z
@@ -1008,50 +1135,107 @@ export const changenewdistance = (indexmin, changevalue, lightname) => {
   }
 }
 
+// 调节新增聚光灯独有的配置项
+export const newSpotLightFun = (indexmin, lightvalue, lightset) => {
+  if (lightset === 'llightangle') {
+    spotArry[indexmin].angle = (lightvalue * Math.PI) / 180 // 弧度=角度 x π/180
+  }
+  if (lightset === 'lightpenumbra') {
+    spotArry[indexmin].penumbra = lightvalue
+  }
+  if (lightset === 'lightdecay') {
+    spotArry[indexmin].decay = lightvalue
+  }
+  spotHelperArry[indexmin].update() // 更新辅助器
+
+}
+
 // 修改新增光源坐标
 // X坐标
-export const newlightXFun = (indexmin, xvalue, lightname) => {
-  if (lightname === 'pointlight') {
-    lightaddArry[indexmin].position.x = xvalue  // 点光源
-    lightaddArry[indexmin].update()
+export const newlightXFun = (indexmin, xvalue, lightname, lightclass) => {
+  if (lightclass === 'position') {
+    if (lightname === 'pointlight') {
+      lightaddArry[indexmin].position.x = xvalue  // 点光源
+      lightaddArry[indexmin].update()
+    }
+    if (lightname === 'directionallight') {
+      directionalArry[indexmin].position.x = xvalue  // 平行光
+      directionalHelperArry[indexmin].update()
+    }
+    if (lightname === 'spotlight') {
+      spotArry[indexmin].position.x = xvalue  // 聚光灯
+      spotHelperArry[indexmin].update()
+    }
   }
-  if (lightname === 'directionallight') {
-    directionalArry[indexmin].position.x = xvalue  // 平行光
-    directionalHelperArry[indexmin].update()
-  }
-  if (lightname === 'spotlight') {
-    spotArry[indexmin].position.x = xvalue  // 聚光灯
-    spotHelperArry[indexmin].update()
+
+  if (lightclass === 'target') {
+    if (lightname === 'directionallight') {
+      directionalArry[indexmin].target.position.x = xvalue  // 平行光
+      directionalArry[indexmin].target.updateMatrixWorld() // 更新目标的世界矩阵
+      directionalHelperArry[indexmin].update()
+    }
+    if (lightname === 'spotlight') {
+      spotArry[indexmin].target.position.x = xvalue  // 聚光灯
+      spotHelperArry[indexmin].update()
+    }
   }
 }
 // Y坐标
-export const newlightYFun = (indexmin, xvalue, lightname) => {
-  if (lightname === 'pointlight') {
-    lightaddArry[indexmin].position.y = xvalue  // 点光源
-    lightaddArry[indexmin].update()
+export const newlightYFun = (indexmin, yvalue, lightname, lightclass) => {
+  if (lightclass === 'position') {
+    if (lightname === 'pointlight') {
+      lightaddArry[indexmin].position.y = yvalue  // 点光源
+      lightaddArry[indexmin].update()
+    }
+    if (lightname === 'directionallight') {
+      directionalArry[indexmin].position.y = yvalue  // 平行光
+      directionalHelperArry[indexmin].update()
+    }
+    if (lightname === 'spotlight') {
+      spotArry[indexmin].position.y = yvalue  // 聚光灯
+      spotHelperArry[indexmin].update()
+    }
   }
-  if (lightname === 'directionallight') {
-    directionalArry[indexmin].position.y = xvalue  // 平行光
-    directionalHelperArry[indexmin].update()
-  }
-  if (lightname === 'spotlight') {
-    spotArry[indexmin].position.y = xvalue  // 聚光灯
-    spotHelperArry[indexmin].update()
+
+  if (lightclass === 'target') {
+    if (lightname === 'directionallight') {
+      directionalArry[indexmin].target.position.y = yvalue  // 平行光
+      directionalArry[indexmin].target.updateMatrixWorld() // 更新目标的世界矩阵
+      directionalHelperArry[indexmin].update()
+    }
+    if (lightname === 'spotlight') {
+      spotArry[indexmin].target.position.y = yvalue  // 聚光灯
+      spotHelperArry[indexmin].update()
+    }
   }
 }
 // Z坐标
-export const newlightZFun = (indexmin, xvalue, lightname) => {
-  if (lightname === 'pointlight') {
-    lightaddArry[indexmin].position.z = xvalue  // 点光源
-    lightaddArry[indexmin].update()
+export const newlightZFun = (indexmin, zvalue, lightname, lightclass) => {
+  if (lightclass === 'position') {
+    if (lightname === 'pointlight') {
+      lightaddArry[indexmin].position.z = zvalue  // 点光源
+      lightaddArry[indexmin].update()
+    }
+    if (lightname === 'directionallight') {
+      directionalArry[indexmin].position.z = zvalue  // 平行光
+      directionalHelperArry[indexmin].update()
+    }
+    if (lightname === 'spotlight') {
+      spotArry[indexmin].position.z = zvalue  // 聚光灯
+      spotHelperArry[indexmin].update()
+    }
   }
-  if (lightname === 'directionallight') {
-    directionalArry[indexmin].position.z = xvalue  // 平行光
-    directionalHelperArry[indexmin].update()
-  }
-  if (lightname === 'spotlight') {
-    spotArry[indexmin].position.z = xvalue  // 聚光灯
-    spotHelperArry[indexmin].update()
+
+  if (lightclass === 'target') {
+    if (lightname === 'directionallight') {
+      directionalArry[indexmin].target.position.z = zvalue  // 平行光
+      directionalArry[indexmin].target.updateMatrixWorld() // 更新目标的世界矩阵
+      directionalHelperArry[indexmin].update()
+    }
+    if (lightname === 'spotlight') {
+      spotArry[indexmin].target.position.z = zvalue  // 聚光灯
+      spotHelperArry[indexmin].update()
+    }
   }
 }
 
@@ -1591,128 +1775,4 @@ export const poinyListener = value => {
   }
   window.removeEventListener('click', pointClick)
   scene.remove(currentConeMarker) // 移除椎体
-}
-
-
-
-// 导出场景功能模块（暂未使用）
-
-export const sceneDataFun = () => {
-  // 获取场景数据
-  const sceneData = scene.toJSON()
-  const jsonStr = JSON.stringify(sceneData, null, 2)
-
-  // 创建一个 Blob 对象，用于保存 JSON 数据
-  const blob = new Blob([jsonStr], { type: 'application/json' })
-  const sceneJsonFile = new File([blob], 'scene.json')
-
-  // 获取纹理资源（如果有）
-  const resources = []
-  scene.traverse((object) => {
-    if (object.material && object.material.map) {
-      const texture = object.material.map
-      if (texture.isTexture && texture.image && texture.image.src) {
-        resources.push(texture.image.src)  // 纹理路径
-      }
-    }
-  })
-
-  // 如果有纹理资源，输出资源路径
-  if (resources.length > 0) {
-    console.log('需要导出的资源文件:', resources)
-  } else {
-    console.log('没有找到纹理资源')
-  }
-
-  // 创建 ZIP 文件
-  createZipFile([sceneJsonFile, ...resources])
-}
-
-const createZipFile = (files) => {
-  const zip = new JSZip()
-
-  // 添加场景 JSON 文件
-  zip.file('scene.json', files[0])
-
-  // 加载所有纹理资源并添加到压缩包
-  const texturePromises = files.slice(1).map((texturePath, index) => {
-    return fetch(texturePath)
-      .then(response => response.blob())
-      .then(blob => {
-        zip.file(`assets/texture${index + 1}.jpg`, blob)
-      })
-  })
-
-  // 等待所有纹理加载完成后生成 ZIP 文件
-  Promise.all(texturePromises).then(() => {
-    // 添加 HTML 文件
-    zip.file('index.html', generateHtmlFile())
-
-    // 打包 ZIP
-    zip.generateAsync({ type: 'blob' })
-      .then(function (content) {
-        saveAs(content, 'scene-package.zip')
-      })
-      .catch((error) => {
-        console.error('生成 ZIP 文件失败:', error)
-      })
-  }).catch((error) => {
-    console.error('纹理资源加载失败:', error)
-  })
-}
-
-const generateHtmlFile = () => {
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Three.js Scene</title>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    </head>
-    <body>
-      <script>
-        // 加载场景数据
-        fetch('scene.json')
-          .then(response => response.json())
-          .then(sceneData => {
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-
-            const loader = new THREE.ObjectLoader();
-            loader.parse(sceneData, (object) => {
-              scene.add(object);
-            });
-
-            // 加载纹理资源
-            scene.traverse((object) => {
-              if (object.material && object.material.map) {
-                const textureURL = 'assets/texture1.jpg'; // 确保纹理路径正确
-                const textureLoader = new THREE.TextureLoader();
-                textureLoader.load(textureURL, (texture) => {
-                  object.material.map = texture;
-                  object.material.needsUpdate = true;
-                });
-              }
-            });
-
-            camera.position.z = 5;
-
-            const animate = () => {
-              requestAnimationFrame(animate);
-              renderer.render(scene, camera);
-            };
-            animate();
-          })
-          .catch(error => {
-            console.error('加载场景数据失败:', error);
-          });
-      </script>
-    </body>
-    </html>
-  `
 }
