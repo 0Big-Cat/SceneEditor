@@ -5,7 +5,8 @@ import { defineStore } from 'pinia'
 export const lightCounterStore = defineStore('light', () => {
   // 右侧灯光面板
   const lightpanel = ref({
-    lightshow: false
+    // lightshow: false
+    rightpanel: false
   })
 
   // 灯光合集，存储光源的基本信息
@@ -21,121 +22,140 @@ export const lightCounterStore = defineStore('light', () => {
       lightshow: false
     },
     {
-      lightlabel: '点光源',
-      lightname: 'pointlight',
-      lightshow: false,
-      lightcolor: '#ffffff',
-      lightstrength: 1,
-      lightdistance: 0,
-      distance: true, // 用于显示光源范围调节
+      lightlabel: '点光源', // 右侧面板的展示文字
+      lightname: 'pointlight', // 光源名称
+      lightcolor: '#ffffff', // 光源颜色
+      lightstrength: 1, // 光源强度
+      lightdistance: 0, // 光照范围
       lightadd: [], // 存储新增光源
-      lightshodow: false,
-      lightxyz: true, // 用于显示坐标
-      x: 0,
+      x: 0, // position坐标
       y: 0,
       Z: 0,
-      unflod: true, // 用于控制操作面板的显示与隐藏
-      lightassist: false, // 用于控制相机阴影辅助器显示、隐藏
-      // assistwidth: 10,
-      // assistheight: 10,
-      assistnear: 0.1,
-      assistfar: 500,
-      assistzoom: 1
-    },
-    {
-      lightlabel: '平行光',
-      lightname: 'directionallight',
-      lightshow: false,
-      lightcolor: '#ffffff',
-      lightstrength: 1,
-      lightadd: [],
-      lightshodow: false,
-      lightxyz: true, // 用于显示坐标
-      x: 0,
-      y: 0,
-      Z: 0,
-      lighttarget: true, // 用于显示光源目标
-      tarx: 0,
-      tary: 0,
-      tarz: 0,
-      unflod: true, // 用于控制操作面板的显示与隐藏
-      lightassist: false, // 用于控制相机阴影辅助器显示、隐藏
-      assistwandh: true, // 用于控制宽高配置项的显示与否
-      assistwidth: 10,
-      assistheight: 10,
-      assistnear: 0.1,
-      assistfar: 500,
-      assistzoom: 1
-    },
-    {
-      lightlabel: '聚光灯',
-      lightname: 'spotlight',
-      lightshow: false,
-      lightcolor: '#ffffff',
-      lightstrength: 50,
-      lightdistance: 0,
+      assistnear: 0.1, // 视椎体进截面
+      assistfar: 500, // 视椎体元界面
+      assistzoom: 1, // 缩放
+      name: true, // 控制右侧面板名称的显示
+      lightshow: false, // 控制选中按钮
+      color: true, // 控制颜色配置项的显示
+      intensity: true, // 控制光源强度配置项的显示
       distance: true, // 用于显示光源范围调节
-      lightadd: [],
-      lightshodow: false,
       lightxyz: true, // 用于显示坐标
-      x: 0,
+      unflod: true, // 控制操作面板的显示
+      lightassist: false // 控制相机阴影辅助器显示
+    },
+    {
+      lightlabel: '平行光', // 右侧面板的展示文字
+      lightname: 'directionallight', // 光源名称
+      lightcolor: '#ffffff', // 光源颜色
+      lightstrength: 1, // 光源强度
+      lightadd: [], // 存储新增光源
+      x: 0, // position坐标
       y: 0,
       Z: 0,
-      lighttarget: true, // 用于显示光源目标
-      tarx: 0,
+      tarx: 0, // target坐标
       tary: 0,
       tarz: 0,
-      unflod: true, // 用于控制操作面板的显示与隐藏
+      assistwidth: 10, // 阴影相机辅助器宽度
+      assistheight: 10, // 阴影相机辅助器高度
+      assistnear: 0.1, // 视椎体进截面
+      assistfar: 500, // 视椎体元界面
+      assistzoom: 1, // 缩放
+      name: true, // 控制右侧面板名称的显示
+      lightshow: false, // 控制选中按钮
+      color: true, // 控制颜色配置项的显示
+      intensity: true, // 控制光源强度配置项的显示
+      lightxyz: true, // 显示坐标
+      lighttarget: true, // 显示光源目标
+      unflod: true, // 控制操作面板的显示
+      lightassist: false, // 控制相机阴影辅助器显示
+      assistwandh: true // 控制宽高配置项的显示
+
+    },
+    {
+      lightlabel: '聚光灯', // 右侧面板的展示文字
+      lightname: 'spotlight', // 光源名称
+      lightcolor: '#ffffff', // 光源颜色
+      lightstrength: 50, // 光源强度
+      lightdistance: 0, // 光照范围
+      lightadd: [], // 存储新增光源
+      x: 0, // position坐标
+      y: 0,
+      Z: 0,
+      tarx: 0, // target坐标
+      tary: 0,
+      tarz: 0,
       llightangle: 60, // 光照范围的角度
       lightpenumbra: 0, // 聚光追半影衰减百分比
-      penumbra: true, // 用于显示聚光追半影衰减百分比
       lightdecay: 2, // 沿着光照的衰减量
-      lightassist: false, // 用于控制相机阴影辅助器显示、隐藏
-      // assistwidth: 10,
-      // assistheight: 10,
-      assistnear: 0.1,
-      assistfar: 500,
-      assistzoom: 1
+      assistnear: 0.1, // 视椎体进截面
+      assistfar: 500, // 视椎体元界面
+      assistzoom: 1, // 缩放
+      name: true, // 控制右侧面板名称的显示
+      lightshow: false, // 控制选中按钮
+      color: true, // 控制颜色配置项的显示
+      intensity: true, // 控制光源强度配置项的显示
+      distance: true, // 显示光源范围调节
+      lightxyz: true, // 用于显示坐标
+      lighttarget: true, // 用于显示光源目标
+      unflod: true, // 控制操作面板的显示
+      angle: true, // 控制光照范围角度
+      decay: true, //控制光照的衰减量显示
+      penumbra: true, // 显示聚光追半影衰减百分比
+      lightassist: false // 控制相机阴影辅助器显示、隐藏
     },
     {
       lightlabel: '半球光',
       lightname: 'hemispherelight',
-      lightshow: false,
       lightcolor: '#ffffff',
       lightstrength: 1,
-      unflod: true // 用于控制操作面板的显示与隐藏
+      name: true, // 控制右侧面板名称的显示
+      lightshow: false, // 控制选中按钮
+      color: true, // 控制颜色配置项的显示
+      intensity: true, // 控制光源强度配置项的显示
+      unflod: true // 控制操作面板的显示
     },
     {
       lightlabel: '环境光',
       lightname: 'ambientlight',
-      lightshow: false,
       lightcolor: '#ffffff',
       lightstrength: 1,
-      unflod: true // 用于控制操作面板的显示与隐藏
+      name: true, // 控制右侧面板名称的显示
+      lightshow: false, // 控制选中按钮
+      color: true, // 控制颜色配置项的显示
+      intensity: true, // 控制光源强度配置项的显示
+      unflod: true // 控制操作面板的显示
     },
     {
       lightlabel: '矩形区域光',
       lightname: 'rectanglelight',
-      lightshow: false,
       lightcolor: '#ffffff',
       lightstrength: 1,
       lightwidth: 10,
       lightheight: 5,
-      lightshodow: false,
-      unflod: true, // 用于控制操作面板的显示与隐藏
       lightadd: [],
-      lightxyz: true, // 用于显示坐标
-      lighttarget: true, // 用于显示光源目标
       tarx: -90,
       tary: 0,
       tarz: 0,
       x: 0,
       y: 5,
-      z: 0
+      z: 0,
+      name: true, // 控制右侧面板名称的显示
+      lightshow: false, // 控制选中按钮
+      color: true, // 控制颜色配置项的显示
+      intensity: true, // 控制光源强度配置项的显示
+      unflod: true, // 控制操作面板的显示与隐藏
+      lightxyz: true, // 显示坐标
+      lighttarget: true // 显示光源目标
     }, {
-      lightlabel: '阴影',
+      lightlabel: '阴影接收地面',
       lightname: 'shadow',
-      lightshow: false
+      planewidth: 100, // 接收阴影的地面宽高
+      planeheight: 100,
+      name: true, // 控制右侧面板名称的显示
+      lightshow: false, // 控制选中按钮
+      planewh: true, // 控制宽高配置项的显示
+      unflod: true // 控制操作面板的显示
+
     }
   ])
 

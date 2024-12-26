@@ -4,42 +4,24 @@ import {
   changeLightStrength,
   changeLightColor,
   changeLightDistance,
-  lightcoordinatesXFun,
-  lightcoordinatesYFun,
-  lightcoordinatesZFun,
+  lightPositionFun,
   lightaddFun,
   lightremoveFun,
   changenewlightcolor,
   changenewlight,
   changenewdistance,
-  newlightXFun,
-  newlightYFun,
-  newlightZFun,
+  newlightPositionFun,
   changeSpotLightFun,
   rectanglelightwhFun,
   assistcaremaFun,
-  newSpotLightFun
+  newSpotLightFun,
+  newrectanglelightwhFun,
+  planeshadowFun
 } from '../../../public/three/mainScene'
 
 import { lightCounterStore } from '@/stores'
 
 const { lightpanel, lightSet } = lightCounterStore()
-
-// 复制光源坐标
-// const copylightpoint = (itemx, itemy, itemz) => {
-//   const cameraString = `${itemx},${itemy},${itemz}`
-//   navigator.clipboard.writeText(cameraString).then(() => {
-//     ElMessage({
-//       message: '坐标复制成功',
-//       type: 'success'
-//     })
-//   }).catch(() => {
-//     ElMessage({
-//       message: '坐标复制失败',
-//       type: 'warning'
-//     })
-//   })
-// }
 
 // 删除新增的光源
 const deleatlight = (index, lightname, indexmin) => {
@@ -56,19 +38,19 @@ const unflodFun = index => {
 
 <template>
   <transition name="rightlight">
-    <div v-if="lightpanel.lightshow" id="rightlightpanel">
+    <div v-if="lightpanel.rightpanel" id="rightlightpanel">
       <ul>
         <li v-for="(item, index) in lightSet " :key="item.lightname">
 
           <!-- 光源类型（这里根据是否有颜色来显示有无光照范围调整） -->
-          <div v-if="item.lightcolor && item.lightshow">
+          <div v-if="item.name && item.lightshow">
             <div>
               <div>
                 <span class="iconfont icon-xiala" :class="item.unflod ? 'pulldown' : 'packup'"></span>
                 <span @click="unflodFun(index)">{{ item.lightlabel }}</span>
               </div>
-              <div>
-                <button @click="lightaddFun(item.lightname)">新增</button>
+              <div v-if="item.color">
+                <button @click="lightaddFun(item.lightname, index)">新增</button>
                 <!-- <button @click="copylightpoint(item.x, item.y, item.z)">复制</button> -->
               </div>
             </div>
@@ -77,7 +59,7 @@ const unflodFun = index => {
           <transition name="slide">
             <div v-show="item.unflod" class="lightmain">
               <!-- 光源颜色 -->
-              <div v-if="item.lightcolor && item.lightshow" class="lightcolor">
+              <div v-if="item.color && item.lightshow" class="lightcolor">
                 <span>color</span>
                 <div>
                   <input type="color" v-model="item.lightcolor"
@@ -88,7 +70,7 @@ const unflodFun = index => {
               </div>
 
               <!-- 光照强度 -->
-              <div v-if="item.lightstrength && item.lightshow" class="lightvalue">
+              <div v-if="item.intensity && item.lightshow" class="lightvalue">
                 <span>intensity</span>
                 <div>
                   <el-slider v-model="item.lightstrength" :precision="2" :step="0.01" :max="100" :min="1"
@@ -111,7 +93,7 @@ const unflodFun = index => {
               </div>
 
               <!-- 光照范围的角度(聚光灯独有配置) -->
-              <div v-if="item.llightangle && item.lightshow" class="llightangle">
+              <div v-if="item.angle && item.lightshow" class="llightangle">
                 <span>angle</span>
                 <div>
                   <el-slider v-model="item.llightangle" :precision="2" :step="0.01" :max="100" :min="1"
@@ -133,7 +115,7 @@ const unflodFun = index => {
               </div>
 
               <!-- 沿着光照的衰减量(聚光灯独有配置) -->
-              <div v-if="item.lightdecay && item.lightshow" class="lightdecay">
+              <div v-if="item.decay && item.lightshow" class="lightdecay">
                 <span>decay</span>
                 <div>
                   <el-slider v-model="item.lightdecay" :precision="2" :step="1" :max="10" :min="2"
@@ -172,9 +154,9 @@ const unflodFun = index => {
                   <span>target-x</span>
                   <div>
                     <el-slider v-model="item.tarx" :precision="2" :step="0.01" :max="180" :min="-180"
-                      @input="lightcoordinatesXFun(item.lightname, item.tarx, 'target')" />
+                      @input="lightPositionFun(item.lightname, item.tarx, 'target', 'x')" />
                     <input type="number" v-model="item.tarx" max="20" min="-20" required
-                      @input="lightcoordinatesXFun(item.lightname, item.tarx, 'target')">
+                      @input="lightPositionFun(item.lightname, item.tarx, 'target', 'x')">
                   </div>
                 </div>
                 <!-- Y -->
@@ -182,9 +164,9 @@ const unflodFun = index => {
                   <span>target-y</span>
                   <div>
                     <el-slider v-model="item.tary" :precision="2" :step="0.01" :max="180" :min="-180"
-                      @input="lightcoordinatesYFun(item.lightname, item.tary, 'target')" />
+                      @input="lightPositionFun(item.lightname, item.tary, 'target', 'y')" />
                     <input type="number" v-model="item.tary" max="20" min="-20" required
-                      @input="lightcoordinatesYFun(item.lightname, item.tary, 'target')">
+                      @input="lightPositionFun(item.lightname, item.tary, 'target', 'y')">
                   </div>
                 </div>
                 <!-- Z -->
@@ -192,9 +174,9 @@ const unflodFun = index => {
                   <span>target-z</span>
                   <div>
                     <el-slider v-model="item.tarz" :precision="2" :step="0.01" :max="180" :min="-180"
-                      @input="lightcoordinatesZFun(item.lightname, item.tarz, 'target')" />
+                      @input="lightPositionFun(item.lightname, item.tarz, 'target', 'z')" />
                     <input type="number" v-model="item.tarz" max="20" min="-20" required
-                      @input="lightcoordinatesZFun(item.lightname, item.tarz, 'target')">
+                      @input="lightPositionFun(item.lightname, item.tarz, 'target', 'z')">
                   </div>
                 </div>
               </div>
@@ -206,9 +188,9 @@ const unflodFun = index => {
                   <span>position-x</span>
                   <div>
                     <el-slider v-model="item.x" :precision="2" :step="0.01" :max="20" :min="-20"
-                      @input="lightcoordinatesXFun(item.lightname, item.x, 'position')" />
+                      @input="lightPositionFun(item.lightname, item.x, 'position', 'x')" />
                     <input type="number" v-model="item.x" max="20" min="-20" required
-                      @input="lightcoordinatesXFun(item.lightname, item.x, 'position')">
+                      @input="lightPositionFun(item.lightname, item.x, 'position', 'x')">
                   </div>
                 </div>
                 <!-- Y -->
@@ -216,9 +198,9 @@ const unflodFun = index => {
                   <span>position-y</span>
                   <div>
                     <el-slider v-model="item.y" :precision="2" :step="0.01" :max="20" :min="-20"
-                      @input="lightcoordinatesYFun(item.lightname, item.y, 'position')" />
+                      @input="lightPositionFun(item.lightname, item.y, 'position', 'y')" />
                     <input type="number" v-model="item.y" max="20" min="-20" required
-                      @input="lightcoordinatesYFun(item.lightname, item.y, 'position')">
+                      @input="lightPositionFun(item.lightname, item.y, 'position', 'y')">
                   </div>
                 </div>
                 <!-- Z -->
@@ -226,19 +208,33 @@ const unflodFun = index => {
                   <span>position-z</span>
                   <div>
                     <el-slider v-model="item.z" :precision="2" :step="0.01" :max="20" :min="-20"
-                      @input="lightcoordinatesZFun(item.lightname, item.z, 'position')" />
+                      @input="lightPositionFun(item.lightname, item.z, 'position', 'z')" />
                     <input type="number" v-model="item.z" max="20" min="-20" required
-                      @input="lightcoordinatesZFun(item.lightname, item.z, 'position')">
+                      @input="lightPositionFun(item.lightname, item.z, 'position', 'z')">
                   </div>
                 </div>
-                <!-- 复制光源坐标 -->
-                <!-- <div>
-                  <div></div>
-                  <div>
-                    <button @click="lightaddFun(item.lightname)">新增</button>
-                    <button @click="copylightpoint(item.x, item.y, item.z)">复制</button>
-                  </div>
-                </div> -->
+              </div>
+
+              <!-- 接收阴影的地面 -->
+              <!-- 宽 -->
+              <div v-if="item.planewh && item.lightshow" class="lightdecay">
+                <span>width</span>
+                <div>
+                  <el-slider v-model="item.planewidth" :precision="2" :step="0.01" :max="500" :min="1"
+                    @input="planeshadowFun('width', item.planewidth)" />
+                  <input type="number" v-model="item.planewidth" max="500" min="1" required
+                    @input="planeshadowFun('width', item.planewidth)">
+                </div>
+              </div>
+              <!-- 高 -->
+              <div v-if="item.planewh && item.lightshow" class="lightdecay">
+                <span>height</span>
+                <div>
+                  <el-slider v-model="item.planeheight" :precision="2" :step="0.01" :max="500" :min="1"
+                    @input="planeshadowFun('height', item.planeheight)" />
+                  <input type="number" v-model="item.planeheight" max="500" min="1" required
+                    @input="planeshadowFun('height', item.planeheight)">
+                </div>
               </div>
 
               <!-- 设置阴影相机辅助器 -->
@@ -380,6 +376,28 @@ const unflodFun = index => {
                           </div>
                         </div>
 
+                        <!-- 设置矩形区域光的宽（矩形区域光独有） -->
+                        <div v-if="itemmin.lightwidth">
+                          <span>width</span>
+                          <div>
+                            <el-slider v-model="itemmin.lightwidth" :precision="2" :step="1" :max="20" :min="1"
+                              @input="newrectanglelightwhFun(indexmin, 'width', itemmin.lightwidth)" />
+                            <input type="number" v-model="itemmin.lightwidth" max="20" min="1" required
+                              @input="newrectanglelightwhFun(indexmin, 'width', itemmin.lightwidth)">
+                          </div>
+                        </div>
+
+                        <!-- 设置矩形区域光的宽（矩形区域光独有） -->
+                        <div v-if="itemmin.lightheight">
+                          <span>height</span>
+                          <div>
+                            <el-slider v-model="itemmin.lightheight" :precision="2" :step="1" :max="20" :min="1"
+                              @input="newrectanglelightwhFun(indexmin, 'height', itemmin.lightheight)" />
+                            <input type="number" v-model="itemmin.lightheight" max="20" min="1" required
+                              @input="newrectanglelightwhFun(indexmin, 'height', itemmin.lightheight)">
+                          </div>
+                        </div>
+
                         <!-- 新增光源目标坐标 -->
                         <div v-if="itemmin.lighttarget" class="newlightposition">
                           <!-- X -->
@@ -387,9 +405,9 @@ const unflodFun = index => {
                             <span>target-x</span>
                             <div>
                               <el-slider v-model="itemmin.tarx" :precision="2" :step="0.01" :max="180" :min="-180"
-                                @input="newlightXFun(indexmin, itemmin.tarx, itemmin.lightname, 'target')" />
+                                @input="newlightPositionFun(indexmin, itemmin.tarx, itemmin.lightname, 'target', 'x')" />
                               <input type="number" v-model="itemmin.tarx" max="20" min="-20" required
-                                @input="newlightXFun(indexmin, itemmin.tarx, itemmin.lightname, 'target')">
+                                @input="newlightPositionFun(indexmin, itemmin.tarx, itemmin.lightname, 'target', 'x')">
                             </div>
                           </div>
                           <!-- Y -->
@@ -397,9 +415,9 @@ const unflodFun = index => {
                             <span>target-y</span>
                             <div>
                               <el-slider v-model="itemmin.tary" :precision="2" :step="0.01" :max="180" :min="-180"
-                                @input="newlightYFun(indexmin, itemmin.tary, itemmin.lightname, 'target')" />
+                                @input="newlightPositionFun(indexmin, itemmin.tary, itemmin.lightname, 'target', 'y')" />
                               <input type="number" v-model="itemmin.tary" max="20" min="-20" required
-                                @input="newlightYFun(indexmin, itemmin.tary, itemmin.lightname, 'target')">
+                                @input="newlightPositionFun(indexmin, itemmin.tary, itemmin.lightname, 'target', 'y')">
                             </div>
                           </div>
                           <!-- Z -->
@@ -407,9 +425,9 @@ const unflodFun = index => {
                             <span>target-z</span>
                             <div>
                               <el-slider v-model="itemmin.tarz" :precision="2" :step="0.01" :max="180" :min="-180"
-                                @input="newlightZFun(indexmin, itemmin.tarz, itemmin.lightname, 'target')" />
+                                @input="newlightPositionFun(indexmin, itemmin.tarz, itemmin.lightname, 'target', 'z')" />
                               <input type="number" v-model="itemmin.tarz" max="20" min="-20" required
-                                @input="newlightZFun(indexmin, itemmin.tarz, itemmin.lightname, 'target')">
+                                @input="newlightPositionFun(indexmin, itemmin.tarz, itemmin.lightname, 'target', 'z')">
                             </div>
                           </div>
 
@@ -422,9 +440,9 @@ const unflodFun = index => {
                             <span>position-x</span>
                             <div>
                               <el-slider v-model="itemmin.x" :precision="2" :step="0.01" :max="20" :min="-20"
-                                @input="newlightXFun(indexmin, itemmin.x, itemmin.lightname, 'position')" />
+                                @input="newlightPositionFun(indexmin, itemmin.x, itemmin.lightname, 'position', 'x')" />
                               <input type="number" v-model="itemmin.x" max="20" min="-20" required
-                                @input="newlightXFun(indexmin, itemmin.x, itemmin.lightname, 'position')">
+                                @input="newlightPositionFun(indexmin, itemmin.x, itemmin.lightname, 'position', 'x')">
                             </div>
                           </div>
                           <!-- Y -->
@@ -432,9 +450,9 @@ const unflodFun = index => {
                             <span>position-y</span>
                             <div>
                               <el-slider v-model="itemmin.y" :precision="2" :step="0.01" :max="20" :min="-20"
-                                @input="newlightYFun(indexmin, itemmin.y, itemmin.lightname, 'position')" />
+                                @input="newlightPositionFun(indexmin, itemmin.y, itemmin.lightname, 'position', 'y')" />
                               <input type="number" v-model="itemmin.y" max="20" min="-20" required
-                                @input="newlightYFun(indexmin, itemmin.y, itemmin.lightname, 'position')">
+                                @input="newlightPositionFun(indexmin, itemmin.y, itemmin.lightname, 'position', 'y')">
                             </div>
                           </div>
                           <!-- Z -->
@@ -442,9 +460,9 @@ const unflodFun = index => {
                             <span>position-z</span>
                             <div>
                               <el-slider v-model="itemmin.z" :precision="2" :step="0.01" :max="20" :min="-20"
-                                @input="newlightZFun(indexmin, itemmin.z, itemmin.lightname, 'position')" />
+                                @input="newlightPositionFun(indexmin, itemmin.z, itemmin.lightname, 'position', 'z')" />
                               <input type="number" v-model="itemmin.z" max="20" min="-20" required
-                                @input="newlightZFun(indexmin, itemmin.z, itemmin.lightname, 'position')">
+                                @input="newlightPositionFun(indexmin, itemmin.z, itemmin.lightname, 'position', 'z')">
                             </div>
                           </div>
                         </div>
@@ -484,10 +502,12 @@ const unflodFun = index => {
 
   li {
     // margin-top: vh(10px);
+    // padding-bottom: vh(5px);
   }
 
   li>div:first-of-type {
-    margin-bottom: vh(10px);
+    // padding: vh(5px) 0;
+    margin-top: vh(5px);
 
     div {
       display: flex;
@@ -516,7 +536,6 @@ const unflodFun = index => {
 
     &:focus {
       outline: none;
-      /* 去掉焦点时的外部轮廓 */
     }
   }
 
@@ -551,6 +570,10 @@ const unflodFun = index => {
     }
   }
 
+  .lightcolor {
+    margin-top: vh(5px);
+  }
+
   .lightcolor,
   .lightvalue,
   .lightdistance,
@@ -579,7 +602,12 @@ const unflodFun = index => {
       >div {
         display: flex;
         align-items: center;
+
+        // &:last-child() {
+        //   // margin-bottom: vh(5px);
+        // }
       }
+
     }
   }
 
@@ -608,7 +636,7 @@ const unflodFun = index => {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: vh(10px) 0;
+      margin: vh(5px) 0;
     }
 
     div>div>div>div {
@@ -631,78 +659,7 @@ const unflodFun = index => {
       }
     }
   }
-
-
-  // li:nth-of-type(1) {
-  //   display: flex;
-  //   align-items: center;
-  //   width: 100%;
-
-  //   span {
-  //     width: vw(50px);
-  //     margin-right: vw(5px);
-  //   }
-  // }
-
-  // li:nth-of-type(2) {
-  //   display: flex;
-  //   align-items: center;
-
-  //   input {
-  //     width: 40px;
-  //     height: 19px;
-  //     margin-left: vw(3px);
-  //     text-align: center;
-
-  //     &:focus {
-  //       outline: none;
-  //     }
-  //   }
-
-
-  // }
-
-  // li:nth-of-type(3) {
-  //   display: flex;
-  //   align-items: center;
-  //   margin-top: vh(10px);
-  // }
-
-  // li:nth-of-type(4) {
-  //   div {
-  //     display: flex;
-  //     align-items: center;
-  //   }
-  // }
 }
-
-// .newlight span:nth-of-type(2) {
-//   display: inline-block;
-//   width: 20px;
-//   height: 20px;
-//   line-height: 20px;
-//   text-align: center;
-//   background-color: #0ab0b7;
-//   margin-left: vw(5px);
-//   cursor: pointer;
-// }
-
-// 阴影
-// .lightshadow {
-//   /* 设置透明的边框，确保只有下边框有渐变效果 */
-//   border-top: 1px solid transparent;
-//   border-left: 1px solid transparent;
-//   border-right: 1px solid transparent;
-
-//   /* 创建渐变的下边框 */
-//   background-image: linear-gradient(to right, #0ab0b7, #fff);
-//   background-position: bottom left;
-//   background-repeat: no-repeat;
-//   background-size: 100% 2px;
-// }
-// }
-// }
-// }
 
 // 下拉
 .pulldown {
