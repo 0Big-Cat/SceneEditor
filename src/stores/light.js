@@ -34,6 +34,18 @@ export const lightCounterStore = defineStore('light', () => {
       assistnear: 0.1, // 视椎体进截面
       assistfar: 500, // 视椎体元界面
       assistzoom: 1, // 缩放
+
+      p_x_max: 10, // position X坐标最大值
+      p_x_min: -10, // position X坐标最小值
+      p_y_max: 10,
+      p_y_min: -10,
+      p_z_max: 10,
+      p_z_min: -10,
+      intensity_max: 100, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
+      distance_max: 40, // 光源范围最大值
+      distance_min: 0, // 光源范围最小值
+
       name: true, // 控制右侧面板名称的显示
       lightshow: false, // 控制选中按钮
       color: true, // 控制颜色配置项的显示
@@ -60,6 +72,24 @@ export const lightCounterStore = defineStore('light', () => {
       assistnear: 0.1, // 视椎体进截面
       assistfar: 500, // 视椎体元界面
       assistzoom: 1, // 缩放
+
+      p_x_max: 10, // position X坐标最大值
+      p_x_min: -10, // position X坐标最小值
+      p_y_max: 10,
+      p_y_min: -10,
+      p_z_max: 10,
+      p_z_min: -10,
+      t_x_max: 10, // target X坐标最大值
+      t_x_min: -10, // target X坐标最小值
+      t_y_max: 10,
+      t_y_min: -10,
+      t_z_max: 10,
+      t_z_min: -10,
+      intensity_max: 10, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
+      distance_max: 40, // 光源范围最大值
+      distance_min: 0, // 光源范围最小值
+
       name: true, // 控制右侧面板名称的显示
       lightshow: false, // 控制选中按钮
       color: true, // 控制颜色配置项的显示
@@ -69,7 +99,6 @@ export const lightCounterStore = defineStore('light', () => {
       unflod: true, // 控制操作面板的显示
       lightassist: false, // 控制相机阴影辅助器显示
       assistwandh: true // 控制宽高配置项的显示
-
     },
     {
       lightlabel: '聚光灯', // 右侧面板的展示文字
@@ -86,10 +115,32 @@ export const lightCounterStore = defineStore('light', () => {
       tarz: 0,
       llightangle: 60, // 光照范围的角度
       lightpenumbra: 0, // 聚光追半影衰减百分比
-      lightdecay: 2, // 沿着光照的衰减量
+      // lightdecay: 2, // 沿着光照的衰减量
       assistnear: 0.1, // 视椎体进截面
       assistfar: 500, // 视椎体元界面
       assistzoom: 1, // 缩放
+
+      p_x_max: 10, // position X坐标最大值
+      p_x_min: -10, // position X坐标最小值
+      p_y_max: 10,
+      p_y_min: -10,
+      p_z_max: 10,
+      p_z_min: -10,
+      t_x_max: 10, // target X坐标最大值
+      t_x_min: -10, // target X坐标最小值
+      t_y_max: 10,
+      t_y_min: -10,
+      t_z_max: 10,
+      t_z_min: -10,
+      intensity_max: 200, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
+      distance_max: 40, // 光源范围最大值
+      distance_min: 0, // 光源范围最小值
+      angle_max: 90, // 光照角度最大值
+      angle_min: 1, // 光照角度最小值
+      penumbra_max: 1, // 半影衰减最大值
+      penumbra_min: 0, // 半影衰减最小值
+
       name: true, // 控制右侧面板名称的显示
       lightshow: false, // 控制选中按钮
       color: true, // 控制颜色配置项的显示
@@ -108,6 +159,8 @@ export const lightCounterStore = defineStore('light', () => {
       lightname: 'hemispherelight',
       lightcolor: '#ffffff',
       lightstrength: 1,
+      intensity_max: 10, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
       name: true, // 控制右侧面板名称的显示
       lightshow: false, // 控制选中按钮
       color: true, // 控制颜色配置项的显示
@@ -119,6 +172,8 @@ export const lightCounterStore = defineStore('light', () => {
       lightname: 'ambientlight',
       lightcolor: '#ffffff',
       lightstrength: 1,
+      intensity_max: 10, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
       name: true, // 控制右侧面板名称的显示
       lightshow: false, // 控制选中按钮
       color: true, // 控制颜色配置项的显示
@@ -139,6 +194,22 @@ export const lightCounterStore = defineStore('light', () => {
       x: 0,
       y: 5,
       z: 0,
+
+      p_x_max: 10, // position X坐标最大值
+      p_x_min: -10, // position X坐标最小值
+      p_y_max: 10,
+      p_y_min: -10,
+      p_z_max: 10,
+      p_z_min: -10,
+      t_x_max: 180, // target X坐标最大值
+      t_x_min: -180, // target X坐标最小值
+      t_y_max: 180,
+      t_y_min: -180,
+      t_z_max: 180,
+      t_z_min: -180,
+      intensity_max: 10, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
+
       name: true, // 控制右侧面板名称的显示
       lightshow: false, // 控制选中按钮
       color: true, // 控制颜色配置项的显示
@@ -146,7 +217,8 @@ export const lightCounterStore = defineStore('light', () => {
       unflod: true, // 控制操作面板的显示与隐藏
       lightxyz: true, // 显示坐标
       lighttarget: true // 显示光源目标
-    }, {
+    },
+    {
       lightlabel: '阴影接收地面',
       lightname: 'shadow',
       planewidth: 100, // 接收阴影的地面宽高
@@ -158,6 +230,8 @@ export const lightCounterStore = defineStore('light', () => {
 
     }
   ])
+
+
 
   return {
     lightpanel,

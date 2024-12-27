@@ -33,6 +33,7 @@ function dumpObject(obj, lines = [], isLast = true, prefix = '') {
   return lines
 }
 
+// ====================
 // 主场景
 export const initThreeScene = () => {
 
@@ -151,7 +152,7 @@ export const initThreeScene = () => {
   // composer.addPass(outlinePass)
 }
 
-
+// ====================
 // 模型板块
 
 let model // 当前传入的模型
@@ -375,7 +376,7 @@ export const wireframeMoodel = (name, vision) => {
   })
 }
 
-
+// ====================
 // 相机板块
 
 // 还原相机坐标
@@ -388,7 +389,7 @@ export const controlsPoint = () => {
   controls.target.set(0, 0, 0)
 }
 
-
+// ====================
 // 灯光板块
 
 let pointLight // 点光源
@@ -419,6 +420,7 @@ export const lightPointFun = () => {
   }
   // 在这里调用辅助器函数，确保启用或禁用光源时自动更新辅助器
   assistDeviceFun()
+  cameraHelperFun()
 }
 
 // 平行光源函数
@@ -442,6 +444,7 @@ export const directionalLightFun = () => {
     scene.remove(directionallight)
   }
   assistDeviceFun()
+  cameraHelperFun()
 }
 
 // 聚光灯函数
@@ -465,6 +468,7 @@ export const spotLightFun = () => {
     scene.remove(spotlight)
   }
   assistDeviceFun()
+  cameraHelperFun()
 }
 
 // 半球光函数
@@ -608,13 +612,45 @@ export const assistDeviceFun = () => {
   )
 
   if (!anyLightEnabled) {
-    cameraHelperFun()
     lightSet[1].lightshow = false // 取消光源辅助器的选中状态
   }
   if (!anyLightEnabled && !lightSet[2].lightshow && !lightSet[3].lightshow && !lightSet[4].lightshow && !lightSet[5].lightshow && !lightSet[6].lightshow && !lightSet[7].lightshow && !lightSet[8].lightshow) {
     lightpanel.rightpanel = false // 关闭右侧光源配置项调节面板
   }
+  lightHeaperHinit()
+}
 
+// 光源辅助器提示函数
+let lightHeaperState = {
+  2: false,
+  3: false,
+  4: false,
+  5: false,
+  7: false
+}
+const lightHeaperHinit = () => {
+  const { lightSet } = lightCounterStore()
+  // 检查当前光源状态是否全部为 false
+  const allLightsOff = !lightSet[2].lightshow &&
+    !lightSet[3].lightshow &&
+    !lightSet[4].lightshow &&
+    !lightSet[5].lightshow &&
+    !lightSet[7].lightshow
+  // 遍历光源状态，检查是否从 true 转为 false
+  let anyLightTurnedOff = Object.keys(lightHeaperState).some(key =>
+    lightHeaperState[key] === true && lightSet[key].lightshow === false
+  )
+  // 只有当全为 false 且没有从 true 转为 false 的情况下才提示
+  if (allLightsOff && !anyLightTurnedOff) {
+    ElMessage({
+      message: '需开启支持辅助器的光源！',
+      type: 'warning'
+    })
+  }
+  // 更新 previousState
+  Object.keys(lightHeaperState).forEach(key => {
+    lightHeaperState[key] = lightSet[key].lightshow
+  })
 }
 
 // 阴影
@@ -666,7 +702,6 @@ export const planeshadowFun = (planeset, planevalue) => {
   plane.geometry = newGeometry // 更新地面的几何体
 }
 
-
 let pointLightCameraHelper // 点光源阴影相机辅助器
 let directionalLightCameraHelper // 平行光源阴影相机辅助器
 let spotLightCameraHelper // 聚光灯阴影相机辅助器
@@ -711,6 +746,36 @@ export const cameraHelperFun = () => {
   if (!anyCameraEnabled) {
     lightSet[0].lightshow = false
   }
+  lightShadowHinit()
+}
+// 阴影相机辅助器提示函数
+let lightShadowState = {
+  0: false,
+  2: false,
+  3: false,
+  4: false
+}
+const lightShadowHinit = () => {
+  const { lightSet } = lightCounterStore()
+  // 检查当前光源状态是否全部为 false
+  const allLightsOff = !lightSet[2].lightshow &&
+    !lightSet[3].lightshow &&
+    !lightSet[4].lightshow
+  // 遍历光源状态，检查是否从 true 转为 false
+  let anyLightTurnedOff = Object.keys(lightShadowState).some(key =>
+    lightShadowState[key] === true && lightSet[key].lightshow === false
+  )
+  // 只有当全为 false 且没有从 true 转为 false 的情况下才提示
+  if (allLightsOff && !anyLightTurnedOff) {
+    ElMessage({
+      message: '需开启支持阴影的光源！',
+      type: 'warning'
+    })
+  }
+  // 更新 previousState
+  Object.keys(lightShadowState).forEach(key => {
+    lightShadowState[key] = lightSet[key].lightshow
+  })
 }
 
 // 更新阴影相机辅助器的配置项
@@ -846,9 +911,6 @@ export const changeSpotLightFun = (lightset, lightvalue) => {
   if (lightset === 'lightpenumbra') {
     spotlight.penumbra = lightvalue
   }
-  if (lightset === 'lightdecay') {
-    spotlight.decay = lightvalue
-  }
   spotlightHelper.update() // 更新辅助器
   spotLightCameraHelper.update()
   spotlight.shadow.camera.updateProjectionMatrix() // 更新投影矩阵
@@ -897,7 +959,119 @@ export const lightPositionFun = (lightName, value, positionclass, axis) => {
   }
 }
 
+// 重置光源配置项
+export const resetLightSettings = (lightname, index) => {
+  const { lightSet } = lightCounterStore()
 
+  // 定义光源对象和默认设置的映射
+  const lightMappings = {
+    // 点光源
+    pointlight: {
+      light: pointLight,
+      helper: pointLightHelper,
+      defaults: {
+        lightcolor: '#ffffff',
+        lightstrength: 1,
+        lightdistance: 0,
+        x: 0,
+        y: 0,
+        z: 0,
+        sceneSettings: (light) => {
+          light.color.set('#ffffff')
+          light.intensity = 1
+          light.distance = 0
+          light.position.set(0, 1, 0)
+        }
+      }
+    },
+    // 平行光
+    directionallight: {
+      light: directionallight,
+      helper: directionallightHelper,
+      defaults: {
+        lightcolor: '#ffffff',
+        lightstrength: 1,
+        x: 5,
+        y: 5,
+        z: 5,
+        tarx: 0,
+        tary: 0,
+        tarz: 0,
+        sceneSettings: (light) => {
+          light.color.set('#ffffff')
+          light.intensity = 1
+          light.position.set(5, 5, 5)
+          light.target.position.set(0, 0, 0)
+        }
+      }
+    },
+    // 聚光灯
+    spotlight: {
+      light: spotlight,
+      helper: spotlightHelper,
+      defaults: {
+        lightcolor: '#ffffff',
+        lightstrength: 50,
+        lightdistance: 0,
+        llightangle: 60,
+        lightpenumbra: 0,
+        x: 0,
+        y: 5,
+        z: 0,
+        tarx: 0,
+        tary: 0,
+        tarz: 0,
+        sceneSettings: (light) => {
+          light.color.set('#ffffff')
+          light.intensity = 50
+          light.distance = 0
+          light.angle = (60 * Math.PI) / 180
+          light.penumbra = 0
+          light.position.set(0, 5, 0)
+          light.target.position.set(0, 0, 0)
+        }
+      }
+    },
+    // 矩形区域光
+    rectanglelight: {
+      light: rectanglelight,
+      helper: rectanglelightHelper,
+      defaults: {
+        lightcolor: '#ffffff',
+        lightstrength: 1,
+        lightwidth: 10,
+        lightheight: 5,
+        x: 0,
+        y: 5,
+        z: 0,
+        tarx: -90,
+        tary: 0,
+        tarz: 0,
+        sceneSettings: (light) => {
+          light.color.set('#ffffff')
+          light.intensity = 1
+          light.width = 10
+          light.height = 5
+          light.position.set(0, 5, 0)
+          light.rotation.set(THREE.MathUtils.degToRad(-90), 0, 0)
+        }
+      }
+    }
+  }
+  // 获取当前光源的设置
+  const mapping = lightMappings[lightname]
+  if (mapping) {
+    const { light, helper, defaults } = mapping
+    // 更新数据设置
+    Object.assign(lightSet[index], defaults)
+    // 更新三维场景设置
+    defaults.sceneSettings(light)
+    // 更新光源辅助器
+    if (helper) helper.update()
+  }
+}
+
+// ====================
 // 新增光源板块
 
 const lightaddArry = [] // 点光源
@@ -924,6 +1098,18 @@ export const lightaddFun = (lightName, index) => {
       lightcolor: '#ffffff',
       lightstrength: 1,
       lightdistance: 0,
+
+      p_x_max: 10, // position X坐标最大值
+      p_x_min: -10, // position X坐标最小值
+      p_y_max: 10,
+      p_y_min: -10,
+      p_z_max: 10,
+      p_z_min: -10,
+      intensity_max: 100, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
+      distance_max: 40, // 光源范围最大值
+      distance_min: 0, // 光源范围最小值
+
       distance: true, // 用于显示光源范围调节
       lightxyz: true, // 用于显示坐标
       unflod: true, // 用于控制新增光源的显示与隐藏
@@ -958,6 +1144,24 @@ export const lightaddFun = (lightName, index) => {
       tarx: 0,
       tary: 0,
       tarz: 0,
+
+      p_x_max: 10, // position X坐标最大值
+      p_x_min: -10, // position X坐标最小值
+      p_y_max: 10,
+      p_y_min: -10,
+      p_z_max: 10,
+      p_z_min: -10,
+      t_x_max: 10, // target X坐标最大值
+      t_x_min: -10, // target X坐标最小值
+      t_y_max: 10,
+      t_y_min: -10,
+      t_z_max: 10,
+      t_z_min: -10,
+      intensity_max: 10, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
+      distance_max: 40, // 光源范围最大值
+      distance_min: 0, // 光源范围最小值
+
       x: directionallight.position.x,
       y: directionallight.position.y,
       z: directionallight.position.z
@@ -991,14 +1195,34 @@ export const lightaddFun = (lightName, index) => {
       llightangle: 60, // 光照范围的角度
       lightpenumbra: 0, // 聚光追半影衰减百分比
       penumbra: true, // 用于显示聚光追半影衰减百分比
-      lightdecay: 2, // 沿着光照的衰减量
+      // lightdecay: 2, // 沿着光照的衰减量
       lighttarget: true, // 用于显示光源目标
       tarx: 0,
       tary: 0,
       tarz: 0,
       x: spotlight.position.x,
       y: spotlight.position.y,
-      z: spotlight.position.z
+      z: spotlight.position.z,
+      p_x_max: 10, // position X坐标最大值
+      p_x_min: -10, // position X坐标最小值
+      p_y_max: 10,
+      p_y_min: -10,
+      p_z_max: 10,
+      p_z_min: -10,
+      t_x_max: 10, // target X坐标最大值
+      t_x_min: -10, // target X坐标最小值
+      t_y_max: 10,
+      t_y_min: -10,
+      t_z_max: 10,
+      t_z_min: -10,
+      intensity_max: 200, // 光源强度最大值
+      intensity_min: 1, // 光源强度最小值
+      distance_max: 40, // 光源范围最大值
+      distance_min: 0, // 光源范围最小值
+      angle_max: 90, // 光照角度最大值
+      angle_min: 1, // 光照角度最小值
+      penumbra_max: 1, // 半影衰减最大值
+      penumbra_min: 0 // 半影衰减最小值
     }) // 新建光源存入数组管理
     // 新增的光源辅助器，先存到数组中，暂不添加到场景中，由辅助器那块统一管理
     const spotlightHelper = new THREE.SpotLightHelper(spotlight)
@@ -1030,7 +1254,21 @@ export const lightaddFun = (lightName, index) => {
       tarz: 0,
       x: rectanglelight.position.x,
       y: rectanglelight.position.y,
-      z: rectanglelight.position.z
+      z: rectanglelight.position.z,
+      p_x_max: 10, // position X坐标最大值
+      p_x_min: -10, // position X坐标最小值
+      p_y_max: 10,
+      p_y_min: -10,
+      p_z_max: 10,
+      p_z_min: -10,
+      t_x_max: 180, // target X坐标最大值
+      t_x_min: -180, // target X坐标最小值
+      t_y_max: 180,
+      t_y_min: -180,
+      t_z_max: 180,
+      t_z_min: -180,
+      intensity_max: 10, // 光源强度最大值
+      intensity_min: 1 // 光源强度最小值
     })// 新建光源存入数组管理
     // 新增的光源辅助器，先存到数组中，暂不添加到场景中，由辅助器那块统一管理
     const rectangleHelper = new RectAreaLightHelper(rectanglelight)
@@ -1207,8 +1445,87 @@ export const newlightPositionFun = (indexmin, value, lightname, lightclass, axis
   }
 }
 
+// 重置新增光源配置项
+export const newresetLightSettings = (index, lightname, indexmin) => {
+  const { lightSet } = lightCounterStore()
+
+  const lightConfigs = {
+    pointlight: {
+      position: [1, 1, 0],
+      lightstrength: 1,
+      lightdistance: 0,
+      helperArray: lightaddHelperArry,
+      sceneArray: lightaddArry
+    },
+    directionallight: {
+      position: [5, 5, 0],
+      targetPosition: [0, 0, 0],
+      lightstrength: 1,
+      lightdistance: 0,
+      helperArray: directionalHelperArry,
+      sceneArray: directionalArry
+    },
+    spotlight: {
+      position: [0, 5, 0],
+      targetPosition: [0, 0, 0],
+      lightstrength: 50,
+      lightdistance: 0,
+      additionalProps: { angle: (60 * Math.PI) / 180, penumbra: 0 },
+      helperArray: spotHelperArry,
+      sceneArray: spotArry
+    },
+    rectanglelight: {
+      position: [0, 5, 0],
+      targetPosition: [-90, 0, 0],
+      lightstrength: 1,
+      additionalProps: { width: 10, height: 5 },
+      helperArray: rectanglelightHelperArry,
+      sceneArray: rectangleArry
+    }
+  }
+
+  const config = lightConfigs[lightname]
+  if (!config) throw new Error(`Unsupported light name: ${lightname}`)
+
+  const lightObj = lightSet[index].lightadd[indexmin]
+  const sceneObj = config.sceneArray[indexmin]
+
+  // Reset common properties
+  lightObj.lightcolor = '#ffffff'
+  lightObj.lightstrength = config.lightstrength
+  lightObj.lightdistance = config.lightdistance || 0;
+  [lightObj.x, lightObj.y, lightObj.z] = config.position
+  if (config.targetPosition) {
+    [lightObj.tarx, lightObj.tary, lightObj.tarz] = config.targetPosition
+  }
+  Object.assign(lightObj, config.additionalProps || {})
+
+  sceneObj.color.set('#ffffff')
+  sceneObj.intensity = config.lightstrength
+  sceneObj.distance = config.lightdistance || 0
+  sceneObj.position.set(...config.position)
+  if (config.targetPosition && sceneObj.target) {
+    sceneObj.target.position.set(...config.targetPosition)
+  }
+  if (lightname === 'rectanglelight') {
+    sceneObj.rotation.set(THREE.MathUtils.degToRad(-90), 0, 0)
+  }
+  if (config.targetPosition && sceneObj.target) {
+    sceneObj.target.position.set(...config.targetPosition)
+  }
+  Object.entries(config.additionalProps || {}).forEach(([key, value]) => {
+    if (sceneObj[key] !== undefined) {
+      sceneObj[key] = value
+    }
+  })
+
+  // Update helper
+  config.helperArray[indexmin].update()
+}
 
 
+// ====================
+// 场景板块
 
 let rgbeloader
 // 天空球模块

@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1684804",
+      "name": "新增",
+      "font_class": "xinzeng",
+      "unicode": "e6b9",
+      "unicode_decimal": 59065
+    },
+    {
+      "icon_id": "4880413",
+      "name": "删除",
+      "font_class": "shanchu",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "6326748",
+      "name": "重置",
+      "font_class": "zhongzhi",
+      "unicode": "e627",
+      "unicode_decimal": 58919
+    },
+    {
       "icon_id": "39661595",
       "name": "下拉",
       "font_class": "xiala",
