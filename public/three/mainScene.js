@@ -2054,10 +2054,15 @@ export const clearLastLine = () => {
 
 // 添加/移除点位监听事件
 export const poinyListener = value => {
+  const data = pointlabelCounterStore()
   if (value) {
     window.addEventListener('click', pointClick) // dblclick双击
+    data.rightpanel = true
     return
   }
   window.removeEventListener('click', pointClick)
   scene.remove(currentConeMarker) // 移除椎体
+  if (!data.pointlabel && !data.pathlabel) {
+    data.rightpanel = false
+  }
 }

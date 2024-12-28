@@ -7,6 +7,8 @@ export const pointlabelCounterStore = defineStore('pointlabel', () => {
   const pointlabel = ref(false)
   // 是否开启路径标注
   const pathlabel = ref(false)
+  // 是否展开右侧面板
+  const rightpanel = ref(false)
 
   // 点位坐标
   const pointcoordinate = ref({
@@ -18,6 +20,7 @@ export const pointlabelCounterStore = defineStore('pointlabel', () => {
   return {
     pointlabel,
     pathlabel,
+    rightpanel,
     pointcoordinate
   }
 })

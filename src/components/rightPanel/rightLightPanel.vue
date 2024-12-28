@@ -59,65 +59,64 @@ const unflodFun = index => {
             </div>
           </div>
 
-          <transition name="slide">
-            <div v-if="item.unflod && item.lightshow" class="lightmain">
-              <!-- 光源颜色 -->
-              <div v-if="item.color && item.lightshow" class="lightcolor">
-                <span>color</span>
-                <div>
-                  <input type="color" v-model="item.lightcolor"
-                    @input="changeLightColor(item.lightname, item.lightcolor)">
-                  <input type="text" v-model="item.lightcolor"
-                    @input="changeLightColor(item.lightname, item.lightcolor)">
-                </div>
+          <!-- <transition name="slide"> -->
+          <div v-if="item.unflod && item.lightshow" class="lightmain">
+            <!-- 光源颜色 -->
+            <div v-if="item.color && item.lightshow" class="lightcolor">
+              <span>color</span>
+              <div>
+                <input type="color" v-model="item.lightcolor"
+                  @input="changeLightColor(item.lightname, item.lightcolor)">
+                <input type="text" v-model="item.lightcolor" @input="changeLightColor(item.lightname, item.lightcolor)">
               </div>
+            </div>
 
-              <!-- 光照强度 -->
-              <div v-if="item.intensity && item.lightshow" class="lightvalue">
-                <span>intensity</span>
-                <div>
-                  <el-slider v-model="item.lightstrength" :precision="2" :step="0.01" :max="item.intensity_max"
-                    :min="item.intensity_min" @input="changeLightStrength(item.lightname, item.lightstrength)" />
-                  <input type="number" v-model="item.lightstrength" :max="item.intensity_max" :min="item.intensity_min"
-                    required @input="changeLightStrength(item.lightname, item.lightstrength)">
-                </div>
+            <!-- 光照强度 -->
+            <div v-if="item.intensity && item.lightshow" class="lightvalue">
+              <span>intensity</span>
+              <div>
+                <el-slider v-model="item.lightstrength" :precision="2" :step="0.01" :max="item.intensity_max"
+                  :min="item.intensity_min" @input="changeLightStrength(item.lightname, item.lightstrength)" />
+                <input type="number" v-model="item.lightstrength" :max="item.intensity_max" :min="item.intensity_min"
+                  required @input="changeLightStrength(item.lightname, item.lightstrength)">
               </div>
+            </div>
 
-              <!-- 光照范围（值为0时即无限远） -->
-              <div v-if="item.distance && item.lightshow" class="lightdistance">
-                <span>distance</span>
-                <div>
-                  <el-slider v-model="item.lightdistance" :precision="2" :step="0.1" :max="item.distance_max"
-                    :min="item.distance_min" @input="changeLightDistance(item.lightname, item.lightdistance)" />
-                  <input type="number" v-model="item.lightdistance" :max="item.distance_max" :min="item.distance_min"
-                    required @input="changeLightDistance(item.lightname, item.lightdistance)">
-                </div>
+            <!-- 光照范围（值为0时即无限远） -->
+            <div v-if="item.distance && item.lightshow" class="lightdistance">
+              <span>distance</span>
+              <div>
+                <el-slider v-model="item.lightdistance" :precision="2" :step="0.1" :max="item.distance_max"
+                  :min="item.distance_min" @input="changeLightDistance(item.lightname, item.lightdistance)" />
+                <input type="number" v-model="item.lightdistance" :max="item.distance_max" :min="item.distance_min"
+                  required @input="changeLightDistance(item.lightname, item.lightdistance)">
               </div>
+            </div>
 
-              <!-- 光照范围的角度(聚光灯独有配置) -->
-              <div v-if="item.angle && item.lightshow" class="llightangle">
-                <span>angle</span>
-                <div>
-                  <el-slider v-model="item.llightangle" :precision="2" :step="0.01" :max="item.angle_max"
-                    :min="item.angle_min" @input="changeSpotLightFun('llightangle', item.llightangle)" />
-                  <input type="number" v-model="item.llightangle" :max="item.angle_max" :min="item.angle_min" required
-                    @input="changeSpotLightFun('llightangle', item.llightangle)">
-                </div>
+            <!-- 光照范围的角度(聚光灯独有配置) -->
+            <div v-if="item.angle && item.lightshow" class="llightangle">
+              <span>angle</span>
+              <div>
+                <el-slider v-model="item.llightangle" :precision="2" :step="0.01" :max="item.angle_max"
+                  :min="item.angle_min" @input="changeSpotLightFun('llightangle', item.llightangle)" />
+                <input type="number" v-model="item.llightangle" :max="item.angle_max" :min="item.angle_min" required
+                  @input="changeSpotLightFun('llightangle', item.llightangle)">
               </div>
+            </div>
 
-              <!-- 聚光追半影衰减百分比(聚光灯独有配置) -->
-              <div v-if="item.penumbra && item.lightshow" class="lightpenumbra">
-                <span>penumbra</span>
-                <div>
-                  <el-slider v-model="item.lightpenumbra" :precision="2" :step="0.01" :max="item.penumbra_max"
-                    :min="item.penumbra_min" @input="changeSpotLightFun('lightpenumbra', item.lightpenumbra)" />
-                  <input type="number" v-model="item.lightpenumbra" :max="item.penumbra_max" :min="item.penumbra_min"
-                    required @input="changeSpotLightFun('lightpenumbra', item.lightpenumbra)">
-                </div>
+            <!-- 聚光追半影衰减百分比(聚光灯独有配置) -->
+            <div v-if="item.penumbra && item.lightshow" class="lightpenumbra">
+              <span>penumbra</span>
+              <div>
+                <el-slider v-model="item.lightpenumbra" :precision="2" :step="0.01" :max="item.penumbra_max"
+                  :min="item.penumbra_min" @input="changeSpotLightFun('lightpenumbra', item.lightpenumbra)" />
+                <input type="number" v-model="item.lightpenumbra" :max="item.penumbra_max" :min="item.penumbra_min"
+                  required @input="changeSpotLightFun('lightpenumbra', item.lightpenumbra)">
               </div>
+            </div>
 
-              <!-- 沿着光照的衰减量(聚光灯独有配置) -->
-              <!-- <div v-if="item.decay && item.lightshow" class="lightdecay">
+            <!-- 沿着光照的衰减量(聚光灯独有配置) -->
+            <!-- <div v-if="item.decay && item.lightshow" class="lightdecay">
                 <span>decay</span>
                 <div>
                   <el-slider v-model="item.lightdecay" :precision="2" :step="1" :max="10" :min="2"
@@ -127,260 +126,260 @@ const unflodFun = index => {
                 </div>
               </div> -->
 
-              <!-- 设置矩形区域光的宽（矩形区域光独有） -->
-              <div v-if="item.lightwidth && item.lightshow" class="lightdecay">
-                <span>width</span>
-                <div>
-                  <el-slider v-model="item.lightwidth" :precision="2" :step="1" :max="20" :min="1"
-                    @input="rectanglelightwhFun('width', item.lightwidth)" />
-                  <input type="number" v-model="item.lightwidth" max="20" min="1" required
-                    @input="rectanglelightwhFun('width', item.lightwidth)">
-                </div>
+            <!-- 设置矩形区域光的宽（矩形区域光独有） -->
+            <div v-if="item.lightwidth && item.lightshow" class="lightdecay">
+              <span>width</span>
+              <div>
+                <el-slider v-model="item.lightwidth" :precision="2" :step="1" :max="20" :min="1"
+                  @input="rectanglelightwhFun('width', item.lightwidth)" />
+                <input type="number" v-model="item.lightwidth" max="20" min="1" required
+                  @input="rectanglelightwhFun('width', item.lightwidth)">
               </div>
+            </div>
 
-              <!-- 设置矩形区域光的宽（矩形区域光独有） -->
-              <div v-if="item.lightheight && item.lightshow" class="lightdecay">
-                <span>height</span>
-                <div>
-                  <el-slider v-model="item.lightheight" :precision="2" :step="1" :max="20" :min="1"
-                    @input="rectanglelightwhFun('height', item.lightheight)" />
-                  <input type="number" v-model="item.lightheight" max="20" min="1" required
-                    @input="rectanglelightwhFun('height', item.lightheight)">
-                </div>
+            <!-- 设置矩形区域光的宽（矩形区域光独有） -->
+            <div v-if="item.lightheight && item.lightshow" class="lightdecay">
+              <span>height</span>
+              <div>
+                <el-slider v-model="item.lightheight" :precision="2" :step="1" :max="20" :min="1"
+                  @input="rectanglelightwhFun('height', item.lightheight)" />
+                <input type="number" v-model="item.lightheight" max="20" min="1" required
+                  @input="rectanglelightwhFun('height', item.lightheight)">
               </div>
+            </div>
 
-              <!-- 光源目标坐标 -->
-              <div v-if="item.lighttarget && item.lightshow" class="lighttarget">
-                <!-- X -->
+            <!-- 光源目标坐标 -->
+            <div v-if="item.lighttarget && item.lightshow" class="lighttarget">
+              <!-- X -->
+              <div>
+                <span>target-x</span>
                 <div>
-                  <span>target-x</span>
-                  <div>
-                    <el-slider v-model="item.tarx" :precision="2" :step="0.01" :max="item.t_x_max" :min="item.t_x_min"
-                      @input="lightPositionFun(item.lightname, item.tarx, 'target', 'x')" />
-                    <input type="number" v-model="item.tarx" :max="item.t_x_max" :min="item.t_x_min" required
-                      @input="lightPositionFun(item.lightname, item.tarx, 'target', 'x')">
-                  </div>
-                </div>
-                <!-- Y -->
-                <div>
-                  <span>target-y</span>
-                  <div>
-                    <el-slider v-model="item.tary" :precision="2" :step="0.01" :max="item.t_y_max" :min="item.t_y_min"
-                      @input="lightPositionFun(item.lightname, item.tary, 'target', 'y')" />
-                    <input type="number" v-model="item.tary" :max="item.t_y_max" :min="item.t_y_min" required
-                      @input="lightPositionFun(item.lightname, item.tary, 'target', 'y')">
-                  </div>
-                </div>
-                <!-- Z -->
-                <div>
-                  <span>target-z</span>
-                  <div>
-                    <el-slider v-model="item.tarz" :precision="2" :step="0.01" :max="item.t_z_max" :min="item.t_z_min"
-                      @input="lightPositionFun(item.lightname, item.tarz, 'target', 'z')" />
-                    <input type="number" v-model="item.tarz" :max="item.t_z_max" :min="item.t_z_min" required
-                      @input="lightPositionFun(item.lightname, item.tarz, 'target', 'z')">
-                  </div>
+                  <el-slider v-model="item.tarx" :precision="2" :step="0.01" :max="item.t_x_max" :min="item.t_x_min"
+                    @input="lightPositionFun(item.lightname, item.tarx, 'target', 'x')" />
+                  <input type="number" v-model="item.tarx" :max="item.t_x_max" :min="item.t_x_min" required
+                    @input="lightPositionFun(item.lightname, item.tarx, 'target', 'x')">
                 </div>
               </div>
+              <!-- Y -->
+              <div>
+                <span>target-y</span>
+                <div>
+                  <el-slider v-model="item.tary" :precision="2" :step="0.01" :max="item.t_y_max" :min="item.t_y_min"
+                    @input="lightPositionFun(item.lightname, item.tary, 'target', 'y')" />
+                  <input type="number" v-model="item.tary" :max="item.t_y_max" :min="item.t_y_min" required
+                    @input="lightPositionFun(item.lightname, item.tary, 'target', 'y')">
+                </div>
+              </div>
+              <!-- Z -->
+              <div>
+                <span>target-z</span>
+                <div>
+                  <el-slider v-model="item.tarz" :precision="2" :step="0.01" :max="item.t_z_max" :min="item.t_z_min"
+                    @input="lightPositionFun(item.lightname, item.tarz, 'target', 'z')" />
+                  <input type="number" v-model="item.tarz" :max="item.t_z_max" :min="item.t_z_min" required
+                    @input="lightPositionFun(item.lightname, item.tarz, 'target', 'z')">
+                </div>
+              </div>
+            </div>
 
-              <!-- 光源坐标 -->
-              <div v-if="item.lightxyz && item.lightshow" class="lightpoint">
-                <!-- X -->
+            <!-- 光源坐标 -->
+            <div v-if="item.lightxyz && item.lightshow" class="lightpoint">
+              <!-- X -->
+              <div>
+                <span>position-x</span>
                 <div>
-                  <span>position-x</span>
-                  <div>
-                    <el-slider v-model="item.x" :precision="2" :step="0.01" :max="item.p_x_max" :min="item.p_x_min"
-                      @input="lightPositionFun(item.lightname, item.x, 'position', 'x')" />
-                    <input type="number" v-model="item.x" :max="item.p_x_max" :min="item.p_x_min" required
-                      @input="lightPositionFun(item.lightname, item.x, 'position', 'x')">
-                  </div>
-                </div>
-                <!-- Y -->
-                <div>
-                  <span>position-y</span>
-                  <div>
-                    <el-slider v-model="item.y" :precision="2" :step="0.01" :max="item.p_y_max" :min="item.p_y_min"
-                      @input="lightPositionFun(item.lightname, item.y, 'position', 'y')" />
-                    <input type="number" v-model="item.y" :max="item.p_y_max" :min="item.p_y_min" required
-                      @input="lightPositionFun(item.lightname, item.y, 'position', 'y')">
-                  </div>
-                </div>
-                <!-- Z -->
-                <div>
-                  <span>position-z</span>
-                  <div>
-                    <el-slider v-model="item.z" :precision="2" :step="0.01" :max="item.p_z_max" :min="item.p_z_min"
-                      @input="lightPositionFun(item.lightname, item.z, 'position', 'z')" />
-                    <input type="number" v-model="item.z" :max="item.p_z_max" :min="item.p_z_min" required
-                      @input="lightPositionFun(item.lightname, item.z, 'position', 'z')">
-                  </div>
+                  <el-slider v-model="item.x" :precision="2" :step="0.01" :max="item.p_x_max" :min="item.p_x_min"
+                    @input="lightPositionFun(item.lightname, item.x, 'position', 'x')" />
+                  <input type="number" v-model="item.x" :max="item.p_x_max" :min="item.p_x_min" required
+                    @input="lightPositionFun(item.lightname, item.x, 'position', 'x')">
                 </div>
               </div>
+              <!-- Y -->
+              <div>
+                <span>position-y</span>
+                <div>
+                  <el-slider v-model="item.y" :precision="2" :step="0.01" :max="item.p_y_max" :min="item.p_y_min"
+                    @input="lightPositionFun(item.lightname, item.y, 'position', 'y')" />
+                  <input type="number" v-model="item.y" :max="item.p_y_max" :min="item.p_y_min" required
+                    @input="lightPositionFun(item.lightname, item.y, 'position', 'y')">
+                </div>
+              </div>
+              <!-- Z -->
+              <div>
+                <span>position-z</span>
+                <div>
+                  <el-slider v-model="item.z" :precision="2" :step="0.01" :max="item.p_z_max" :min="item.p_z_min"
+                    @input="lightPositionFun(item.lightname, item.z, 'position', 'z')" />
+                  <input type="number" v-model="item.z" :max="item.p_z_max" :min="item.p_z_min" required
+                    @input="lightPositionFun(item.lightname, item.z, 'position', 'z')">
+                </div>
+              </div>
+            </div>
 
-              <!-- 接收阴影的地面 -->
-              <!-- 宽 -->
-              <div v-if="item.planewh && item.lightshow" class="lightdecay">
-                <span>width</span>
-                <div>
-                  <el-slider v-model="item.planewidth" :precision="2" :step="0.01" :max="500" :min="1"
-                    @input="planeshadowFun('width', item.planewidth)" />
-                  <input type="number" v-model="item.planewidth" max="500" min="1" required
-                    @input="planeshadowFun('width', item.planewidth)">
-                </div>
+            <!-- 接收阴影的地面 -->
+            <!-- 宽 -->
+            <div v-if="item.planewh && item.lightshow" class="lightdecay">
+              <span>width</span>
+              <div>
+                <el-slider v-model="item.planewidth" :precision="2" :step="0.01" :max="500" :min="1"
+                  @input="planeshadowFun('width', item.planewidth)" />
+                <input type="number" v-model="item.planewidth" max="500" min="1" required
+                  @input="planeshadowFun('width', item.planewidth)">
               </div>
-              <!-- 高 -->
-              <div v-if="item.planewh && item.lightshow" class="lightdecay">
-                <span>height</span>
-                <div>
-                  <el-slider v-model="item.planeheight" :precision="2" :step="0.01" :max="500" :min="1"
-                    @input="planeshadowFun('height', item.planeheight)" />
-                  <input type="number" v-model="item.planeheight" max="500" min="1" required
-                    @input="planeshadowFun('height', item.planeheight)">
-                </div>
+            </div>
+            <!-- 高 -->
+            <div v-if="item.planewh && item.lightshow" class="lightdecay">
+              <span>height</span>
+              <div>
+                <el-slider v-model="item.planeheight" :precision="2" :step="0.01" :max="500" :min="1"
+                  @input="planeshadowFun('height', item.planeheight)" />
+                <input type="number" v-model="item.planeheight" max="500" min="1" required
+                  @input="planeshadowFun('height', item.planeheight)">
               </div>
+            </div>
 
-              <!-- 设置阴影相机辅助器 -->
-              <!-- 宽 -->
-              <div v-if="item.lightassist && item.assistwandh" class="lightdecay">
-                <span>width</span>
-                <div>
-                  <el-slider v-model="item.assistwidth" :precision="2" :step="0.01" :max="100" :min="1"
-                    @input="assistcaremaFun('width', item.lightname, item.assistwidth)" />
-                  <input type="number" v-model="item.assistwidth" max="100" min="1" required
-                    @input="assistcaremaFun('width', item.lightname, item.assistwidth)">
-                </div>
+            <!-- 设置阴影相机辅助器 -->
+            <!-- 宽 -->
+            <div v-if="item.lightassist && item.assistwandh" class="lightdecay">
+              <span>width</span>
+              <div>
+                <el-slider v-model="item.assistwidth" :precision="2" :step="0.01" :max="100" :min="1"
+                  @input="assistcaremaFun('width', item.lightname, item.assistwidth)" />
+                <input type="number" v-model="item.assistwidth" max="100" min="1" required
+                  @input="assistcaremaFun('width', item.lightname, item.assistwidth)">
               </div>
-              <!-- 高 -->
-              <div v-if="item.lightassist && item.assistwandh" class="lightdecay">
-                <span>height</span>
-                <div>
-                  <el-slider v-model="item.assistheight" :precision="2" :step="0.01" :max="100" :min="1"
-                    @input="assistcaremaFun('height', item.lightname, item.assistheight)" />
-                  <input type="number" v-model="item.assistheight" max="100" min="1" required
-                    @input="assistcaremaFun('height', item.lightname, item.assistheight)">
-                </div>
+            </div>
+            <!-- 高 -->
+            <div v-if="item.lightassist && item.assistwandh" class="lightdecay">
+              <span>height</span>
+              <div>
+                <el-slider v-model="item.assistheight" :precision="2" :step="0.01" :max="100" :min="1"
+                  @input="assistcaremaFun('height', item.lightname, item.assistheight)" />
+                <input type="number" v-model="item.assistheight" max="100" min="1" required
+                  @input="assistcaremaFun('height', item.lightname, item.assistheight)">
               </div>
-              <!-- near -->
-              <div v-if="item.lightassist" class="lightdecay">
-                <span>near</span>
-                <div>
-                  <el-slider v-model="item.assistnear" :precision="2" :step="0.01" :max="50" :min="0.1"
-                    @input="assistcaremaFun('near', item.lightname, item.assistnear)" />
-                  <input type="number" v-model="item.assistnear" max="50" min="0.1" required
-                    @input="assistcaremaFun('near', item.lightname, item.assistnear)">
-                </div>
+            </div>
+            <!-- near -->
+            <div v-if="item.lightassist" class="lightdecay">
+              <span>near</span>
+              <div>
+                <el-slider v-model="item.assistnear" :precision="2" :step="0.01" :max="50" :min="0.1"
+                  @input="assistcaremaFun('near', item.lightname, item.assistnear)" />
+                <input type="number" v-model="item.assistnear" max="50" min="0.1" required
+                  @input="assistcaremaFun('near', item.lightname, item.assistnear)">
               </div>
-              <!-- far -->
-              <div v-if="item.lightassist" class="lightdecay">
-                <span>far</span>
-                <div>
-                  <el-slider v-model="item.assistfar" :precision="2" :step="0.01" :max="500" :min="1"
-                    @input="assistcaremaFun('far', item.lightname, item.assistfar)" />
-                  <input type="number" v-model="item.assistfar" max="500" min="1" required
-                    @input="assistcaremaFun('far', item.lightname, item.assistfar)">
-                </div>
+            </div>
+            <!-- far -->
+            <div v-if="item.lightassist" class="lightdecay">
+              <span>far</span>
+              <div>
+                <el-slider v-model="item.assistfar" :precision="2" :step="0.01" :max="500" :min="1"
+                  @input="assistcaremaFun('far', item.lightname, item.assistfar)" />
+                <input type="number" v-model="item.assistfar" max="500" min="1" required
+                  @input="assistcaremaFun('far', item.lightname, item.assistfar)">
               </div>
-              <!-- zoom -->
-              <div v-if="item.lightassist" class="lightdecay">
-                <span>zoom</span>
-                <div>
-                  <el-slider v-model="item.assistzoom" :precision="2" :step="0.01" :max="1.5" :min="0.01"
-                    @input="assistcaremaFun('zoom', item.lightname, item.assistzoom)" />
-                  <input type="number" v-model="item.assistzoom" max="1.5" min="0.01" required
-                    @input="assistcaremaFun('zoom', item.lightname, item.assistzoom)">
-                </div>
+            </div>
+            <!-- zoom -->
+            <div v-if="item.lightassist" class="lightdecay">
+              <span>zoom</span>
+              <div>
+                <el-slider v-model="item.assistzoom" :precision="2" :step="0.01" :max="1.5" :min="0.01"
+                  @input="assistcaremaFun('zoom', item.lightname, item.assistzoom)" />
+                <input type="number" v-model="item.assistzoom" max="1.5" min="0.01" required
+                  @input="assistcaremaFun('zoom', item.lightname, item.assistzoom)">
               </div>
+            </div>
 
-              <!-- 新增光源 -->
-              <div class="newlight">
-                <!-- 新增光源主体区域 -->
-                <div v-if="item.lightadd && item.lightshow && item.lightadd.length > 0">
-                  <div v-for="(itemmin, indexmin) in item.lightadd" :key="itemmin">
+            <!-- 新增光源 -->
+            <div class="newlight">
+              <!-- 新增光源主体区域 -->
+              <div v-if="item.lightadd && item.lightshow && item.lightadd.length > 0">
+                <div v-for="(itemmin, indexmin) in item.lightadd" :key="itemmin">
 
-                    <!-- 新增光源名称 -->
-                    <div class="newlightname">
-                      <span class="newligntname" @click="itemmin.unflod = !itemmin.unflod"><i
-                          class="iconfont icon-xiala" :class="itemmin.unflod ? 'pulldown' : 'packup'"></i>{{
-                            itemmin.lightlabel }}-{{ indexmin +
-                          1 }}
-                      </span>
-                      <div>
-                        <button class="iconfont icon-zhongzhi"
-                          @click="newresetLightSettings(index, itemmin.lightname, indexmin)"></button>
-                        <button class="iconfont icon-shanchu"
-                          @click="deleatlight(index, itemmin.lightname, indexmin)"></button>
-                      </div>
+                  <!-- 新增光源名称 -->
+                  <div class="newlightname">
+                    <span class="newligntname" @click="itemmin.unflod = !itemmin.unflod"><i class="iconfont icon-xiala"
+                        :class="itemmin.unflod ? 'pulldown' : 'packup'"></i>{{
+                          itemmin.lightlabel }}-{{ indexmin +
+                        1 }}
+                    </span>
+                    <div>
+                      <button class="iconfont icon-zhongzhi"
+                        @click="newresetLightSettings(index, itemmin.lightname, indexmin)"></button>
+                      <button class="iconfont icon-shanchu"
+                        @click="deleatlight(index, itemmin.lightname, indexmin)"></button>
                     </div>
+                  </div>
 
-                    <transition name="slide">
-                      <!-- 新增光源操作面板主体 -->
-                      <div v-show="itemmin.unflod">
+                  <transition name="slide">
+                    <!-- 新增光源操作面板主体 -->
+                    <div v-show="itemmin.unflod">
 
-                        <!-- 新增光源颜色 -->
-                        <div v-if="itemmin.lightcolor">
-                          <span>color</span>
-                          <div>
-                            <input type="color" v-model="itemmin.lightcolor"
-                              @input="changenewlightcolor(indexmin, itemmin.lightcolor, itemmin.lightname)">
-                            <input type="text" v-model="itemmin.lightcolor"
-                              @input="changenewlightcolor(indexmin, itemmin.lightcolor, itemmin.lightname)">
-                          </div>
+                      <!-- 新增光源颜色 -->
+                      <div v-if="itemmin.lightcolor">
+                        <span>color</span>
+                        <div>
+                          <input type="color" v-model="itemmin.lightcolor"
+                            @input="changenewlightcolor(indexmin, itemmin.lightcolor, itemmin.lightname)">
+                          <input type="text" v-model="itemmin.lightcolor"
+                            @input="changenewlightcolor(indexmin, itemmin.lightcolor, itemmin.lightname)">
                         </div>
+                      </div>
 
-                        <!-- 新增光照强度 -->
-                        <div v-if="itemmin.lightstrength">
-                          <span>intensity</span>
-                          <div>
-                            <el-slider v-model="itemmin.lightstrength" :precision="2" :step="0.01"
-                              :max="itemmin.intensity_max" :min="itemmin.intensity_min"
-                              @input="changenewlight(indexmin, itemmin.lightstrength, itemmin.lightname)" />
-                            <input type="number" v-model="itemmin.lightstrength" :max="itemmin.intensity_max"
-                              :min="itemmin.intensity_min"
-                              @input="changenewlight(indexmin, itemmin.lightstrength, itemmin.lightname)">
-                          </div>
+                      <!-- 新增光照强度 -->
+                      <div v-if="itemmin.lightstrength">
+                        <span>intensity</span>
+                        <div>
+                          <el-slider v-model="itemmin.lightstrength" :precision="2" :step="0.01"
+                            :max="itemmin.intensity_max" :min="itemmin.intensity_min"
+                            @input="changenewlight(indexmin, itemmin.lightstrength, itemmin.lightname)" />
+                          <input type="number" v-model="itemmin.lightstrength" :max="itemmin.intensity_max"
+                            :min="itemmin.intensity_min"
+                            @input="changenewlight(indexmin, itemmin.lightstrength, itemmin.lightname)">
                         </div>
+                      </div>
 
-                        <!-- 新增光源范围 -->
-                        <div v-if="itemmin.distance">
-                          <span>distance</span>
-                          <div>
-                            <el-slider v-model="itemmin.lightdistance" :precision="2" :step="0.01"
-                              :max="itemmin.distance_max" :min="itemmin.distance_min"
-                              @input="changenewdistance(indexmin, itemmin.lightdistance, itemmin.lightname)" />
-                            <input type="number" v-model="itemmin.lightdistance" :max="itemmin.distance_max"
-                              :min="itemmin.distance_min"
-                              @input="changenewdistance(indexmin, itemmin.lightdistance, itemmin.lightname)">
-                          </div>
+                      <!-- 新增光源范围 -->
+                      <div v-if="itemmin.distance">
+                        <span>distance</span>
+                        <div>
+                          <el-slider v-model="itemmin.lightdistance" :precision="2" :step="0.01"
+                            :max="itemmin.distance_max" :min="itemmin.distance_min"
+                            @input="changenewdistance(indexmin, itemmin.lightdistance, itemmin.lightname)" />
+                          <input type="number" v-model="itemmin.lightdistance" :max="itemmin.distance_max"
+                            :min="itemmin.distance_min"
+                            @input="changenewdistance(indexmin, itemmin.lightdistance, itemmin.lightname)">
                         </div>
+                      </div>
 
-                        <!-- 光照范围的角度(聚光灯独有配置) -->
-                        <div v-if="itemmin.llightangle">
-                          <span>angle</span>
-                          <div>
-                            <el-slider v-model="itemmin.llightangle" :precision="2" :step="0.01"
-                              :max="itemmin.angle_max" :min="itemmin.angle_min"
-                              @input="newSpotLightFun(indexmin, itemmin.llightangle, 'llightangle')" />
-                            <input type="number" v-model="itemmin.llightangle" :max="itemmin.angle_max"
-                              :min="itemmin.angle_min" required
-                              @input="newSpotLightFun(indexmin, itemmin.llightangle, 'llightangle')">
-                          </div>
+                      <!-- 光照范围的角度(聚光灯独有配置) -->
+                      <div v-if="itemmin.llightangle">
+                        <span>angle</span>
+                        <div>
+                          <el-slider v-model="itemmin.llightangle" :precision="2" :step="0.01" :max="itemmin.angle_max"
+                            :min="itemmin.angle_min"
+                            @input="newSpotLightFun(indexmin, itemmin.llightangle, 'llightangle')" />
+                          <input type="number" v-model="itemmin.llightangle" :max="itemmin.angle_max"
+                            :min="itemmin.angle_min" required
+                            @input="newSpotLightFun(indexmin, itemmin.llightangle, 'llightangle')">
                         </div>
+                      </div>
 
-                        <!-- 聚光追半影衰减百分比(聚光灯独有配置) -->
-                        <div v-if="itemmin.penumbra">
-                          <span>penumbra</span>
-                          <div>
-                            <el-slider v-model="itemmin.lightpenumbra" :precision="2" :step="0.01"
-                              :max="itemmin.penumbra_max" :min="itemmin.penumbra_min"
-                              @input="newSpotLightFun(indexmin, itemmin.lightpenumbra, 'lightpenumbra')" />
-                            <input type="number" v-model="itemmin.lightpenumbra" :max="itemmin.penumbra_max"
-                              :min="itemmin.penumbra_min" required
-                              @input="newSpotLightFun(indexmin, itemmin.lightpenumbra, 'lightpenumbra')">
-                          </div>
+                      <!-- 聚光追半影衰减百分比(聚光灯独有配置) -->
+                      <div v-if="itemmin.penumbra">
+                        <span>penumbra</span>
+                        <div>
+                          <el-slider v-model="itemmin.lightpenumbra" :precision="2" :step="0.01"
+                            :max="itemmin.penumbra_max" :min="itemmin.penumbra_min"
+                            @input="newSpotLightFun(indexmin, itemmin.lightpenumbra, 'lightpenumbra')" />
+                          <input type="number" v-model="itemmin.lightpenumbra" :max="itemmin.penumbra_max"
+                            :min="itemmin.penumbra_min" required
+                            @input="newSpotLightFun(indexmin, itemmin.lightpenumbra, 'lightpenumbra')">
                         </div>
+                      </div>
 
-                        <!-- 沿着光照的衰减量(聚光灯独有配置) -->
-                        <!-- <div v-if="itemmin.lightdecay">
+                      <!-- 沿着光照的衰减量(聚光灯独有配置) -->
+                      <!-- <div v-if="itemmin.lightdecay">
                           <span>decay</span>
                           <div>
                             <el-slider v-model="itemmin.lightdecay" :precision="2" :step="1" :max="10" :min="2"
@@ -390,115 +389,115 @@ const unflodFun = index => {
                           </div>
                         </div> -->
 
-                        <!-- 设置矩形区域光的宽（矩形区域光独有） -->
-                        <div v-if="itemmin.lightwidth">
-                          <span>width</span>
+                      <!-- 设置矩形区域光的宽（矩形区域光独有） -->
+                      <div v-if="itemmin.lightwidth">
+                        <span>width</span>
+                        <div>
+                          <el-slider v-model="itemmin.lightwidth" :precision="2" :step="1" :max="20" :min="1"
+                            @input="newrectanglelightwhFun(indexmin, 'width', itemmin.lightwidth)" />
+                          <input type="number" v-model="itemmin.lightwidth" max="20" min="1" required
+                            @input="newrectanglelightwhFun(indexmin, 'width', itemmin.lightwidth)">
+                        </div>
+                      </div>
+
+                      <!-- 设置矩形区域光的宽（矩形区域光独有） -->
+                      <div v-if="itemmin.lightheight">
+                        <span>height</span>
+                        <div>
+                          <el-slider v-model="itemmin.lightheight" :precision="2" :step="1" :max="20" :min="1"
+                            @input="newrectanglelightwhFun(indexmin, 'height', itemmin.lightheight)" />
+                          <input type="number" v-model="itemmin.lightheight" max="20" min="1" required
+                            @input="newrectanglelightwhFun(indexmin, 'height', itemmin.lightheight)">
+                        </div>
+                      </div>
+
+                      <!-- 新增光源目标坐标 -->
+                      <div v-if="itemmin.lighttarget" class="newlightposition">
+                        <!-- X -->
+                        <div>
+                          <span>target-x</span>
                           <div>
-                            <el-slider v-model="itemmin.lightwidth" :precision="2" :step="1" :max="20" :min="1"
-                              @input="newrectanglelightwhFun(indexmin, 'width', itemmin.lightwidth)" />
-                            <input type="number" v-model="itemmin.lightwidth" max="20" min="1" required
-                              @input="newrectanglelightwhFun(indexmin, 'width', itemmin.lightwidth)">
+                            <el-slider v-model="itemmin.tarx" :precision="2" :step="0.01" :max="itemmin.t_x_max"
+                              :min="itemmin.t_x_min"
+                              @input="newlightPositionFun(indexmin, itemmin.tarx, itemmin.lightname, 'target', 'x')" />
+                            <input type="number" v-model="itemmin.tarx" :max="itemmin.t_x_max" :min="itemmin.t_x_min"
+                              required
+                              @input="newlightPositionFun(indexmin, itemmin.tarx, itemmin.lightname, 'target', 'x')">
+                          </div>
+                        </div>
+                        <!-- Y -->
+                        <div>
+                          <span>target-y</span>
+                          <div>
+                            <el-slider v-model="itemmin.tary" :precision="2" :step="0.01" :max="itemmin.t_y_max"
+                              :min="itemmin.t_y_min"
+                              @input="newlightPositionFun(indexmin, itemmin.tary, itemmin.lightname, 'target', 'y')" />
+                            <input type="number" v-model="itemmin.tary" :max="itemmin.t_y_max" :min="itemmin.t_y_min"
+                              required
+                              @input="newlightPositionFun(indexmin, itemmin.tary, itemmin.lightname, 'target', 'y')">
+                          </div>
+                        </div>
+                        <!-- Z -->
+                        <div>
+                          <span>target-z</span>
+                          <div>
+                            <el-slider v-model="itemmin.tarz" :precision="2" :step="0.01" :max="itemmin.t_z_max"
+                              :min="itemmin.t_z_min"
+                              @input="newlightPositionFun(indexmin, itemmin.tarz, itemmin.lightname, 'target', 'z')" />
+                            <input type="number" v-model="itemmin.tarz" :max="itemmin.t_z_max" :min="itemmin.t_z_min"
+                              required
+                              @input="newlightPositionFun(indexmin, itemmin.tarz, itemmin.lightname, 'target', 'z')">
                           </div>
                         </div>
 
-                        <!-- 设置矩形区域光的宽（矩形区域光独有） -->
-                        <div v-if="itemmin.lightheight">
-                          <span>height</span>
+                      </div>
+
+                      <!-- 新增光源坐标 -->
+                      <div v-if="itemmin.lightxyz" class="newlightposition">
+                        <!-- X -->
+                        <div>
+                          <span>position-x</span>
                           <div>
-                            <el-slider v-model="itemmin.lightheight" :precision="2" :step="1" :max="20" :min="1"
-                              @input="newrectanglelightwhFun(indexmin, 'height', itemmin.lightheight)" />
-                            <input type="number" v-model="itemmin.lightheight" max="20" min="1" required
-                              @input="newrectanglelightwhFun(indexmin, 'height', itemmin.lightheight)">
+                            <el-slider v-model="itemmin.x" :precision="2" :step="0.01" :max="itemmin.p_x_max"
+                              :min="itemmin.p_x_min"
+                              @input="newlightPositionFun(indexmin, itemmin.x, itemmin.lightname, 'position', 'x')" />
+                            <input type="number" v-model="itemmin.x" :max="itemmin.p_x_max" :min="itemmin.p_x_min"
+                              required
+                              @input="newlightPositionFun(indexmin, itemmin.x, itemmin.lightname, 'position', 'x')">
                           </div>
                         </div>
-
-                        <!-- 新增光源目标坐标 -->
-                        <div v-if="itemmin.lighttarget" class="newlightposition">
-                          <!-- X -->
+                        <!-- Y -->
+                        <div>
+                          <span>position-y</span>
                           <div>
-                            <span>target-x</span>
-                            <div>
-                              <el-slider v-model="itemmin.tarx" :precision="2" :step="0.01" :max="itemmin.t_x_max"
-                                :min="itemmin.t_x_min"
-                                @input="newlightPositionFun(indexmin, itemmin.tarx, itemmin.lightname, 'target', 'x')" />
-                              <input type="number" v-model="itemmin.tarx" :max="itemmin.t_x_max" :min="itemmin.t_x_min"
-                                required
-                                @input="newlightPositionFun(indexmin, itemmin.tarx, itemmin.lightname, 'target', 'x')">
-                            </div>
+                            <el-slider v-model="itemmin.y" :precision="2" :step="0.01" :max="itemmin.p_y_max"
+                              :min="itemmin.p_y_min"
+                              @input="newlightPositionFun(indexmin, itemmin.y, itemmin.lightname, 'position', 'y')" />
+                            <input type="number" v-model="itemmin.y" :max="itemmin.p_y_max" :min="itemmin.p_y_min"
+                              required
+                              @input="newlightPositionFun(indexmin, itemmin.y, itemmin.lightname, 'position', 'y')">
                           </div>
-                          <!-- Y -->
-                          <div>
-                            <span>target-y</span>
-                            <div>
-                              <el-slider v-model="itemmin.tary" :precision="2" :step="0.01" :max="itemmin.t_y_max"
-                                :min="itemmin.t_y_min"
-                                @input="newlightPositionFun(indexmin, itemmin.tary, itemmin.lightname, 'target', 'y')" />
-                              <input type="number" v-model="itemmin.tary" :max="itemmin.t_y_max" :min="itemmin.t_y_min"
-                                required
-                                @input="newlightPositionFun(indexmin, itemmin.tary, itemmin.lightname, 'target', 'y')">
-                            </div>
-                          </div>
-                          <!-- Z -->
-                          <div>
-                            <span>target-z</span>
-                            <div>
-                              <el-slider v-model="itemmin.tarz" :precision="2" :step="0.01" :max="itemmin.t_z_max"
-                                :min="itemmin.t_z_min"
-                                @input="newlightPositionFun(indexmin, itemmin.tarz, itemmin.lightname, 'target', 'z')" />
-                              <input type="number" v-model="itemmin.tarz" :max="itemmin.t_z_max" :min="itemmin.t_z_min"
-                                required
-                                @input="newlightPositionFun(indexmin, itemmin.tarz, itemmin.lightname, 'target', 'z')">
-                            </div>
-                          </div>
-
                         </div>
-
-                        <!-- 新增光源坐标 -->
-                        <div v-if="itemmin.lightxyz" class="newlightposition">
-                          <!-- X -->
+                        <!-- Z -->
+                        <div>
+                          <span>position-z</span>
                           <div>
-                            <span>position-x</span>
-                            <div>
-                              <el-slider v-model="itemmin.x" :precision="2" :step="0.01" :max="itemmin.p_x_max"
-                                :min="itemmin.p_x_min"
-                                @input="newlightPositionFun(indexmin, itemmin.x, itemmin.lightname, 'position', 'x')" />
-                              <input type="number" v-model="itemmin.x" :max="itemmin.p_x_max" :min="itemmin.p_x_min"
-                                required
-                                @input="newlightPositionFun(indexmin, itemmin.x, itemmin.lightname, 'position', 'x')">
-                            </div>
-                          </div>
-                          <!-- Y -->
-                          <div>
-                            <span>position-y</span>
-                            <div>
-                              <el-slider v-model="itemmin.y" :precision="2" :step="0.01" :max="itemmin.p_y_max"
-                                :min="itemmin.p_y_min"
-                                @input="newlightPositionFun(indexmin, itemmin.y, itemmin.lightname, 'position', 'y')" />
-                              <input type="number" v-model="itemmin.y" :max="itemmin.p_y_max" :min="itemmin.p_y_min"
-                                required
-                                @input="newlightPositionFun(indexmin, itemmin.y, itemmin.lightname, 'position', 'y')">
-                            </div>
-                          </div>
-                          <!-- Z -->
-                          <div>
-                            <span>position-z</span>
-                            <div>
-                              <el-slider v-model="itemmin.z" :precision="2" :step="0.01" :max="itemmin.p_z_max"
-                                :min="itemmin.p_z_min"
-                                @input="newlightPositionFun(indexmin, itemmin.z, itemmin.lightname, 'position', 'z')" />
-                              <input type="number" v-model="itemmin.z" :max="itemmin.p_z_max" :min="itemmin.p_z_min"
-                                required
-                                @input="newlightPositionFun(indexmin, itemmin.z, itemmin.lightname, 'position', 'z')">
-                            </div>
+                            <el-slider v-model="itemmin.z" :precision="2" :step="0.01" :max="itemmin.p_z_max"
+                              :min="itemmin.p_z_min"
+                              @input="newlightPositionFun(indexmin, itemmin.z, itemmin.lightname, 'position', 'z')" />
+                            <input type="number" v-model="itemmin.z" :max="itemmin.p_z_max" :min="itemmin.p_z_min"
+                              required
+                              @input="newlightPositionFun(indexmin, itemmin.z, itemmin.lightname, 'position', 'z')">
                           </div>
                         </div>
                       </div>
-                    </transition>
-                  </div>
+                    </div>
+                  </transition>
                 </div>
               </div>
             </div>
-          </transition>
+          </div>
+          <!-- </transition> -->
         </li>
       </ul>
     </div>
@@ -522,13 +521,8 @@ const unflodFun = index => {
   scrollbar-width: none;
 
   ul {
-    margin-top: vh(17px);
+    // margin-top: vh(17px);
     width: 100%;
-  }
-
-  li {
-    // margin-top: vh(10px);
-    // padding-bottom: vh(5px);
   }
 
   li>div:first-of-type {
@@ -748,20 +742,20 @@ input[type="color"] {
 .slide-enter-from,
 .slide-leave-to {
   transform: translateX(-100%);
-  opacity: 0;
+  // opacity: 0;
 }
 
 /* 进入和离开的结束状态 */
 .slide-enter-to,
 .slide-leave-from {
   transform: translateX(0);
-  opacity: 1;
+  // opacity: 1;
 }
 
 /* 过渡效果 */
 .slide-enter-active,
 .slide-leave-active {
-  transition: transform 0.3s linear, opacity 0.3s linear;
+  transition: transform 0.3s linear, opacity 0.3s ease;
 }
 
 

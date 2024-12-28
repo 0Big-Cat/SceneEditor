@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { lightCounterStore } from '@/stores'
+import { lightCounterStore, pointlabelCounterStore } from '@/stores'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,6 +58,15 @@ router.beforeEach((to) => {
   } else {
     // 跳转至其他路由地址隐藏
     lightpanel.rightpanel = false
+  }
+
+  const data = pointlabelCounterStore()
+  if (to.path === '/point') {
+    if (data.pointlabel || data.pathlabel) {
+      data.rightpanel = true
+    }
+  } else {
+    data.rightpanel = false
   }
 })
 

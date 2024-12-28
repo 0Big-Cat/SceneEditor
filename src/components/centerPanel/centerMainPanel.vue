@@ -39,7 +39,7 @@ const loadval = loadingCounterStore()
   .progress-value {
     box-shadow: 0 10px 40px -10px #fff;
     border-radius: 100px;
-    background: skyblue;
+    background: #0ab0b7;
     height: 30px;
     transition: width 0.3s ease;
     /* 添加过渡效果 */
