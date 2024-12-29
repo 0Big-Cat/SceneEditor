@@ -25,6 +25,42 @@ import { lightCounterStore } from '@/stores'
 
 const { lightpanel, lightSet } = lightCounterStore()
 
+// 复制相机坐标函数
+const copycameraposition = (item) => {
+  // 格式化相机坐标为字符串
+  const cameraString = `${item.x},${item.y},${item.z}`
+  // 使用 Clipboard API 将相机坐标复制到剪贴板
+  navigator.clipboard.writeText(cameraString).then(() => {
+    ElMessage({
+      message: '复制成功',
+      type: 'success'
+    })
+  }).catch(() => {
+    ElMessage({
+      message: '复制失败',
+      type: 'warning'
+    })
+  })
+}
+
+// 复制目标坐标函数
+const copycameratarget = (item) => {
+  // 格式化相机坐标为字符串
+  const cameraString = `${item.tarx},${item.tary},${item.tarz}`
+  // 使用 Clipboard API 将相机坐标复制到剪贴板
+  navigator.clipboard.writeText(cameraString).then(() => {
+    ElMessage({
+      message: '复制成功',
+      type: 'success'
+    })
+  }).catch(() => {
+    ElMessage({
+      message: '复制失败',
+      type: 'warning'
+    })
+  })
+}
+
 // 删除新增的光源
 const deleatlight = (index, lightname, indexmin) => {
   lightSet[index].lightadd.splice(indexmin, 1)
@@ -52,9 +88,10 @@ const unflodFun = index => {
                 <span @click="unflodFun(index)">{{ item.lightlabel }}</span>
               </div>
               <div v-if="item.lightadd">
+                <button v-if="item.tarx" class="iconfont icon-fuzhimubiao" @click="copycameratarget(item)"></button>
+                <button class="iconfont icon-fuzhi" @click="copycameraposition(item)"></button>
                 <button class="iconfont icon-zhongzhi" @click="resetLightSettings(item.lightname, index)"></button>
                 <button class="iconfont icon-xinzeng" @click="lightaddFun(item.lightname, index)"></button>
-                <!-- <button @click="copylightpoint(item.x, item.y, item.z)">复制</button> -->
               </div>
             </div>
           </div>
@@ -304,6 +341,9 @@ const unflodFun = index => {
                         1 }}
                     </span>
                     <div>
+                      <button v-if="itemmin.tarx" class="iconfont icon-fuzhimubiao"
+                        @click="copycameratarget(itemmin)"></button>
+                      <button class="iconfont icon-fuzhi" @click="copycameraposition(itemmin)"></button>
                       <button class="iconfont icon-zhongzhi"
                         @click="newresetLightSettings(index, itemmin.lightname, indexmin)"></button>
                       <button class="iconfont icon-shanchu"
@@ -684,6 +724,10 @@ const unflodFun = index => {
       }
     }
   }
+}
+
+[class="iconfont icon-fuzhimubiao"] {
+  font-size: 13px;
 }
 
 // 下拉

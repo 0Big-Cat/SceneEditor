@@ -58,23 +58,37 @@ const controlspoint = () => {
 
 <template>
   <div id="pointmodule">
-    <h4>相机坐标:</h4>
-    <div><span>x:</span><input type="text" v-model="point.camerapoint.x"></div>
-    <div><span>y:</span><input type="text" v-model="point.camerapoint.y"></div>
-    <div><span>z:</span><input type="text" v-model="point.camerapoint.z"></div>
-    <div>
-      <button @click="copycamerapoint">复制坐标</button>
-      <button @click="camerapoint">还原坐标</button>
+    <div class="titlebox">
+      <h4>相机坐标</h4>
+      <div>
+        <button @click="camerapoint" class="iconfont icon-zhongzhi">
+          <!-- <span class="hinttext1">重置position坐标</span> -->
+        </button>
+        <button @click="copycamerapoint" class="iconfont icon-fuzhi">
+          <!-- <span class="hinttext2">复制position坐标</span> -->
+        </button>
+      </div>
     </div>
+    <div><span>position-x</span><input type="number" v-model="point.camerapoint.x"></div>
+    <div><span>position-y</span><input type="number" v-model="point.camerapoint.y"></div>
+    <div><span>position-z</span><input type="number" v-model="point.camerapoint.z"></div>
 
-    <h4>旋转中心坐标:</h4>
-    <div><span>x:</span><input type="text" v-model="point.controlspoint.x"></div>
-    <div><span>y:</span><input type="text" v-model="point.controlspoint.y"></div>
-    <div><span>z:</span><input type="text" v-model="point.controlspoint.z"></div>
-    <div>
-      <button @click="copycontrolspoint">复制坐标</button>
-      <button @click="controlspoint">还原坐标</button>
+
+    <div class="titlebox">
+      <h4>旋转中心坐标</h4>
+      <div>
+        <button @click="controlspoint" class="iconfont icon-zhongzhi">
+          <!-- <span class="hinttext3">重置target坐标</span> -->
+        </button>
+        <button @click="copycontrolspoint" class="iconfont icon-fuzhi">
+          <!-- <span class="hinttext4">复制target坐标</span> -->
+        </button>
+      </div>
     </div>
+    <div><span>target-x</span><input type="number" v-model="point.controlspoint.x"></div>
+    <div><span>target-y</span><input type="number" v-model="point.controlspoint.y"></div>
+    <div><span>target-z</span><input type="number" v-model="point.controlspoint.z"></div>
+
   </div>
 </template>
 
@@ -89,13 +103,61 @@ const controlspoint = () => {
   color: #fff;
   font-size: rem(16px);
   padding: 0 vw(20px);
+  margin-top: vh(17px);
+
+  >div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: vh(15px);
+
+    >div {
+      display: flex;
+      align-items: center;
+    }
+  }
 
   h4 {
-    font-size: rem(18px);
+    font-size: rem(14px);
     font-weight: 400;
-    margin: vh(17px) 0;
+    // margin: vh(17px) 0;
     width: 100%;
     height: vh(30px);
+
+  }
+
+  span {
+    font-size: rem(14px);
+    color: #606266;
+  }
+
+  input {
+    width: vw(100px);
+    text-align: center;
+    background-color: #333;
+    color: #0ab0b7;
+    border: none;
+
+    &:focus {
+      outline: none;
+      /* 去掉焦点时的外部轮廓 */
+    }
+
+  }
+
+  button {
+    color: #fff;
+    background-color: transparent;
+    border: none;
+    margin-left: vw(5px);
+    cursor: pointer;
+
+    &:hover {
+      color: #0ab0b7;
+    }
+  }
+
+  .titlebox {
     /* 设置透明的边框，确保只有下边框有渐变效果 */
     border-top: 1px solid transparent;
     border-left: 1px solid transparent;
@@ -108,35 +170,62 @@ const controlspoint = () => {
     background-size: 100% 2px;
   }
 
-  div {
-    margin-bottom: vh(17px);
+  .hinttext1,
+  .hinttext2 {
+    display: none;
+    position: fixed;
+    top: vh(20px);
+    left: vw(300px);
+    font-size: rem(12px);
+    z-index: 3;
+    color: #0ab0b7;
   }
 
-  span {
-    margin-right: vw(5px);
-    font-size: rem(18px);
+  .hinttext3,
+  .hinttext4 {
+    display: none;
+    position: fixed;
+    top: vh(175px);
+    left: vw(300px);
+    font-size: rem(12px);
+    z-index: 3;
+    color: #0ab0b7;
   }
 
-  input {
-    width: vw(100px);
-
-    &:focus {
-      outline: none;
-      /* 去掉焦点时的外部轮廓 */
+  [class="iconfont icon-zhongzhi"] {
+    &:hover .hinttext1 {
+      display: block;
     }
-
   }
 
-  button {
-    margin-bottom: vh(30px);
-    margin-right: vw(5px);
-    width: vw(84px);
-    height: vh(42px);
-    line-height: vh(32px);
-    color: #fff;
-    border: none;
-    background: url('../../assets/imgs/buttonback.png') no-repeat center/100% 100%;
-    cursor: pointer;
+  [class="iconfont icon-fuzhi"] {
+    &:hover .hinttext2 {
+      display: block;
+    }
+  }
+
+  [class="iconfont icon-zhongzhi"] {
+    &:hover .hinttext3 {
+      display: block;
+    }
+  }
+
+  [class="iconfont icon-fuzhi"] {
+    &:hover .hinttext4 {
+      display: block;
+    }
+  }
+
+  /* 去掉 Chrome 和 Safari 的小箭头 */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* 去掉 Firefox 的小箭头 */
+  input[type="number"] {
+    -moz-appearance: textfield;
   }
 }
 </style>

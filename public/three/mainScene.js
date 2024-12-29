@@ -15,7 +15,7 @@ import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js
 // 引入后期库
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
 // 引入相机位置+旋转中心位置模块变量
-import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, animateCounterStore, uploadCounterStore, pointlabelCounterStore } from '@/stores'
+import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, groundCounterStore, fogCounterStore, animateCounterStore, uploadCounterStore, pointlabelCounterStore } from '@/stores'
 
 // 将关键变量提出
 let scene, camera, render, controls, gltfLoader, axesHelper
@@ -51,7 +51,7 @@ export const initThreeScene = () => {
     0.1,
     100000
   )
-  camera.position.set(0, 15, 15)
+  camera.position.set(15, 15, 15)
 
 
   // 初始化渲染器
@@ -139,6 +139,9 @@ export const initThreeScene = () => {
   // 辅助坐标系
   axesHelper = new THREE.AxesHelper(10)
   scene.add(axesHelper)
+
+  gridHelper = new THREE.GridHelper(100, 25, 0x888888, 0x555555)
+  scene.add(gridHelper)
 
   // 创建渲染器
   // const composer = new EffectComposer(render)
@@ -1530,30 +1533,19 @@ export const newresetLightSettings = (index, lightname, indexmin) => {
 let rgbeloader
 // 天空球模块
 export const skyballHDR = (value) => {
-  const loadval = loadingCounterStore()
   const skyurl = skyCounterStore()
-
+  const { grounddata } = groundCounterStore()
+  const { fogdata, fogexp2data } = fogCounterStore()
   if (value) {
-    loadval.loadingvalue = 0
-    loadval.loadingshow = true
-
-    // 加载HDR贴图
-    rgbeloader = new RGBELoader()
-    rgbeloader.load(skyurl.skyhdrurl, (envMap) => {
-      envMap.mapping = THREE.EquirectangularReflectionMapping
-      scene.background = envMap
-      scene.environment = envMap
-      loadval.loadingshow = false
-    }, (xhr) => {
-      const percent = parseInt((xhr.loaded / xhr.total) * 100)
-      loadval.loadingvalue = percent
-    })
+    skyurl.rightpanel = true
     return
   }
-
   // 清空场景背景
   scene.background = new THREE.Color('#333')
   scene.environment = ''
+  if (!skyurl.skyvalue && !grounddata.showvalue && !grounddata.axeshelper && !fogdata.show && !fogexp2data.show) {
+    skyurl.rightpanel = false
+  }
 }
 
 // 切换天空球
@@ -1561,9 +1553,22 @@ export const changeskyHDR = (id, value) => {
   if (value) {
     const skyurl = skyCounterStore()
     const hdrUrl = skyurl.getSkyhdrById(id)
+    const loadval = loadingCounterStore()
     if (hdrUrl) {
       skyurl.skyhdrurl = hdrUrl
-      skyballHDR(true)
+      loadval.loadingvalue = 0 // 进度条归零
+      loadval.loadingshow = true // 显示进度条
+      // 加载HDR贴图
+      rgbeloader = new RGBELoader()
+      rgbeloader.load(skyurl.skyhdrurl, (envMap) => {
+        envMap.mapping = THREE.EquirectangularReflectionMapping
+        scene.background = envMap
+        scene.environment = envMap
+        loadval.loadingshow = false
+      }, (xhr) => {
+        const percent = parseInt((xhr.loaded / xhr.total) * 100)
+        loadval.loadingvalue = percent
+      })
     }
   }
 }
@@ -1574,12 +1579,16 @@ let currentSize = 100  // 初始大小
 let currentDivisions = 25  // 初始格子数
 // 地面模块
 export const ground = (value, size, divisions) => {
+  const skyurl = skyCounterStore()
+  const { grounddata } = groundCounterStore()
+  const { fogdata, fogexp2data } = fogCounterStore()
   if (value) {
     if (!gridHelper) {  // 确保只在没有初始化时创建 gridHelper
       gridHelper = new THREE.GridHelper(size, divisions, 0x888888, 0x555555)
       scene.add(gridHelper)
       currentSize = size
       currentDivisions = divisions
+      skyurl.rightpanel = true
     }
     return
   }
@@ -1587,6 +1596,9 @@ export const ground = (value, size, divisions) => {
   if (gridHelper) {
     scene.remove(gridHelper)
     gridHelper = null  // 删除后，设置为 null，避免后续出错
+    if (!skyurl.skyvalue && !grounddata.showvalue && !grounddata.axeshelper && !fogdata.show && !fogexp2data.show) {
+      skyurl.rightpanel = false
+    }
   }
 }
 // 尺寸函数
@@ -1621,10 +1633,23 @@ export const divisionsFun = divisions => {
 
 // 坐标辅助器
 export const axeshelperFun = value => {
+  const skyurl = skyCounterStore()
+  const { grounddata } = groundCounterStore()
+  const { fogdata, fogexp2data } = fogCounterStore()
   if (value) {
     scene.remove(axesHelper)
+    if (!skyurl.skyvalue && !grounddata.showvalue && !grounddata.axeshelper && !fogdata.show && !fogexp2data.show) {
+      skyurl.rightpanel = false
+    }
     return
   }
+  scene.add(axesHelper)
+  skyurl.rightpanel = true
+}
+
+export const updateaxeshelperFun = value => {
+  scene.remove(axesHelper)
+  axesHelper = new THREE.AxesHelper(value)
   scene.add(axesHelper)
 }
 
@@ -1634,15 +1659,22 @@ let fognear = 1  // 开始距离
 let fogfar = 100  // 结束距离
 let fogcolor = '' // 初始颜色
 export const linearfog = (value, near, far, color) => {
+  const skyurl = skyCounterStore()
+  const { grounddata } = groundCounterStore()
+  const { fogdata, fogexp2data } = fogCounterStore()
   if (value) {
     scene.fog = new THREE.Fog(color, near, far) //（颜色，,距离到50的时候完全被雾笼罩）
     fognear = near
     fogfar = far
     fogcolor = color
+    skyurl.rightpanel = true
     return
   }
   // 移除雾
   scene.fog = null
+  if (!skyurl.skyvalue && !grounddata.showvalue && !grounddata.axeshelper && !fogdata.show && !fogexp2data.show) {
+    skyurl.rightpanel = false
+  }
 }
 export const nearFun = near => {
   // 移除雾
@@ -1667,14 +1699,21 @@ export const colorFun = color => {
 let fogexp2density = 0.1  // 初始浓度
 let fogexp2color = '' // 初始颜色
 export const indexfogexp2 = (value, color, density) => {
+  const skyurl = skyCounterStore()
+  const { grounddata } = groundCounterStore()
+  const { fogdata, fogexp2data } = fogCounterStore()
   if (value) {
     scene.fog = new THREE.FogExp2(color, density)//（颜色，雾的浓度）
     fogexp2color = color
     fogexp2density = density
+    skyurl.rightpanel = true
     return
   }
   // 移除雾
   scene.fog = null
+  if (!skyurl.skyvalue && !grounddata.showvalue && !grounddata.axeshelper && !fogdata.show && !fogexp2data.show) {
+    skyurl.rightpanel = false
+  }
 }
 export const densityFun = density => {
   // 移除雾
@@ -1761,7 +1800,6 @@ export const normalPlayAnimation = (uuid, value, number) => {
     }
   }
 }
-
 
 // 动画进度
 const logProgress = () => {
@@ -1860,8 +1898,10 @@ export const clickListener = value => {
   let childname = uploadCounterStore()
   if (value) {
     window.addEventListener('click', handleClick)
+    childname.rightmodelpanel = true
     return
   }
+  childname.rightmodelpanel = false
   window.removeEventListener('click', handleClick)
   removeOutline(childname.currentOutline)
 }

@@ -4,7 +4,7 @@ import { uploadCounterStore, loadingCounterStore } from '@/stores'
 
 const loadval = loadingCounterStore()
 
-let filename = uploadCounterStore()
+const filename = uploadCounterStore()
 
 // 处理文件上传
 const handleFileChange = event => {
@@ -104,30 +104,45 @@ const wireframemoodel = name => {
         上传模型
         <input type="file" id="fileInput" multiple @change="handleFileChange" />
       </label>
-      <h6>Tips: gltf 需与.bin 纹理一同上传</h6>
+      <!-- <h6>Tips: gltf 需与.bin 纹理放入同一文件夹内</h6> -->
     </div>
     <!-- 模型坐标、缩放、删除等 -->
     <ul>
       <li v-for="item in filename.uploadvalue" :key="item.name">
-        <div class="modelName">模型名称:{{ item.name }}</div>
+        <div class="modelName">模型名称-{{ item.name }}</div>
         <div>
-          <span>坐标:</span>
-          <input v-for="axis in ['x', 'y', 'z']" :key="axis" type="text" v-model="item[axis]"
-            @change="pointmodel(item.name, { x: item.x, y: item.y, z: item.z })">
+          <!-- <span>坐标:</span> -->
+          <div v-for="axis in ['x', 'y', 'z']" :key="axis">
+            <span>position-{{ axis }}</span>
+            <div>
+              <el-slider v-model="item[axis]" :precision="2" :step="0.01" :max="100" :min="-100"
+                @input="pointmodel(item.name, { x: item.x, y: item.y, z: item.z })" />
+              <input type="number" v-model="item[axis]" max="100" min="0"
+                @input="pointmodel(item.name, { x: item.x, y: item.y, z: item.z })">
+            </div>
+          </div>
         </div>
         <div>
-          <span>缩放:</span>
-          <input type="text" v-model="item['s']" @change="scalemodel(item.name, { s: item.s })">
+          <div>
+            <span>scale</span>
+            <div>
+              <el-slider v-model="item['s']" :precision="2" :step="0.01" :max="10" :min="0"
+                @input="scalemodel(item.name, { s: item.s })" />
+              <input type="number" v-model="item['s']" @change="scalemodel(item.name, { s: item.s })">
+            </div>
+          </div>
         </div>
         <div>
-          <el-switch v-model="filename.panelValue" class="ml-2" inline-prompt style="--el-switch-on-color: #13ce66; 
-            --el-switch-off-color: #ff4949" active-text="选中子网格" inactive-text="选中子网格"
-            @change="clickListener(filename.panelValue)" />
-        </div>
-        <div>
-          <button @click="deletemodel(item.name)">删除</button>
-          <button @click="restoremoodel(item.name)">还原</button>
-          <button @click="wireframemoodel(item.name)">{{ item.showhidden ? '隐藏' : '显示' }}</button>
+          <div>
+            <el-switch v-model="filename.panelValue" class="ml-2" inline-prompt style="--el-switch-on-color: #13ce66; 
+            --el-switch-off-color: #ff4949" active-text="查看Mesh" inactive-text="查看Mesh"
+              @change="clickListener(filename.panelValue)" />
+            <div>
+              <button @click="deletemodel(item.name)">删除</button>
+              <button @click="restoremoodel(item.name)">重置</button>
+              <button @click="wireframemoodel(item.name)">{{ item.showhidden ? '隐藏' : '显示' }}</button>
+            </div>
+          </div>
         </div>
       </li>
     </ul>
@@ -158,38 +173,38 @@ const wireframemoodel = name => {
       display: inline-block;
       width: vw(159px);
       height: vh(58px);
-      line-height: vh(70px);
-      background: url('../../assets/imgs/upload.png') no-repeat center/100% 100%;
-      border-radius: 5px;
+      line-height: vh(58px);
       text-align: center;
+      background: url('../../assets/imgs/upload.png') no-repeat center/100% 100%;
+      margin-top: vh(17px);
       font-size: rem(18px);
+      color: #0ab0b7;
       cursor: pointer;
-
-      &:hover {
-        color: #0ab0b7;
-      }
     }
 
     h6 {
-      font-size: rem(12px);
+      font-size: rem(10px);
       color: yellow;
       margin-top: vh(5px);
       font-weight: 400;
-      text-align: center;
+      // text-align: center;
     }
   }
 
   ul {
     li {
       font-size: rem(16px);
-      margin: vh(50px) 0;
+      margin: vh(20px) 0;
 
       input {
-        margin-top: vh(10px);
+        // margin-top: vh(10px);
         width: 40px;
-        height: 19px;
-        margin-right: vw(5px);
+        height: 20px;
+        margin-left: vw(5px);
         text-align: center;
+        color: #0ab0b7;
+        background-color: #333;
+        border: none;
 
         &:focus {
           outline: none;
@@ -203,7 +218,7 @@ const wireframemoodel = name => {
         width: 100%;
         height: vh(30px);
         line-height: vh(26px);
-        font-size: rem(18px);
+        font-size: rem(14px);
         padding-bottom: vh(5px);
         /* 设置透明的边框，确保只有下边框有渐变效果 */
         border-top: 1px solid transparent;
@@ -224,25 +239,44 @@ const wireframemoodel = name => {
       }
 
       button {
-        margin-top: vh(5px);
-        margin-right: vw(10px);
-        width: vw(60px);
-        height: vh(36px);
-        line-height: vh(36px);
-        color: #fff;
+        margin-left: vw(5px);
+        width: vw(40px);
+        height: vh(20px);
         border: none;
-        background: url('../../assets/imgs/buttonback.png') no-repeat center/100% 100%;
+        color: #0ab0b7;
+        background-color: #333;
         cursor: pointer;
-
-        &:hover {
-          color: #0ab0b7;
-        }
       }
 
-      &>div:nth-of-type(4) {
+      >div:nth-of-type(4) {
         margin-top: vh(5px);
+      }
+
+      >div {
+        >div {
+          display: flex;
+          justify-content: space-between;
+          color: #606266;
+
+          >div {
+            display: flex;
+            align-items: center;
+          }
+        }
       }
     }
   }
+}
+
+/* 去掉 Chrome 和 Safari 的小箭头 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 去掉 Firefox 的小箭头 */
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 </style>

@@ -15,6 +15,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
+  margin-top: vh(17px);
   color: #fff;
   display: flex;
   flex-direction: column;

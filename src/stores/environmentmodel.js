@@ -6,8 +6,11 @@ export const skyCounterStore = defineStore('sky', () => {
   // 是否显示/隐藏
   const skyvalue = ref(false)
 
+  // 用于控制右侧操作面板的显示
+  const rightpanel = ref(false)
+
   // 默认天空球
-  const skyhdrurl = ref('textures/hdrs/1.hdr')
+  const skyhdrurl = ref('')
 
   // 本地HDR资源路径合集
   const skyimgs = ref([
@@ -70,6 +73,7 @@ export const skyCounterStore = defineStore('sky', () => {
   }
 
   return {
+    rightpanel,
     skyvalue,
     skyhdrurl,
     skyimgs,
@@ -82,7 +86,8 @@ export const groundCounterStore = defineStore('ground', () => {
   // 是否显示/隐藏
   const grounddata = ref({
     showvalue: true,
-    axeshelper: true,//坐标辅助器
+    axeshelper: true, //坐标辅助器
+    axeshelpersize: 10, // 坐标辅助器初始大小
     sizevalue: 100,
     divisionsvalue: 25
   })
@@ -98,12 +103,12 @@ export const fogCounterStore = defineStore('fog', () => {
     show: false,
     near: 1,
     far: 100,
-    color: '#fff'
+    color: '#ffffff'
   })
   const fogexp2data = ref({
     show: false,
     density: 0.1,
-    color: '#fff'
+    color: '#ffffff'
   })
 
   return {

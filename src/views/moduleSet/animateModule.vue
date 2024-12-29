@@ -15,10 +15,10 @@ const { animatevalue } = animateCounterStore()
   <div id="animatemodule">
     <!-- 遍历 animatevalue 外层 -->
     <ul v-for="(itemex, indexex) in animatevalue" :key="indexex">
-      <h4>模型名称:{{ itemex.modelName }}</h4>
+      <h4>模型名称-{{ itemex.modelName }}</h4>
       <!-- 遍历 animateData 子属性 -->
       <li v-for="animation in itemex.animateData" :key="animation.uuid">
-        <h4>动画名称:{{ animation.name }}</h4>
+        <h4>动画名称-{{ animation.name }}</h4>
 
         <div>
           <!-- 播放/停止 -->
@@ -37,12 +37,12 @@ const { animatevalue } = animateCounterStore()
 
         <!-- 动画进度 -->
         <div>
-          <span>动画进度:</span>
+          <span>动画进度-</span>
           <span>{{ animation.progress.toFixed(0) }}%</span>
         </div>
 
         <div>
-          <span>播放次数:</span>
+          <span>播放次数-</span>
           <el-input-number v-model="animation.animateloop" size="small" min="1"
             @change="animatecishu(animation.uuid, animation.animateloop, animatevalue[indexex].serialnumber)" />
         </div>
@@ -65,8 +65,9 @@ const { animatevalue } = animateCounterStore()
   padding: 0 vw(20px);
 
   h4 {
-    font-size: rem(16px);
+    font-size: rem(14px);
     font-weight: 400;
+    // color: #46484a;
     overflow: hidden;
     /* 超出隐藏 */
     text-overflow: ellipsis;
@@ -80,8 +81,8 @@ const { animatevalue } = animateCounterStore()
     width: 100%;
 
     li {
-      margin-bottom: vh(40px);
-      padding-bottom: vh(10px);
+      margin-bottom: vh(20px);
+      padding-bottom: vh(5px);
       line-height: vh(40px);
 
       /* 设置透明的边框，确保只有下边框有渐变效果 */
@@ -96,7 +97,12 @@ const { animatevalue } = animateCounterStore()
       background-size: 100% 2px;
 
       span {
-        margin-right: vw(5px);
+        font-size: rem(14px);
+      }
+
+      >div {
+        display: flex;
+        align-items: center;
       }
     }
   }

@@ -43,7 +43,7 @@ const copyText = () => {
 
 <template>
   <transition name="right">
-    <div v-if="data.panelValue" id="rightmainpanel">
+    <div v-if="data.rightmodelpanel" id="rightmainpanel">
       <div>子网格名称:</div>
       <div @dblclick="copyText">
         <span>{{ data.modelchildName }}</span>
@@ -85,6 +85,8 @@ const copyText = () => {
 
   &>div:nth-of-type(1) {
     margin-bottom: vh(5px);
+    font-size: rem(14px);
+    color: #606266;
   }
 
   &>div:nth-of-type(2) {

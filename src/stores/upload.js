@@ -17,8 +17,11 @@ export const uploadCounterStore = defineStore('upload', () => {
     ]
   )
 
-  // 隐藏显示右侧面板
+  // 左侧滑块
   const panelValue = ref(false)
+
+  // 控制右侧面板的显示
+  const rightmodelpanel = ref(false)
 
   // 子网格名称
   const modelchildName = ref('')
@@ -38,6 +41,7 @@ export const uploadCounterStore = defineStore('upload', () => {
     modelchildName,
     currentOutline,
     allChildName,
-    checkedValue
+    checkedValue,
+    rightmodelpanel
   }
 })

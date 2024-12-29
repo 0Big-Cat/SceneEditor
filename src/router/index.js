@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { lightCounterStore, pointlabelCounterStore } from '@/stores'
+import { lightCounterStore, pointlabelCounterStore, skyCounterStore, groundCounterStore, fogCounterStore, uploadCounterStore } from '@/stores'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,6 +48,17 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
+
+  // 模型板块右侧面板的显示
+  const filename = uploadCounterStore()
+  if (to.path === '/upload') {
+    if (filename.panelValue) {
+      filename.rightmodelpanel = true
+    }
+  } else {
+    filename.rightmodelpanel = false
+  }
+
   const { lightpanel, lightSet } = lightCounterStore()
   // 灯光模块右侧面板的显示
   if (to.path === '/light') {
@@ -60,6 +71,7 @@ router.beforeEach((to) => {
     lightpanel.rightpanel = false
   }
 
+  // 点位模块右侧面板的显示
   const data = pointlabelCounterStore()
   if (to.path === '/point') {
     if (data.pointlabel || data.pathlabel) {
@@ -67,6 +79,18 @@ router.beforeEach((to) => {
     }
   } else {
     data.rightpanel = false
+  }
+
+  // 场景模块的右侧面板显示
+  const skydata = skyCounterStore()
+  const { grounddata } = groundCounterStore()
+  const { fogdata, fogexp2data } = fogCounterStore()
+  if (to.path === '/environmentmodel') {
+    if (skydata.skyvalue || grounddata.showvalue || grounddata.axeshelper || fogdata.show || fogexp2data.data) {
+      skydata.rightpanel = true
+    }
+  } else {
+    skydata.rightpanel = false
   }
 })
 
