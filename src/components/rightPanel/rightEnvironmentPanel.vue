@@ -28,7 +28,7 @@ const handleImageClick = (id) => {
       <!-- 天空球模块 -->
       <!-- <div>
         <h5>天空球</h5> -->
-      <div v-if="skydata.skyvalue" class="hdrcompilations">
+      <div v-if="skydata.skyvalue" id="hdrcompilations">
         <img v-for="item in skyimgs" :key="item.id" :src="item.url" :class="{ 'selected': selectedImage === item.id }"
           @click="handleImageClick(item.id)">
       </div>
@@ -198,8 +198,8 @@ h5 {
 }
 
 // 天空球模块
-.hdrcompilations {
-  display: grid;
+#hdrcompilations {
+  display: grid !important;
   grid-template-columns: repeat(3, 1fr);
   gap: vh(5px);
   width: 100%;

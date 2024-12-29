@@ -21,17 +21,17 @@ import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterSt
 let scene, camera, render, controls, gltfLoader, axesHelper
 
 // 打印场景图函数
-function dumpObject(obj, lines = [], isLast = true, prefix = '') {
-  const localPrefix = isLast ? '└─' : '├─'
-  lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`)
-  const newPrefix = prefix + (isLast ? '  ' : '│ ')
-  const lastNdx = obj.children.length - 1
-  obj.children.forEach((child, ndx) => {
-    const isLast = ndx === lastNdx
-    dumpObject(child, lines, isLast, newPrefix)
-  })
-  return lines
-}
+// function dumpObject(obj, lines = [], isLast = true, prefix = '') {
+//   const localPrefix = isLast ? '└─' : '├─'
+//   lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`)
+//   const newPrefix = prefix + (isLast ? '  ' : '│ ')
+//   const lastNdx = obj.children.length - 1
+//   obj.children.forEach((child, ndx) => {
+//     const isLast = ndx === lastNdx
+//     dumpObject(child, lines, isLast, newPrefix)
+//   })
+//   return lines
+// }
 
 // ====================
 // 主场景
@@ -183,11 +183,9 @@ export const loadModelScen = files => {
   if (!gltfFile) {
     gltfLoader.load(URL.createObjectURL(files[0]), gltf => {
       model = gltf.scene
-      // model.castShadow = true  // 使模型投射阴影
       models.push(model)
       scene.add(model)
-      // console.log(model)
-      console.log(dumpObject(model).join('\n'))
+      // console.log(dumpObject(model).join('\n'))
       model.name = files[0].name
       loadval.loadingshow = false
 
