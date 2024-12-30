@@ -7,16 +7,56 @@ const loadval = loadingCounterStore()
 const filename = uploadCounterStore()
 
 // 处理文件上传
-const handleFileChange = event => {
+// const handleFileChange = event => {
 
-  const file = event.target.files
-  // 检查并删除空的 name 项
-  filename.uploadvalue = filename.uploadvalue.filter(item => item.name !== '')
+//   const file = event.target.files
+//   console.log(file)
 
-  Array.from(file)
-    .filter(file => file.name.endsWith('.gltf') || file.name.endsWith('.glb'))
-    .map(file => {
+//   // 检查并删除空的 name 项
+//   filename.uploadvalue = filename.uploadvalue.filter(item => item.name !== '')
 
+//   Array.from(file)
+//     .filter(file => file.name.endsWith('.gltf') || file.name.endsWith('.glb'))
+//     .map(file => {
+
+//       const modelData = {
+//         name: file.name,
+//         x: 0,
+//         y: 0,
+//         z: 0,
+//         s: 1,
+//         showhidden: true // 显示隐藏模型
+//       }
+//       filename.uploadvalue.push(modelData)
+//     })
+
+//   loadval.loadingvalue = 0
+//   loadval.loadingshow = true
+//   loadModelScen(file)  // 使用loadModel加载模型
+// }
+
+// 处理文件选择
+const handleFileChange = (event) => {
+  event.preventDefault()
+  // const files = event.target.files
+  // handleFiles(files)
+}
+
+// // 处理拖放文件
+const handleDrop = (event) => {
+  event.preventDefault()
+  const files = event.dataTransfer.files
+  console.log(files)
+
+  handleFiles(files)
+}
+
+// 处理文件上传的通用逻辑
+const handleFiles = (files) => {
+
+  // 这里可以将文件数据处理并添加到相关的数组
+  Array.from(files).forEach((file) => {
+    if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
       const modelData = {
         name: file.name,
         x: 0,
@@ -26,15 +66,19 @@ const handleFileChange = event => {
         showhidden: true // 显示隐藏模型
       }
       filename.uploadvalue.push(modelData)
-    })
-
+    }
+  })
+  // 其他加载逻辑
   loadval.loadingvalue = 0
   loadval.loadingshow = true
-  loadModelScen(file)  // 使用loadModel加载模型
-
-  // console.log(filename.uploadvalue)
-
+  loadModelScen(files)
 }
+
+
+
+
+
+
 
 // 删除模型
 const deletemodel = name => {
@@ -42,15 +86,15 @@ const deletemodel = name => {
     filename.uploadvalue = filename.uploadvalue.filter(item => item.name !== name)
     deleteModel(name)
   }
-  if (filename.uploadvalue.length === 0) {
-    filename.uploadvalue.push({
-      name: '',
-      x: 0,
-      y: 0,
-      z: 0,
-      s: 1
-    })
-  }
+  // if (filename.uploadvalue.length === 0) {
+  //   filename.uploadvalue.push({
+  //     name: '',
+  //     x: 0,
+  //     y: 0,
+  //     z: 0,
+  //     s: 1
+  //   })
+  // }
 }
 
 // 模型坐标
@@ -99,10 +143,10 @@ const wireframemoodel = name => {
 <template>
   <div id="uploadmodule">
     <!-- 模型上传按钮 -->
-    <div>
+    <div @dragover.prevent @drop="handleDrop">
       <label class="custom-file-upload">
-        上传模型
-        <input type="file" id="fileInput" multiple @change="handleFileChange" />
+        拖拽至此上传模型
+        <input type="file" id="fileInput" webkitdirectory mozdirectory odirectory multiple @change="handleFileChange" />
       </label>
       <!-- <h6>Tips: gltf 需与.bin 纹理放入同一文件夹内</h6> -->
     </div>
@@ -163,21 +207,25 @@ const wireframemoodel = name => {
   overflow-x: hidden;
   scrollbar-width: none;
 
-  div {
+  >div {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     input[type="file"] {
       display: none;
     }
 
     .custom-file-upload {
-      display: inline-block;
-      width: vw(159px);
-      height: vh(58px);
-      line-height: vh(58px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 90%;
+      height: vh(100px);
       text-align: center;
       background: url('../../assets/imgs/upload.png') no-repeat center/100% 100%;
-      margin-top: vh(17px);
-      font-size: rem(18px);
+      font-size: rem(16px);
       color: #0ab0b7;
       cursor: pointer;
     }

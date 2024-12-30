@@ -6,14 +6,14 @@ export const uploadCounterStore = defineStore('upload', () => {
   // 模型相关数据
   const uploadvalue = ref(
     [
-      {
-        name: '',
-        x: 0,
-        y: 0,
-        z: 0,
-        s: 1,
-        showhidden: true
-      }
+      // {
+      //   name: '',
+      //   x: 0,
+      //   y: 0,
+      //   z: 0,
+      //   s: 1,
+      //   showhidden: true
+      // }
     ]
   )
 

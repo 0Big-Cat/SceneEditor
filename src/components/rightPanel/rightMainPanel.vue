@@ -72,13 +72,14 @@ const copyText = () => {
 <style lang="scss" scoped>
 #rightmainpanel {
   position: absolute;
-  top: vh(17px);
+  top: 0;
   right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: vw(250px);
   height: 100%;
+  padding-top: vh(17px);
   z-index: 1;
   background-color: #0d0d0d;
   color: #fff;
