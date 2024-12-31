@@ -166,20 +166,16 @@ const mixers = [] // 动画混合器列表
 const fileMap = {} // 用于存储文件的 Map
 
 export const loadModelScen = (files) => {
-  console.log(files)
 
   const loadval = loadingCounterStore()
   const animateal = animateCounterStore()
 
   // 将文件存入 fileMap
   for (let file of files) {
-    fileMap[file.name] = file
+    fileMap[file.name] = file  // 将文件与其路径关联
   }
 
-  // console.log(fileMap)
-
-
-  // 查找 .gltf 文件
+  // 查找 .gltf .glb 文件
   const gltfFile = Array.from(files).find(file => file.name.endsWith('.gltf'))
   const glbFile = Array.from(files).find(file => file.name.endsWith('.glb'))
 
@@ -243,17 +239,18 @@ export const loadModelScen = (files) => {
 
     fileReader.onload = () => {
       const arrayBuffer = fileReader.result // 获取读取的 ArrayBuffer
+      console.log(arrayBuffer)
       const gltfBlob = new Blob([arrayBuffer], { type: 'model/gltf+json' })
+      console.log(gltfBlob)
       const gltfUrl = URL.createObjectURL(gltfBlob)
-
+      console.log(gltfUrl)
       gltfLoader.setPath('') // 设置基础路径为空
       gltfLoader.setResourcePath('') // 清空资源路径
-
-
 
       gltfLoader.manager.setURLModifier((url) => {
         // 替换资源路径为 Blob URL
         const fileName = url.split('/').pop()
+
         if (fileMap[fileName]) {
           const fileBlob = new Blob([fileMap[fileName]])
           return URL.createObjectURL(fileBlob)
@@ -1904,10 +1901,10 @@ export const clickListener = value => {
     childname.rightmodelpanel = true
     return
   }
+  window.removeEventListener('click', handleClick)
   if (!childname.panelValue) {
     childname.rightmodelpanel = false
   }
-  window.removeEventListener('click', handleClick)
   removeOutline(childname.currentOutline)
 }
 
@@ -1919,7 +1916,15 @@ export const allModelChildName = (value) => {
     models.forEach((model) => {
       const nameArray = []
       model.traverse((child) => {
+
+        if (child.isObject3D) {
+          // 如果是 Object3D 类型，存储名称
+          console.log(child.name)
+        }
+
         if (child.isMesh) {
+          // console.log(child)
+
           // 缓存子网格的原始透明属性和透明度
           if (!child.userData.originalMaterial) {
             child.userData.originalMaterial = {

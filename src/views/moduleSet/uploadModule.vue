@@ -3,82 +3,103 @@ import { loadModelScen, deleteModel, pointMoodel, scaleMoodel, wireframeMoodel, 
 import { uploadCounterStore, loadingCounterStore } from '@/stores'
 
 const loadval = loadingCounterStore()
-
 const filename = uploadCounterStore()
-
-// 处理文件上传
-// const handleFileChange = event => {
-
-//   const file = event.target.files
-//   console.log(file)
-
-//   // 检查并删除空的 name 项
-//   filename.uploadvalue = filename.uploadvalue.filter(item => item.name !== '')
-
-//   Array.from(file)
-//     .filter(file => file.name.endsWith('.gltf') || file.name.endsWith('.glb'))
-//     .map(file => {
-
-//       const modelData = {
-//         name: file.name,
-//         x: 0,
-//         y: 0,
-//         z: 0,
-//         s: 1,
-//         showhidden: true // 显示隐藏模型
-//       }
-//       filename.uploadvalue.push(modelData)
-//     })
-
-//   loadval.loadingvalue = 0
-//   loadval.loadingshow = true
-//   loadModelScen(file)  // 使用loadModel加载模型
-// }
 
 // 处理文件选择
 const handleFileChange = (event) => {
   event.preventDefault()
-  // const files = event.target.files
-  // handleFiles(files)
-}
-
-// // 处理拖放文件
-const handleDrop = (event) => {
-  event.preventDefault()
-  const files = event.dataTransfer.files
-  console.log(files)
-
+  // 以下两行用于点击式文件上传
+  const files = event.target.files
   handleFiles(files)
 }
 
-// 处理文件上传的通用逻辑
-const handleFiles = (files) => {
+// 处理拖放文件
+const handleDrop = (event) => {
+  event.preventDefault()
+  const items = event.dataTransfer.items
 
-  // 这里可以将文件数据处理并添加到相关的数组
-  Array.from(files).forEach((file) => {
-    if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
-      const modelData = {
-        name: file.name,
-        x: 0,
-        y: 0,
-        z: 0,
-        s: 1,
-        showhidden: true // 显示隐藏模型
-      }
-      filename.uploadvalue.push(modelData)
+  const filePromises = []
+  Array.from(items).forEach((item) => {
+    const entry = item.webkitGetAsEntry()
+    if (entry) {
+      filePromises.push(readEntry(entry))
     }
   })
-  // 其他加载逻辑
-  loadval.loadingvalue = 0
-  loadval.loadingshow = true
-  loadModelScen(files)
+
+  Promise.all(filePromises).then((files) => {
+    const flatFiles = files.flat() // 将多层嵌套文件拍平成一维数组
+    handleFiles(flatFiles)
+  })
 }
 
+// 递归读取文件夹内容
+const readEntry = (entry) => {
+  return new Promise((resolve) => {
+    if (entry.isFile) {
+      entry.file((file) => resolve([file]))
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader()
+      const readAllEntries = () => {
+        reader.readEntries((entries) => {
+          if (entries.length === 0) {
+            resolve([]) // 文件夹读取完毕
+          } else {
+            const subPromises = Array.from(entries).map(readEntry)
+            Promise.all(subPromises).then((nestedFiles) =>
+              resolve(nestedFiles.flat())
+            )
+          }
+        })
+      }
+      readAllEntries()
+    } else {
+      resolve([]) // 非文件和文件夹
+    }
+  })
+}
 
+// 处理文件上传的通用逻辑
+const uploadedFileNames = new Set()
 
+const handleFiles = (files) => {
+  let hasDuplicate = false // 标记是否存在重复文件
 
+  Array.from(files).forEach((file) => {
+    if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
+      // 检查文件名是否重复
+      if (uploadedFileNames.has(file.name)) {
+        hasDuplicate = true // 标记重复
+        ElMessage({
+          message: `模型 "${file.name}" 重复！`,
+          type: 'warning'
+        })
+      } else {
+        // 文件名不重复，正常处理文件
+        uploadedFileNames.add(file.name) // 记录文件名
 
+        const modelData = {
+          name: file.name,
+          x: 0,
+          y: 0,
+          z: 0,
+          s: 1,
+          showhidden: true // 默认显示模型
+        }
 
+        // 保存模型数据
+        filename.uploadvalue.push(modelData)
+      }
+    }
+  })
+
+  // 如果存在重复文件，终止加载逻辑
+  if (hasDuplicate) return
+
+  // 保留原有加载逻辑
+  loadval.loadingvalue = 0
+  loadval.loadingshow = true
+  loadModelScen(files) // 加载场景
+}
 
 // 删除模型
 const deletemodel = name => {
@@ -86,15 +107,6 @@ const deletemodel = name => {
     filename.uploadvalue = filename.uploadvalue.filter(item => item.name !== name)
     deleteModel(name)
   }
-  // if (filename.uploadvalue.length === 0) {
-  //   filename.uploadvalue.push({
-  //     name: '',
-  //     x: 0,
-  //     y: 0,
-  //     z: 0,
-  //     s: 1
-  //   })
-  // }
 }
 
 // 模型坐标
@@ -146,7 +158,8 @@ const wireframemoodel = name => {
     <div @dragover.prevent @drop="handleDrop">
       <label class="custom-file-upload">
         拖拽至此上传模型
-        <input type="file" id="fileInput" webkitdirectory mozdirectory odirectory multiple @change="handleFileChange" />
+        <input type="file" id="fileInput" webkitdirectory multiple @change="handleFileChange" />
+        <!-- mozdirectory odirectory  -->
       </label>
       <!-- <h6>Tips: gltf 需与.bin 纹理放入同一文件夹内</h6> -->
     </div>
@@ -212,6 +225,7 @@ const wireframemoodel = name => {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: vh(17px);
 
     input[type="file"] {
       display: none;

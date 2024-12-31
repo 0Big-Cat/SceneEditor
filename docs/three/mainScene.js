@@ -162,111 +162,32 @@ let model // 当前传入的模型
 let modelnumber = -1 // 用于记录上传的第几个模型
 let models = [] // 储存模型
 let actions = [] // 动画的控制列表
-const mixers = []
-// 上传模型
-export const loadModelScen = files => {
+const mixers = [] // 动画混合器列表
+const fileMap = {} // 用于存储文件的 Map
+
+export const loadModelScen = (files) => {
 
   const loadval = loadingCounterStore()
   const animateal = animateCounterStore()
 
-  const fileMap = {}
-
-  //  将文件存入 Map，便于后续匹配
+  // 将文件存入 fileMap
   for (let file of files) {
-    fileMap[file.name] = file
+    fileMap[file.name] = file  // 将文件与其路径关联
   }
 
-  // 查找 .gltf 文件
-  const gltfFile = Object.values(fileMap).find(file => file.name.endsWith('.gltf'))
+  // 查找 .gltf .glb 文件
+  const gltfFile = Array.from(files).find(file => file.name.endsWith('.gltf'))
+  const glbFile = Array.from(files).find(file => file.name.endsWith('.glb'))
 
-  // OBJ模型
-  if (!gltfFile) {
-    gltfLoader.load(URL.createObjectURL(files[0]), gltf => {
-      model = gltf.scene
-      models.push(model)
-      scene.add(model)
-      // console.log(dumpObject(model).join('\n'))
-      model.name = files[0].name
-      loadval.loadingshow = false
-
-      // 设置动画
-      const mixer = new THREE.AnimationMixer(model)
-      mixers.push(mixer)
-
-      // 获取动画动作
-      actions.push(gltf.animations.map((clip) => mixer.clipAction(clip)))
-
-      // console.log(actions)
-
-      // 为 gltf.animations 的每个动画对象添加一个响应式变量
-      const animationsWithControl = gltf.animations.map((animation) => ({
-        ...animation, // 保留原始动画对象的属性
-        startandstop: true,
-        pauserecovery: false,
-        positivenegative: true,
-        progress: 0, // 动画进度
-        animateloop: 0 // 动画运行次数
-      }))
-
-      // 播放所有动画
-      if (actions && actions.length > 0) {
-        actions.forEach(item => {
-          item.forEach(action => {
-            action.loop = THREE.LoopOnce // 播放一次后停止
-            // action.clampWhenFinished = true // 动画结束时，停留在最后一帧
-            action.play()
-          })
-        })
-      }
-
-      modelnumber += 1 // 上传一次，计数就+1
-
-      animateal.animatevalue.push({
-        animateData: animationsWithControl,
-        modelName: model.name,
-        serialnumber: modelnumber
-      })
-
-
-    }, (xhr) => {
-      const percent = parseInt((xhr.loaded / xhr.total) * 100)
-      loadval.loadingvalue = percent
-    },
-      (error) => console.error('模型加载出错', error)
-    )
-    return
-  }
-
-  // GLTF模型
-  const fileReader = new FileReader()
-  fileReader.onload = () => {
-    const arrayBuffer = fileReader.result // 获取读取的 ArrayBuffer
-    const gltfBlob = new Blob([arrayBuffer], { type: 'model/gltf+json' })
-    const gltfUrl = URL.createObjectURL(gltfBlob)
-    gltfLoader.setPath('')// 设置为空
-    gltfLoader.setResourcePath('')// 清空资源路径
-    gltfLoader.manager.setURLModifier((url) => {
-      // 替换资源路径为 Blob URL
-      const fileName = url.split('/').pop()
-      if (fileMap[fileName]) {
-        const fileBlob = new Blob([fileMap[fileName]])
-        return URL.createObjectURL(fileBlob)
-      }
-      return url
-    })
-    // 加载模型
+  // 如果是 .glb 文件，直接加载
+  if (glbFile) {
     gltfLoader.load(
-      gltfUrl,
+      URL.createObjectURL(glbFile),
       (gltf) => {
-        // 在场景中添加模型
         model = gltf.scene
         models.push(model)
         scene.add(model)
-        Array.from(files)
-          .filter(file => file.name.endsWith('.gltf') || file.name.endsWith('.glb'))
-          .map(file => {
-            model.name = file.name
-          })
+        model.name = glbFile.name
         loadval.loadingshow = false
 
         // 设置动画
@@ -276,13 +197,13 @@ export const loadModelScen = files => {
         // 获取动画动作
         actions.push(gltf.animations.map((clip) => mixer.clipAction(clip)))
 
-        // 为 gltf.animations 的每个动画对象添加一个响应式变量
+        // 为每个动画对象添加响应式变量
         const animationsWithControl = gltf.animations.map((animation) => ({
-          ...animation, // 保留原始动画对象的属性
+          ...animation,
           startandstop: true,
           pauserecovery: false,
           positivenegative: true,
-          progress: 0, // 动画进度
+          progress: 0,  // 动画进度
           animateloop: 0 // 动画运行次数
         }))
 
@@ -292,13 +213,11 @@ export const loadModelScen = files => {
             item.forEach(action => {
               action.loop = THREE.LoopOnce // 播放一次后停止
               action.play()
-              // actions[0].play() //播放单个
             })
           })
         }
 
-        modelnumber += 1 // 上传一次，计数就+1
-
+        modelnumber += 1 // 上传一次，计数 +1
         animateal.animatevalue.push({
           animateData: animationsWithControl,
           modelName: model.name,
@@ -309,10 +228,93 @@ export const loadModelScen = files => {
         const percent = parseInt((xhr.loaded / xhr.total) * 100)
         loadval.loadingvalue = percent
       },
-      (error) => console.error('模型加载出错', error)
+      (error) => console.error('GLB 模型加载出错', error)
     )
+    return
   }
-  fileReader.readAsArrayBuffer(gltfFile)
+
+  // 如果是 .gltf 文件
+  if (gltfFile) {
+    const fileReader = new FileReader()
+
+    fileReader.onload = () => {
+      const arrayBuffer = fileReader.result // 获取读取的 ArrayBuffer
+      console.log(arrayBuffer)
+      const gltfBlob = new Blob([arrayBuffer], { type: 'model/gltf+json' })
+      console.log(gltfBlob)
+      const gltfUrl = URL.createObjectURL(gltfBlob)
+      console.log(gltfUrl)
+      gltfLoader.setPath('') // 设置基础路径为空
+      gltfLoader.setResourcePath('') // 清空资源路径
+
+      gltfLoader.manager.setURLModifier((url) => {
+        // 替换资源路径为 Blob URL
+        const fileName = url.split('/').pop()
+
+        if (fileMap[fileName]) {
+          const fileBlob = new Blob([fileMap[fileName]])
+          return URL.createObjectURL(fileBlob)
+        }
+        return url
+      })
+
+      // 加载 GLTF 模型
+      gltfLoader.load(
+        gltfUrl,
+        (gltf) => {
+          model = gltf.scene
+          models.push(model)
+          scene.add(model)
+          model.name = gltfFile.name
+          loadval.loadingshow = false
+
+          // 设置动画
+          const mixer = new THREE.AnimationMixer(model)
+          mixers.push(mixer)
+
+          // 获取动画动作
+          actions.push(gltf.animations.map((clip) => mixer.clipAction(clip)))
+
+          // 为每个动画对象添加响应式变量
+          const animationsWithControl = gltf.animations.map((animation) => ({
+            ...animation,
+            startandstop: true,
+            pauserecovery: false,
+            positivenegative: true,
+            progress: 0, // 动画进度
+            animateloop: 0 // 动画运行次数
+          }))
+
+          // 播放所有动画
+          if (actions && actions.length > 0) {
+            actions.forEach(item => {
+              item.forEach(action => {
+                action.loop = THREE.LoopOnce
+                action.play()
+              })
+            })
+          }
+
+          modelnumber += 1 // 上传一次，计数 +1
+          animateal.animatevalue.push({
+            animateData: animationsWithControl,
+            modelName: model.name,
+            serialnumber: modelnumber
+          })
+
+        },
+        (xhr) => {
+          const percent = parseInt((xhr.loaded / xhr.total) * 100)
+          loadval.loadingvalue = percent
+        },
+        (error) => console.error('GLTF 模型加载出错', error)
+      )
+    }
+    fileReader.readAsArrayBuffer(gltfFile)
+    return
+  }
+
+  console.error('未找到 .gltf 或 .glb 文件')
 }
 
 // 删除模型
@@ -1899,8 +1901,10 @@ export const clickListener = value => {
     childname.rightmodelpanel = true
     return
   }
-  childname.rightmodelpanel = false
   window.removeEventListener('click', handleClick)
+  if (!childname.panelValue) {
+    childname.rightmodelpanel = false
+  }
   removeOutline(childname.currentOutline)
 }
 
@@ -1912,7 +1916,15 @@ export const allModelChildName = (value) => {
     models.forEach((model) => {
       const nameArray = []
       model.traverse((child) => {
+
+        if (child.isObject3D) {
+          // 如果是 Object3D 类型，存储名称
+          console.log(child.name)
+        }
+
         if (child.isMesh) {
+          // console.log(child)
+
           // 缓存子网格的原始透明属性和透明度
           if (!child.userData.originalMaterial) {
             child.userData.originalMaterial = {

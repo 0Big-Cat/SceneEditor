@@ -44,12 +44,12 @@ const copyText = () => {
 <template>
   <transition name="right">
     <div v-if="data.rightmodelpanel" id="rightmainpanel">
-      <div>子网格名称:</div>
+      <div>Mesh名称:</div>
       <div @dblclick="copyText">
         <span>{{ data.modelchildName }}</span>
       </div>
       <div>
-        <el-checkbox v-model="data.checkedValue" label="获取所有子网格" size="large"
+        <el-checkbox v-model="data.checkedValue" label="获取所有Mesh" size="large"
           @change="allModelChildName(data.checkedValue)" />
       </div>
       <div>
