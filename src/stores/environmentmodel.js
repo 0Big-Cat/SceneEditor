@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 // 天空球模块
 export const skyCounterStore = defineStore('sky', () => {
   // 是否显示/隐藏
-  const skyvalue = ref(false)
+  const skyvalue = ref(true)
 
   // 用于控制右侧操作面板的显示
   const rightpanel = ref(false)

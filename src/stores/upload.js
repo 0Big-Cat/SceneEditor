@@ -31,6 +31,10 @@ export const uploadCounterStore = defineStore('upload', () => {
 
   // 存储模型所有子网格名称
   const allChildName = ref([])
+  // 所有Object3D对象
+  const allObject3DName = ref([])
+  // 所有Mesh对象
+  const allMeshName = ref([])
 
   // 是否获取所有子网格
   const checkedValue = ref(false)
@@ -42,6 +46,8 @@ export const uploadCounterStore = defineStore('upload', () => {
     currentOutline,
     allChildName,
     checkedValue,
-    rightmodelpanel
+    rightmodelpanel,
+    allObject3DName,
+    allMeshName
   }
 })

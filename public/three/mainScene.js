@@ -12,6 +12,8 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import Stats from 'three/addons/libs/stats.module.js'
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js'
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js'
+// 引入拖拽插件
+// import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 // 引入后期库
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
 // 引入相机位置+旋转中心位置模块变量
@@ -1908,32 +1910,35 @@ export const clickListener = value => {
   removeOutline(childname.currentOutline)
 }
 
+
 // 是否展示所有子网格名称
 export const allModelChildName = (value) => {
   const dataName = uploadCounterStore() // 获取状态管理实例
 
   if (value) {
     models.forEach((model) => {
-      const nameArray = []
-      const Object3DArray = [] // 用于存储Object3D对象
-      const MeshArray = [] // 用于存储Mesh对象
+      // const nameArray = []
+
+      const modelData = [] // 用于存储当前模型的所有 Object3D 信息
+
       model.traverse((child) => {
-
         if (child.isObject3D && !child.isMesh) {
-          // 如果是 Object3D 类型，存储名称
-          console.log(child.name)
-          Object3DArray.push(child.name)
-
+          const meshes = []
           child.children.forEach((subChild) => {
             if (subChild.isMesh) {
-              MeshArray.push(subChild.name)
+              meshes.push(subChild.name)
             }
+          })
+
+          // 保存 Object3D 的 name 和对应 Mesh 的 name 列表
+          modelData.push({
+            objectName: child.name,
+            meshNames: meshes,
+            meshshow: false
           })
         }
 
         if (child.isMesh) {
-          // console.log(child)
-
           // 缓存子网格的原始透明属性和透明度
           if (!child.userData.originalMaterial) {
             child.userData.originalMaterial = {
@@ -1942,11 +1947,13 @@ export const allModelChildName = (value) => {
             }
           }
           // 存储子网格名称
-          nameArray.push(child.name)
+          // nameArray.push(child.name)
         }
       })
       // 将当前模型的所有子网格名称存储
-      dataName.allChildName.push([...nameArray])
+      // dataName.allChildName.push([...nameArray])
+      dataName.allObject3DName.push([...modelData])
+      console.log(dataName.allObject3DName[0])
     })
     clickListener(false) // 移除监听
     return
@@ -1968,6 +1975,16 @@ export const allModelChildName = (value) => {
   dataName.allChildName = []
   clickListener(true) // 开启监听
 }
+
+
+
+
+
+
+
+
+
+
 
 // 根据点击的子网格名称给予对应网格高亮效果
 let lastOutlinedMesh = null
@@ -2002,6 +2019,55 @@ export const childMesh = (name) => {
     })
   })
 }
+
+// 根据点击的Object3D对象来给该对象中的所有Mesh对象赋予网格高亮效果
+export const object3dMesh = (obj3d_name) => {
+  console.log(obj3d_name)
+
+  models.forEach((item) => {
+    item.traverse((child) => {
+      if (child.isObject3D) {
+        if (child.name === obj3d_name) {
+          // 如果匹配到了指定名称的 Object3D 对象
+          child.traverse((subChild) => {
+            if (subChild.isMesh) {
+              // 设置 Mesh 子对象为不透明并添加发光效果
+              subChild.material.transparent = false
+              subChild.material.opacity = 1.0
+              addOutline(subChild)
+            }
+          })
+
+          // 如果存在上一个被描边的 Mesh，移除其效果
+          if (lastOutlinedMesh && lastOutlinedMesh !== child) {
+            lastOutlinedMesh.traverse((prevSubChild) => {
+              if (prevSubChild.isMesh) {
+                const original = prevSubChild.userData.originalMaterial
+                if (original) {
+                  prevSubChild.material.transparent = original.transparent
+                  prevSubChild.material.opacity = original.opacity
+                }
+                removeOutline(prevSubChild)
+              }
+            })
+          }
+
+          // 更新最后一个被描边的 Object3D
+          lastOutlinedMesh = child
+        } else {
+          // 对不匹配的 Object3D，遍历其子对象并设置为透明
+          child.traverse((subChild) => {
+            if (subChild.isMesh) {
+              subChild.material.transparent = true
+              subChild.material.opacity = 0.2 // 透明度可根据需求调整
+            }
+          })
+        }
+      }
+    })
+  })
+}
+
 
 
 
