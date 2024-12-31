@@ -1915,11 +1915,20 @@ export const allModelChildName = (value) => {
   if (value) {
     models.forEach((model) => {
       const nameArray = []
+      const Object3DArray = [] // 用于存储Object3D对象
+      const MeshArray = [] // 用于存储Mesh对象
       model.traverse((child) => {
 
-        if (child.isObject3D) {
+        if (child.isObject3D && !child.isMesh) {
           // 如果是 Object3D 类型，存储名称
           console.log(child.name)
+          Object3DArray.push(child.name)
+
+          child.children.forEach((subChild) => {
+            if (subChild.isMesh) {
+              MeshArray.push(subChild.name)
+            }
+          })
         }
 
         if (child.isMesh) {
