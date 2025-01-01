@@ -1,41 +1,51 @@
 <script setup>
 // 右侧面板主体
 import { ref } from 'vue'
-import { allModelChildName, childMesh, object3dMesh } from '../../../public/three/mainScene'
+import { childMesh, object3dMesh } from '../../../public/three/mainScene'
 import { uploadCounterStore } from '@/stores'
 
 // 面板显示隐藏变量
 let data = uploadCounterStore()
 
-// 展开所有子网格
-const expandedIndex = ref(null)
-// 点击具体的子网格
-const activeIndex = ref(null)
+// 当前选中的父级和子级索引
+const activeParentIndex = ref(null) // 父级的索引
+const activeChildIndices = ref({}) // 用于存储每个父级的子级索引
+
+const setActiveParent = (index) => {
+  activeParentIndex.value = index // 设置父级的活动索引
+  activeChildIndices.value[index] = null // 重置该父级的子级索引
+}
+
+const setActiveChild = (parentIndex, childIndex) => {
+  activeChildIndices.value[parentIndex] = childIndex // 设置父级对应的子级索引
+}
 
 // 是否展开Mesh
-// const meshshow = ref(false)
-
-// 展开显示所有子网格名称
-const toggleChild = (index) => {
-  expandedIndex.value = expandedIndex.value === index ? null : index
+const meshshow = ref(true)
+// 展开Mesh函数
+const toggleChild = () => {
+  meshshow.value = !meshshow.value
 }
+
 // object3d对象
-const obj3dActive = (item) => {
+const obj3dActive = (itemchild, item, parentindex) => {
+  data.allObject3DName.forEach(group => {
+    group.forEach(child => child.meshshow = false)
+  })
   object3dMesh(item)
   data.modelchildName = item
+  setActiveParent(parentindex)
+  itemchild.meshshow = true // 控制+ - 号
 }
 // 展开后被点击的子网格名称
-const setActive = (index, item) => {
-  activeIndex.value = index // 这个是用于被点击项改变背景色的
+const setActive = (item, parentindex, childindex) => {
+  // activeIndex.value = index // 这个是用于被点击项改变背景色的
+  console.log(item)
+
   childMesh(item)
   data.modelchildName = item
+  setActiveChild(parentindex, childindex)
 }
-
-// 控制Mesh是否显示
-const meshShowFun = (itemchild) => {
-  itemchild.meshshow = !itemchild.meshshow
-}
-
 // 复制文本的方法
 const copyText = () => {
   // 格式化相机坐标为字符串
@@ -66,35 +76,41 @@ const copyText = () => {
       </div>
 
       <div>
-        <el-checkbox v-model="data.checkedValue" label="获取所有Mesh" size="large"
-          @change="allModelChildName(data.checkedValue)" />
+        <el-checkbox v-model="demo" label="控制器" size="large" />
+        <el-radio-group v-model="demo">
+          <el-radio value="1" size="small">移动</el-radio>
+          <el-radio value="2" size="small">旋转</el-radio>
+          <el-radio value="3" size="small">缩放</el-radio>
+        </el-radio-group>
       </div>
 
       <div>
         <ul v-for="(item, index) in data.allObject3DName" :key="index">
-          <!-- {{ item }} -->
 
-          <li @click="toggleChild(index)">
-            {{ item[0].objectName }}--{{ expandedIndex === index ? '收起' : '展开' }}
+          <li @click="toggleChild()">
+            <span class="iconfont icon-xiala" :class="meshshow ? 'pulldown' : 'packup'"></span>
+            <span>{{ item[0].objectName }}</span>
           </li>
 
-          <li v-if="expandedIndex === index" class="child-container">
+          <li v-show="meshshow" class="child-container">
 
             <!-- 这里循环的是 模型里面的 isObject3D对象 -->
-            <div v-for="itemchild in item" :key="itemchild">
+            <div v-for="(itemchild, parentindex) in item" :key="itemchild">
               <!-- :class="{ active: activeIndex === index }" -->
               <div v-if="itemchild.meshNames.length > 0">
-                <div :class="{ active: activeIndex === index }">
-                  <span @click="meshShowFun(itemchild)" class="unfold"> {{ itemchild.meshshow ? '-' : '+' }}</span>
-                  <span @click="obj3dActive(itemchild.objectName)"> {{ itemchild.objectName }}</span>
+                <div @click="obj3dActive(itemchild, itemchild.objectName, parentindex)"
+                  :class="{ active: activeParentIndex === parentindex }">
+                  <span class="unfold"> {{ itemchild.meshshow ? '-' : '+' }}</span>
+                  <span> {{ itemchild.objectName }}</span>
                 </div>
               </div>
 
               <!-- 这里循环的是 isObject3D 对象里面的 Mesh对象 -->
-              <div v-show="itemchild.meshshow" v-for="(item, index) in itemchild.meshNames" :key="item">
-                <div>
+              <div v-show="itemchild.meshshow" v-for="(item, childindex) in itemchild.meshNames" :key="item">
+                <div @click="setActive(item, parentindex, childindex)"
+                  :class="{ active: activeChildIndices[parentindex] === childindex }">
                   <i></i>
-                  <span @click="setActive(index, item)"> {{ item }}</span>
+                  <span> {{ item }}</span>
                 </div>
               </div>
 
@@ -147,6 +163,11 @@ const copyText = () => {
 
   }
 
+  &>div:nth-of-type(3) {
+    display: flex;
+    align-items: center;
+  }
+
   &>div:nth-of-type(4) {
     width: vw(230px);
     height: vh(860px);
@@ -161,6 +182,15 @@ const copyText = () => {
 
       li {
         font-size: rem(14px);
+
+        >span:nth-of-type(1) {
+          transition: all 0.3s ease;
+        }
+      }
+
+      >li:nth-of-type(1) {
+        display: flex;
+        align-items: center;
       }
 
       .child-container {
@@ -177,38 +207,42 @@ const copyText = () => {
             width: 90%;
             margin: 5px auto;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            // text-overflow: ellipsis;
+            // white-space: nowrap;
             cursor: pointer;
             font-size: 14px;
 
-            &:hover {
-              background: linear-gradient(to right, #0ab0b7, #333);
 
-              i {
-                background-color: #fff;
-              }
 
-              span {
-                color: #fff;
-              }
-            }
 
-            &.active {
-              background: linear-gradient(to right, #0ab0b7, #333);
-
-              i {
-                background-color: #fff;
-              }
-
-              span {
-                color: #fff;
-              }
-            }
 
             >div {
-              // display: flex;
-              // align-items: center;
+              display: flex;
+              align-items: center;
+
+              &:hover {
+                background: linear-gradient(to right, #0ab0b7, #0d0d0d);
+
+                i {
+                  background-color: #fff;
+                }
+
+                span {
+                  color: #fff;
+                }
+              }
+
+              &.active {
+                background: linear-gradient(to right, #0ab0b7, #0d0d0d);
+
+                i {
+                  background-color: #fff;
+                }
+
+                span {
+                  color: #fff;
+                }
+              }
             }
 
           }
@@ -238,6 +272,16 @@ const copyText = () => {
     }
   }
 
+}
+
+// 下拉
+.pulldown {
+  transform: rotate(0deg) !important;
+}
+
+// 收起
+.packup {
+  transform: rotate(-90deg) !important;
 }
 
 // 组件动画

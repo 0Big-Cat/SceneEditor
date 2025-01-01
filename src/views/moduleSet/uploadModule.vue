@@ -132,6 +132,9 @@ const scalemodel = (name, point) => {
 // 还原模型相关修改
 const restoremoodel = name => {
   const model = filename.uploadvalue.find(item => item.name === name)
+  console.log(model)
+
+
   if (model) {
     model.x = 0
     model.y = 0
@@ -139,6 +142,7 @@ const restoremoodel = name => {
     model.s = 1
     pointMoodel(name, { x: model.x, y: model.y, z: model.z }) // 更新模型位置
     scaleMoodel(name, { s: model.s })
+
   }
 }
 

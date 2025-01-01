@@ -13,7 +13,7 @@ import Stats from 'three/addons/libs/stats.module.js'
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js'
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js'
 // 引入拖拽插件
-// import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 // 引入后期库
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
 // 引入相机位置+旋转中心位置模块变量
@@ -21,21 +21,6 @@ import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterSt
 
 // 将关键变量提出
 let scene, camera, render, controls, gltfLoader, axesHelper
-
-// 打印场景图函数
-// function dumpObject(obj, lines = [], isLast = true, prefix = '') {
-//   const localPrefix = isLast ? '└─' : '├─'
-//   lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`)
-//   const newPrefix = prefix + (isLast ? '  ' : '│ ')
-//   const lastNdx = obj.children.length - 1
-//   obj.children.forEach((child, ndx) => {
-//     const isLast = ndx === lastNdx
-//     dumpObject(child, lines, isLast, newPrefix)
-//   })
-//   return lines
-// }
-
-// ====================
 // 主场景
 export const initThreeScene = () => {
 
@@ -77,6 +62,8 @@ export const initThreeScene = () => {
   // 设置阻尼系数
   controls.dampingFactor = 0.05
 
+  gridHelper = new THREE.GridHelper(100, 25, 0x888888, 0x555555)
+  scene.add(gridHelper)
 
   const textureloader = new THREE.TextureLoader()
   let texture = textureloader.load('./textures/imgs/skyback.jpg', () => {
@@ -132,7 +119,6 @@ export const initThreeScene = () => {
 
     // 动画进度
     logProgress()
-
     render.render(scene, camera)
     controls.update()
   }
@@ -142,8 +128,7 @@ export const initThreeScene = () => {
   axesHelper = new THREE.AxesHelper(10)
   scene.add(axesHelper)
 
-  gridHelper = new THREE.GridHelper(100, 25, 0x888888, 0x555555)
-  scene.add(gridHelper)
+
 
   // 创建渲染器
   // const composer = new EffectComposer(render)
@@ -191,6 +176,7 @@ export const loadModelScen = (files) => {
         scene.add(model)
         model.name = glbFile.name
         loadval.loadingshow = false
+
 
         // 设置动画
         const mixer = new THREE.AnimationMixer(model)
@@ -241,11 +227,11 @@ export const loadModelScen = (files) => {
 
     fileReader.onload = () => {
       const arrayBuffer = fileReader.result // 获取读取的 ArrayBuffer
-      console.log(arrayBuffer)
+      // console.log(arrayBuffer)
       const gltfBlob = new Blob([arrayBuffer], { type: 'model/gltf+json' })
-      console.log(gltfBlob)
+      // console.log(gltfBlob)
       const gltfUrl = URL.createObjectURL(gltfBlob)
-      console.log(gltfUrl)
+      // console.log(gltfUrl)
       gltfLoader.setPath('') // 设置基础路径为空
       gltfLoader.setResourcePath('') // 清空资源路径
 
@@ -347,8 +333,8 @@ export const deleteModel = (name) => {
         }
       })
     }
-    data.allChildName.splice(index, 1)
-    if (data.allChildName.length === 0) {
+    data.allObject3DName.splice(index, 1)
+    if (data.allObject3DName.length === 0) {
       data.checkedValue = false
     }
   }
@@ -1845,8 +1831,9 @@ export const animatecishu = (uuid, value, number) => {
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
-// 定义监听器函数
+// 鼠标点击交互函数
 export const handleClick = event => {
+
   let childname = uploadCounterStore()
   // 计算鼠标位置归一化设备坐标 (-1 to +1)
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
@@ -1857,7 +1844,7 @@ export const handleClick = event => {
   const intersects = raycaster.intersectObjects(scene.children, true).filter(
     intersect =>
       !(intersect.object instanceof THREE.LineSegments) && // 排除描边
-      !(intersect.object instanceof THREE.GridHelper)     // 排除网格辅助线
+      !(intersect.object instanceof THREE.GridHelper) // 排除网格辅助线
   )
   if (intersects.length > 0) {
     // 获取第一个被点击的对象
@@ -1872,14 +1859,15 @@ export const handleClick = event => {
       }
       // 立即为该物体添加描边
       addOutline(clickedObject)
+
       // 更新当前描边的物体
       childname.currentOutline = clickedObject
     }
   }
 }
 
-// 为物体添加描边
-function addOutline(object) {
+// Mesh添加描边
+const addOutline = (object) => {
   // 先移除已有描边（防止重复添加）
   removeOutline(object)
   const edges = new THREE.EdgesGeometry(object.geometry)
@@ -1887,7 +1875,7 @@ function addOutline(object) {
   object.add(line) // 将描边添加到物体中
 }
 
-// 为物体移除描边
+// 移除Mesh描边
 export const removeOutline = (object) => {
   const outline = object.children.find(child => child instanceof THREE.LineSegments)
   if (outline) {
@@ -1895,27 +1883,34 @@ export const removeOutline = (object) => {
   }
 }
 
-// 添加/移除子网格监听事件
+// 添加、移除点击监听事件
 export const clickListener = value => {
   let childname = uploadCounterStore()
   if (value) {
     window.addEventListener('click', handleClick)
-    childname.rightmodelpanel = true
+    childname.rightmodelpanel = true // 显示右侧面板
+    allModelChildName(true) // 获取所有Mesh节点及其父节点
     return
   }
   window.removeEventListener('click', handleClick)
   if (!childname.panelValue) {
     childname.rightmodelpanel = false
   }
-  removeOutline(childname.currentOutline)
+  removeOutline(childname.currentOutline) // 移除描边效果
+  childname.allObject3DName = [] // 清空Mesh名称展示数组
+  allModelChildName(false) // 获取所有Mesh节点及其父节点
 }
 
-
-// 是否展示所有子网格名称
+let transformcontrols // 拖拽控制器
+// 获取所有Mesh名称
 export const allModelChildName = (value) => {
   const dataName = uploadCounterStore() // 获取状态管理实例
 
   if (value) {
+    transformcontrols = new TransformControls(camera, render.domElement)
+    // transformcontrols.setMode('translate') // 设置为平移模式
+    scene.add(transformcontrols.getHelper())
+
     models.forEach((model) => {
       // const nameArray = []
 
@@ -1955,12 +1950,12 @@ export const allModelChildName = (value) => {
       dataName.allObject3DName.push([...modelData])
       console.log(dataName.allObject3DName[0])
     })
-    clickListener(false) // 移除监听
+    // clickListener(false) // 移除监听
     return
   }
 
   // 恢复所有子网格材质属性
-  dataName.allChildName.forEach((nameArray, index) => {
+  dataName.allObject3DName.forEach((index) => {
     models[index].traverse((child) => {
       if (child.isMesh) {
         const original = child.userData.originalMaterial
@@ -1972,24 +1967,18 @@ export const allModelChildName = (value) => {
     })
   })
   removeOutline(lastOutlinedMesh)
-  dataName.allChildName = []
-  clickListener(true) // 开启监听
+  dataName.allObject3DName = []
+  // clickListener(true) // 开启监听
+  scene.remove(transformcontrols.getHelper())
+  transformcontrols.attach(null) // 清空拖拽对象
 }
 
-
-
-
-
-
-
-
-
-
-
-// 根据点击的子网格名称给予对应网格高亮效果
+// 给予在列表中被点击的Mesh描边效果
 let lastOutlinedMesh = null
 export const childMesh = (name) => {
   models.forEach((item) => {
+    console.log(item)
+
     item.traverse((child) => {
       if (child.isMesh) {
         if (child.name === name) {
@@ -2004,64 +1993,88 @@ export const childMesh = (name) => {
           }
 
           // 设置当前匹配的子网格为不透明并添加描边效果
-          child.material.transparent = false
-          child.material.opacity = 1.0
+          // child.material.transparent = false
+          // child.material.opacity = 1.0
           addOutline(child)
+          // 传入需要拖拽的对象
+          transformcontrols.attach(child)
+
+          // 在拖拽开始时禁用 OrbitControls
+          transformcontrols.addEventListener('dragging-changed', (event) => {
+            if (event.value) {
+              console.log(item)
+
+              controls.enabled = false  // 禁用轨道控制器
+            } else {
+              controls.enabled = true  // 拖拽结束后恢复
+            }
+          })
 
           // 更新最后一个被描边的 Mesh
           lastOutlinedMesh = child
         } else {
           // 设置不匹配的子网格为透明，但不改变其透明材质本身
-          child.material.transparent = true
-          child.material.opacity = 0.2 // 透明度可根据需求调整
+          // child.material.transparent = true
+          // child.material.opacity = 0.2 // 透明度可根据需求调整
         }
       }
     })
   })
 }
 
-// 根据点击的Object3D对象来给该对象中的所有Mesh对象赋予网格高亮效果
+// 给予在列表中被点击的Object3D对象以及对象中的所有Mesh子节点赋予描边效果
 export const object3dMesh = (obj3d_name) => {
-  console.log(obj3d_name)
-
   models.forEach((item) => {
     item.traverse((child) => {
       if (child.isObject3D) {
         if (child.name === obj3d_name) {
           // 如果匹配到了指定名称的 Object3D 对象
+
+          // 传入需要拖拽的对象
+          transformcontrols.attach(child)
+
           child.traverse((subChild) => {
             if (subChild.isMesh) {
               // 设置 Mesh 子对象为不透明并添加发光效果
-              subChild.material.transparent = false
-              subChild.material.opacity = 1.0
-              addOutline(subChild)
+              // subChild.material.transparent = false
+              // subChild.material.opacity = 1.0
+              // addOutline(subChild) // 添加描边效果
+
+              // 在拖拽开始时禁用 OrbitControls
+              transformcontrols.addEventListener('dragging-changed', (event) => {
+                if (event.value === true) {
+                  controls.enabled = false  // 禁用轨道控制器
+                } else {
+                  controls.enabled = true  // 拖拽结束后恢复
+                }
+              })
             }
           })
 
-          // 如果存在上一个被描边的 Mesh，移除其效果
-          if (lastOutlinedMesh && lastOutlinedMesh !== child) {
-            lastOutlinedMesh.traverse((prevSubChild) => {
-              if (prevSubChild.isMesh) {
-                const original = prevSubChild.userData.originalMaterial
-                if (original) {
-                  prevSubChild.material.transparent = original.transparent
-                  prevSubChild.material.opacity = original.opacity
-                }
-                removeOutline(prevSubChild)
-              }
-            })
-          }
+          // // 如果存在上一个被描边的 Mesh，移除其效果
+          // if (lastOutlinedMesh && lastOutlinedMesh !== child) {
+          //   lastOutlinedMesh.traverse((prevSubChild) => {
+          //     if (prevSubChild.isMesh) {
+          //       const original = prevSubChild.userData.originalMaterial
+          //       if (original) {
+          //         prevSubChild.material.transparent = original.transparent
+          //         prevSubChild.material.opacity = original.opacity
+          //       }
+          //       removeOutline(prevSubChild)
+          //     }
+          //   })
+          // }
 
           // 更新最后一个被描边的 Object3D
-          lastOutlinedMesh = child
+          // lastOutlinedMesh = child
         } else {
           // 对不匹配的 Object3D，遍历其子对象并设置为透明
-          child.traverse((subChild) => {
-            if (subChild.isMesh) {
-              subChild.material.transparent = true
-              subChild.material.opacity = 0.2 // 透明度可根据需求调整
-            }
-          })
+          // child.traverse((subChild) => {
+          //   if (subChild.isMesh) {
+          //     // subChild.material.transparent = true
+          //     // subChild.material.opacity = 0.2 // 透明度可根据需求调整
+          //   }
+          // })
         }
       }
     })
