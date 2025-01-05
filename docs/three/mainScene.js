@@ -12,28 +12,15 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import Stats from 'three/addons/libs/stats.module.js'
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js'
 import { RectAreaLightHelper } from 'three/addons/helpers/RectAreaLightHelper.js'
+// 引入拖拽插件
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 // 引入后期库
 // import { EffectComposer, UnrealBloomPass } from 'postprocessing'
 // 引入相机位置+旋转中心位置模块变量
 import { pointCounterStore, loadingCounterStore, lightCounterStore, skyCounterStore, groundCounterStore, fogCounterStore, animateCounterStore, uploadCounterStore, pointlabelCounterStore } from '@/stores'
 
 // 将关键变量提出
-let scene, camera, render, controls, gltfLoader, axesHelper
-
-// 打印场景图函数
-// function dumpObject(obj, lines = [], isLast = true, prefix = '') {
-//   const localPrefix = isLast ? '└─' : '├─'
-//   lines.push(`${prefix}${prefix ? localPrefix : ''}${obj.name || '*no-name*'} [${obj.type}]`)
-//   const newPrefix = prefix + (isLast ? '  ' : '│ ')
-//   const lastNdx = obj.children.length - 1
-//   obj.children.forEach((child, ndx) => {
-//     const isLast = ndx === lastNdx
-//     dumpObject(child, lines, isLast, newPrefix)
-//   })
-//   return lines
-// }
-
-// ====================
+let scene, camera, render, controls, gltfLoader, axesHelper, transformcontrols
 // 主场景
 export const initThreeScene = () => {
 
@@ -75,6 +62,8 @@ export const initThreeScene = () => {
   // 设置阻尼系数
   controls.dampingFactor = 0.05
 
+  gridHelper = new THREE.GridHelper(100, 25, 0x888888, 0x555555)
+  scene.add(gridHelper)
 
   const textureloader = new THREE.TextureLoader()
   let texture = textureloader.load('./textures/imgs/skyback.jpg', () => {
@@ -112,6 +101,9 @@ export const initThreeScene = () => {
   stats.dom.style.transform = 'scale(1.3)' // 按比例缩小
   stats.dom.style.transformOrigin = 'top left' // 缩放的基点
 
+  // 拖拽控制器
+  transformcontrols = new TransformControls(camera, render.domElement)
+
   // 创建一个时钟对象来计算时间差
   const clock = new THREE.Clock()
 
@@ -132,6 +124,7 @@ export const initThreeScene = () => {
     logProgress()
 
     render.render(scene, camera)
+
     controls.update()
   }
   animate()
@@ -140,8 +133,7 @@ export const initThreeScene = () => {
   axesHelper = new THREE.AxesHelper(10)
   scene.add(axesHelper)
 
-  gridHelper = new THREE.GridHelper(100, 25, 0x888888, 0x555555)
-  scene.add(gridHelper)
+
 
   // 创建渲染器
   // const composer = new EffectComposer(render)
@@ -169,6 +161,7 @@ export const loadModelScen = (files) => {
 
   const loadval = loadingCounterStore()
   const animateal = animateCounterStore()
+  // const dataName = uploadCounterStore() // 获取状态管理实例
 
   // 将文件存入 fileMap
   for (let file of files) {
@@ -189,6 +182,7 @@ export const loadModelScen = (files) => {
         scene.add(model)
         model.name = glbFile.name
         loadval.loadingshow = false
+
 
         // 设置动画
         const mixer = new THREE.AnimationMixer(model)
@@ -223,6 +217,10 @@ export const loadModelScen = (files) => {
           modelName: model.name,
           serialnumber: modelnumber
         })
+
+        // if (dataName.panelValue) {
+        //   allModelChildName(true)
+        // }
       },
       (xhr) => {
         const percent = parseInt((xhr.loaded / xhr.total) * 100)
@@ -239,11 +237,11 @@ export const loadModelScen = (files) => {
 
     fileReader.onload = () => {
       const arrayBuffer = fileReader.result // 获取读取的 ArrayBuffer
-      console.log(arrayBuffer)
+      // console.log(arrayBuffer)
       const gltfBlob = new Blob([arrayBuffer], { type: 'model/gltf+json' })
-      console.log(gltfBlob)
+      // console.log(gltfBlob)
       const gltfUrl = URL.createObjectURL(gltfBlob)
-      console.log(gltfUrl)
+      // console.log(gltfUrl)
       gltfLoader.setPath('') // 设置基础路径为空
       gltfLoader.setResourcePath('') // 清空资源路径
 
@@ -302,6 +300,10 @@ export const loadModelScen = (files) => {
             serialnumber: modelnumber
           })
 
+          // if (dataName.panelValue) {
+          //   allModelChildName(true)
+          // }
+
         },
         (xhr) => {
           const percent = parseInt((xhr.loaded / xhr.total) * 100)
@@ -345,10 +347,14 @@ export const deleteModel = (name) => {
         }
       })
     }
-    data.allChildName.splice(index, 1)
-    if (data.allChildName.length === 0) {
-      data.checkedValue = false
+
+    data.allObject3DName.splice(index, 1)
+    if (data.allObject3DName.length === 0) {
+      data.rightmodelpanel = false
+      data.panelValue = false
+      clickListener(false)
     }
+    // data.uploadvalue.splice(index, 1)
   }
 }
 
@@ -356,6 +362,7 @@ export const deleteModel = (name) => {
 export const pointMoodel = (name, point) => {
   models.forEach(item => {
     if (item.name === name) {
+      // 恢复位置、旋转和缩放
       item.position.set(point.x, point.y, point.z)
     }
   })
@@ -1839,45 +1846,114 @@ export const animatecishu = (uuid, value, number) => {
 }
 
 
+
+
 // 创建 Raycaster 和鼠标向量
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
+const helperGroup = new THREE.Group()
 
-// 定义监听器函数
+// 鼠标点击交互函数
 export const handleClick = event => {
+
   let childname = uploadCounterStore()
   // 计算鼠标位置归一化设备坐标 (-1 to +1)
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+
   // 使用摄像机和鼠标位置更新射线
   raycaster.setFromCamera(mouse, camera)
+
   // 检测与场景中物体的交互
-  const intersects = raycaster.intersectObjects(scene.children, true).filter(
+  const intersects = raycaster.intersectObjects(
+    scene.children.filter(child => child !== helperGroup),
+    true
+  ).filter(
     intersect =>
-      !(intersect.object instanceof THREE.LineSegments) && // 排除描边
-      !(intersect.object instanceof THREE.GridHelper)     // 排除网格辅助线
+      !(intersect.object instanceof THREE.LineSegments) &&
+      !(intersect.object instanceof THREE.GridHelper)
   )
+  // const intersects = raycaster.intersectObjects(scene.children, true).filter(
+  //   intersect =>
+  //     !(intersect.object instanceof TransformControls) && // 排除拖拽控制器
+  //     !(intersect.object === transformcontrols.getHelper()) && // 排除 TransformControls 的 Helper
+  //     !(intersect.object instanceof THREE.LineSegments) && // 排除描边线
+  //     !(intersect.object instanceof THREE.GridHelper) // 排除网格辅助线
+  // )
+
   if (intersects.length > 0) {
+
     // 获取第一个被点击的对象
     const clickedObject = intersects[0].object
+
     // 仅点击模型生效
     if (clickedObject.isMesh) {
+
       // 将子网格名称传递给右侧面板展示
       childname.modelchildName = clickedObject.name
+
+      // 同步展开右侧父级
+      const allObject3DName = childname.allObject3DName || []
+      allObject3DName.forEach((group, parentindex) => {
+        group.forEach((child, childindex) => {
+          // 展开父级包含此 Mesh 的节点
+          if (child.meshNames.includes(clickedObject.name)) {
+            child.meshshow = true
+
+            const targetId = `mesh-${childindex}-${parentindex}`
+            const targetElement = document.getElementById(targetId)
+            // 让右侧面板滚动到目标位置
+            if (targetElement) {
+              setTimeout(() => {
+                targetElement.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'center'
+                })
+              }, 100)
+            }
+          } else {
+            child.meshshow = false
+          }
+        })
+      })
+      // 移除其他高亮
+      childname.activeParentIndex = null
+      childname.activeChildIndices = {}
+
+      // 显示拖拽控制器
+      if (childname.transformctrl) {
+        // 传入需要拖拽的对象
+        // scene.add(transformcontrols.getHelper())
+        transformcontrols.attach(clickedObject)
+        childname.currentOutline = clickedObject // 将当前点击的Mesh做个记录
+        // 在拖拽开始时禁用 OrbitControls
+        transformcontrols.addEventListener('dragging-changed', (event) => {
+          if (event.value) {
+            controls.enabled = false  // 禁用轨道控制器
+          } else {
+            controls.enabled = true  // 拖拽结束后恢复
+          }
+        })
+
+        return
+      }
+
       // 如果已经有描边的物体不同于当前点击的物体，移除上一个描边
       if (childname.currentOutline && childname.currentOutline !== clickedObject) {
         removeOutline(childname.currentOutline)
       }
+
       // 立即为该物体添加描边
       addOutline(clickedObject)
+
       // 更新当前描边的物体
       childname.currentOutline = clickedObject
     }
   }
 }
 
-// 为物体添加描边
-function addOutline(object) {
+// Mesh添加描边
+const addOutline = (object) => {
   // 先移除已有描边（防止重复添加）
   removeOutline(object)
   const edges = new THREE.EdgesGeometry(object.geometry)
@@ -1885,7 +1961,7 @@ function addOutline(object) {
   object.add(line) // 将描边添加到物体中
 }
 
-// 为物体移除描边
+// 移除Mesh描边
 export const removeOutline = (object) => {
   const outline = object.children.find(child => child instanceof THREE.LineSegments)
   if (outline) {
@@ -1893,106 +1969,230 @@ export const removeOutline = (object) => {
   }
 }
 
-// 添加/移除子网格监听事件
+// 添加、移除点击监听事件
 export const clickListener = value => {
   let childname = uploadCounterStore()
+
   if (value) {
     window.addEventListener('click', handleClick)
-    childname.rightmodelpanel = true
+    childname.rightmodelpanel = true // 显示右侧面板
+    allModelChildName(true) // 获取所有Mesh节点及其父节点
     return
   }
   window.removeEventListener('click', handleClick)
   if (!childname.panelValue) {
-    childname.rightmodelpanel = false
+    childname.rightmodelpanel = false // 隐藏右侧面板
   }
-  removeOutline(childname.currentOutline)
+  removeOutline(childname.currentOutline) // 移除描边效果
+  allModelChildName(false) // 移除获取到的Mesh节点及其父节点
+  childname.transformctrl = false
+  childname.transformstatevalue = '0'
 }
 
-// 是否展示所有子网格名称
+
+// 获取所有Mesh名称
 export const allModelChildName = (value) => {
   const dataName = uploadCounterStore() // 获取状态管理实例
 
   if (value) {
+
     models.forEach((model) => {
-      const nameArray = []
+      // const nameArray = []
+
+      const modelData = [] // 用于存储当前模型的所有 Object3D 信息
+
       model.traverse((child) => {
 
-        if (child.isObject3D) {
-          // 如果是 Object3D 类型，存储名称
-          console.log(child.name)
-        }
+        if (child.isObject3D && !child.isMesh) {
 
-        if (child.isMesh) {
-          // console.log(child)
+          const meshes = []
+          const transformInfo = [] // 用于存储每个 Mesh 的初始变换信息
 
-          // 缓存子网格的原始透明属性和透明度
-          if (!child.userData.originalMaterial) {
-            child.userData.originalMaterial = {
-              transparent: child.material.transparent,
-              opacity: child.material.opacity
+          child.children.forEach((subChild) => {
+            if (subChild.isMesh) {
+              meshes.push(subChild.name)
+
+              // 保存每个子节点的初始变换信息
+              transformInfo.push({
+                name: subChild.name,
+                position: subChild.position.clone(), // 初始位置
+                rotation: subChild.rotation.clone(), // 初始旋转
+                scale: subChild.scale.clone() // 初始缩放
+              })
             }
-          }
-          // 存储子网格名称
-          nameArray.push(child.name)
+          })
+
+          // 保存 Object3D 的 name 和对应 Mesh 的 name 列表
+          modelData.push({
+            objectName: child.name,
+            meshNames: meshes,
+            meshshow: false,
+            transformInfo: transformInfo, // 保存变换信息
+            parentTransform: {
+              position: child.position.clone(),
+              rotation: child.rotation.clone(),
+              scale: child.scale.clone()
+            } // 保存父节点的初始变换信息
+          })
         }
       })
       // 将当前模型的所有子网格名称存储
-      dataName.allChildName.push([...nameArray])
+      dataName.allObject3DName.push([...modelData])
     })
-    clickListener(false) // 移除监听
     return
   }
-
-  // 恢复所有子网格材质属性
-  dataName.allChildName.forEach((nameArray, index) => {
-    models[index].traverse((child) => {
-      if (child.isMesh) {
-        const original = child.userData.originalMaterial
-        if (original) {
-          child.material.transparent = original.transparent
-          child.material.opacity = original.opacity
-        }
-      }
-    })
-  })
-  removeOutline(lastOutlinedMesh)
-  dataName.allChildName = []
-  clickListener(true) // 开启监听
+  dataName.allObject3DName = []
+  scene.remove(helperGroup)
+  transformcontrols.attach(null) // 清空拖拽对象
 }
 
-// 根据点击的子网格名称给予对应网格高亮效果
-let lastOutlinedMesh = null
+// 给予在列表中被点击的Mesh描边效果
 export const childMesh = (name) => {
+  let data = uploadCounterStore()
   models.forEach((item) => {
+
     item.traverse((child) => {
       if (child.isMesh) {
         if (child.name === name) {
-          // 如果有上一个被描边的 Mesh，移除描边效果并恢复原始材质
-          if (lastOutlinedMesh && lastOutlinedMesh !== child) {
-            const original = lastOutlinedMesh.userData.originalMaterial
-            if (original) {
-              lastOutlinedMesh.material.transparent = original.transparent
-              lastOutlinedMesh.material.opacity = original.opacity
-            }
-            removeOutline(lastOutlinedMesh)
+
+          // 拖拽辅助器
+          if (data.transformctrl) {
+            // 传入需要拖拽的对象
+            transformcontrols.attach(child)
+            data.currentOutline = child
+
+            // 在拖拽开始时禁用 OrbitControls
+            transformcontrols.addEventListener('dragging-changed', (event) => {
+              if (event.value) {
+                controls.enabled = false  // 禁用轨道控制器
+              } else {
+                controls.enabled = true  // 拖拽结束后恢复
+              }
+            })
+            return
           }
 
-          // 设置当前匹配的子网格为不透明并添加描边效果
-          child.material.transparent = false
-          child.material.opacity = 1.0
+          // 如果有上一个被描边的 Mesh，移除描边效果并恢复原始材质
+          if (data.currentOutline && data.currentOutline !== child) {
+            removeOutline(data.currentOutline)
+          }
+
+          // 立即为该物体添加描边
           addOutline(child)
 
-          // 更新最后一个被描边的 Mesh
-          lastOutlinedMesh = child
-        } else {
-          // 设置不匹配的子网格为透明，但不改变其透明材质本身
-          child.material.transparent = true
-          child.material.opacity = 0.2 // 透明度可根据需求调整
+          // 更新当前描边的物体
+          data.currentOutline = child
         }
       }
     })
   })
 }
+
+// 给予在列表中被点击的Object3D对象以及对象中的所有Mesh子节点赋予描边效果
+export const object3dMesh = (obj3d_name) => {
+  let data = uploadCounterStore()
+  models.forEach((item) => {
+    item.traverse((child) => {
+      if (child.isObject3D) {
+        if (child.name === obj3d_name) {
+          // 如果匹配到了指定名称的 Object3D 对象
+          if (data.transformctrl) {
+            // scene.add(transformcontrols.getHelper())
+            // 传入需要拖拽的对象
+            transformcontrols.attach(child)
+            data.currentOutline = child
+
+            child.traverse((subChild) => {
+              if (subChild.isMesh) {
+
+                // 在拖拽开始时禁用 OrbitControls
+                transformcontrols.addEventListener('dragging-changed', (event) => {
+                  if (event.value === true) {
+                    controls.enabled = false  // 禁用轨道控制器
+                  } else {
+                    controls.enabled = true  // 拖拽结束后恢复
+                  }
+                })
+              }
+            })
+          }
+        }
+      }
+    })
+  })
+}
+
+// 取消transformcontrols的应用 
+export const cancelTransform = () => {
+  let data = uploadCounterStore()
+  if (data.transformctrl) {
+    data.transformstatevalue = '1'
+    transformState('1') // 初始锁定移动功能
+    scene.add(helperGroup)
+    removeOutline(data.currentOutline) // 移除描边效果
+    helperGroup.add(transformcontrols.getHelper())
+    transformcontrols.attach(data.currentOutline) // 赋予取消前选中的对象
+    transformcontrols.addEventListener('dragging-changed', (event) => {
+      if (event.value) {
+        controls.enabled = false  // 禁用轨道控制器
+      } else {
+        controls.enabled = true  // 拖拽结束后恢复
+      }
+    })
+    return
+  }
+  scene.remove(helperGroup)
+  transformcontrols.attach(null) // 清空拖拽对象
+  addOutline(data.currentOutline) // 添加描边效果
+  data.transformstatevalue = '0'
+}
+
+// 设置transformcontrols的功能
+// 移动、旋转、缩放
+export const transformState = (value) => {
+  if (value === '1') {
+    transformcontrols.setMode('translate')
+  }
+  if (value === '2') {
+    transformcontrols.setMode('rotate')
+  }
+  if (value === '3') {
+    transformcontrols.setMode('scale')
+  }
+}
+
+// 恢复原状的逻辑
+export const resetTransform = (objectName) => {
+  const dataName = uploadCounterStore() // 获取状态管理实例
+  // 获取目标 Object3D 的信息
+  const targetModelData = dataName.allObject3DName.find(
+    (model) => model.some((object) => object.objectName === objectName)
+  )
+
+  if (!targetModelData) return
+
+  // 恢复每个 Object3D 的变换
+  targetModelData.forEach((objectData) => {
+    const targetObject = scene.getObjectByName(objectData.objectName)
+    if (targetObject) {
+      // 恢复父节点的初始变换
+      targetObject.position.copy(objectData.parentTransform.position)
+      targetObject.rotation.copy(objectData.parentTransform.rotation)
+      targetObject.scale.copy(objectData.parentTransform.scale)
+    }
+
+    // 恢复每个 Mesh 的初始变换
+    objectData.transformInfo.forEach((info) => {
+      const targetMesh = scene.getObjectByName(info.name)
+      if (targetMesh) {
+        targetMesh.position.copy(info.position)
+        targetMesh.rotation.copy(info.rotation)
+        targetMesh.scale.copy(info.scale)
+      }
+    })
+  })
+}
+
 
 
 

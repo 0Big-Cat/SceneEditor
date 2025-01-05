@@ -1,5 +1,5 @@
 <script setup>
-import { loadModelScen, deleteModel, pointMoodel, scaleMoodel, wireframeMoodel, clickListener } from '../../../public/three/mainScene'
+import { loadModelScen, deleteModel, pointMoodel, scaleMoodel, wireframeMoodel, clickListener, resetTransform } from '../../../public/three/mainScene'
 import { uploadCounterStore, loadingCounterStore } from '@/stores'
 
 const loadval = loadingCounterStore()
@@ -104,7 +104,12 @@ const handleFiles = (files) => {
 // 删除模型
 const deletemodel = name => {
   if (name) {
+    // 从上传列表中移除模型数据
     filename.uploadvalue = filename.uploadvalue.filter(item => item.name !== name)
+    // 从已上传文件名集合中移除文件名
+    if (uploadedFileNames.has(name)) {
+      uploadedFileNames.delete(name)
+    }
     deleteModel(name)
   }
 }
@@ -132,9 +137,9 @@ const scalemodel = (name, point) => {
 // 还原模型相关修改
 const restoremoodel = name => {
   const model = filename.uploadvalue.find(item => item.name === name)
-  console.log(model)
+  console.log(name)
 
-
+  resetTransform(name) // 恢复所有Mesh位置
   if (model) {
     model.x = 0
     model.y = 0

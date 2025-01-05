@@ -26,7 +26,7 @@ export const uploadCounterStore = defineStore('upload', () => {
   // 子网格名称
   const modelchildName = ref('')
 
-  // 显示or取消子网格描边
+  // 记录描边的Mesh（即被点击的物体，为transformcontrols提供拖拽目标）
   const currentOutline = ref(null)
 
   // 存储模型所有子网格名称
@@ -41,6 +41,15 @@ export const uploadCounterStore = defineStore('upload', () => {
   // 是否获取所有子网格
   const checkedValue = ref(false)
 
+  // TransformControls控制器的显示
+  const transformctrl = ref(false)
+
+  const activeParentIndex = ref(null) // 父级的索引
+  const activeChildIndices = ref({}) // 用于存储每个父级的子级索引
+
+  // 选择transform的功能：移动、旋转、缩放
+  const transformstatevalue = ref('')
+
   return {
     uploadvalue,
     panelValue,
@@ -50,6 +59,10 @@ export const uploadCounterStore = defineStore('upload', () => {
     checkedValue,
     rightmodelpanel,
     allObject3DName,
-    allMeshName
+    allMeshName,
+    transformctrl,
+    activeParentIndex,
+    activeChildIndices,
+    transformstatevalue
   }
 })

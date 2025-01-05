@@ -1,23 +1,19 @@
 <script setup>
 // 右侧面板主体
 import { ref } from 'vue'
-import { childMesh, object3dMesh } from '../../../public/three/mainScene'
+import { childMesh, object3dMesh, cancelTransform, transformState } from '../../../public/three/mainScene.js'
 import { uploadCounterStore } from '@/stores'
 
 // 面板显示隐藏变量
 let data = uploadCounterStore()
 
-// 当前选中的父级和子级索引
-const activeParentIndex = ref(null) // 父级的索引
-const activeChildIndices = ref({}) // 用于存储每个父级的子级索引
-
 const setActiveParent = (index) => {
-  activeParentIndex.value = index // 设置父级的活动索引
-  activeChildIndices.value[index] = null // 重置该父级的子级索引
+  data.activeParentIndex = index // 设置父级的活动索引
+  data.activeChildIndices[index] = null // 重置该父级的子级索引
 }
 
 const setActiveChild = (parentIndex, childIndex) => {
-  activeChildIndices.value[parentIndex] = childIndex // 设置父级对应的子级索引
+  data.activeChildIndices[parentIndex] = childIndex // 设置父级对应的子级索引
 }
 
 // 是否展开Mesh
@@ -37,15 +33,14 @@ const obj3dActive = (itemchild, item, parentindex) => {
   setActiveParent(parentindex)
   itemchild.meshshow = true // 控制+ - 号
 }
+
 // 展开后被点击的子网格名称
 const setActive = (item, parentindex, childindex) => {
-  // activeIndex.value = index // 这个是用于被点击项改变背景色的
-  console.log(item)
-
   childMesh(item)
   data.modelchildName = item
   setActiveChild(parentindex, childindex)
 }
+
 // 复制文本的方法
 const copyText = () => {
   // 格式化相机坐标为字符串
@@ -63,6 +58,7 @@ const copyText = () => {
     })
   })
 }
+
 </script>
 
 <template>
@@ -76,11 +72,11 @@ const copyText = () => {
       </div>
 
       <div>
-        <el-checkbox v-model="demo" label="控制器" size="large" />
-        <el-radio-group v-model="demo">
-          <el-radio value="1" size="small">移动</el-radio>
-          <el-radio value="2" size="small">旋转</el-radio>
-          <el-radio value="3" size="small">缩放</el-radio>
+        <el-checkbox v-model="data.transformctrl" @change="cancelTransform()" label="控制器" size="large" />
+        <el-radio-group v-model="data.transformstatevalue">
+          <el-radio @click="transformState('1')" value="1" size="small">移动</el-radio>
+          <el-radio @click="transformState('2')" value="2" size="small">旋转</el-radio>
+          <el-radio @click="transformState('3')" value="3" size="small">缩放</el-radio>
         </el-radio-group>
       </div>
 
@@ -99,7 +95,7 @@ const copyText = () => {
               <!-- :class="{ active: activeIndex === index }" -->
               <div v-if="itemchild.meshNames.length > 0">
                 <div @click="obj3dActive(itemchild, itemchild.objectName, parentindex)"
-                  :class="{ active: activeParentIndex === parentindex }">
+                  :class="{ active: data.activeParentIndex === parentindex }">
                   <span class="unfold"> {{ itemchild.meshshow ? '-' : '+' }}</span>
                   <span> {{ itemchild.objectName }}</span>
                 </div>
@@ -108,9 +104,9 @@ const copyText = () => {
               <!-- 这里循环的是 isObject3D 对象里面的 Mesh对象 -->
               <div v-show="itemchild.meshshow" v-for="(item, childindex) in itemchild.meshNames" :key="item">
                 <div @click="setActive(item, parentindex, childindex)"
-                  :class="{ active: activeChildIndices[parentindex] === childindex }">
+                  :class="{ active: data.activeChildIndices[parentindex] === childindex, highlighted: data.modelchildName === item }">
                   <i></i>
-                  <span> {{ item }}</span>
+                  <span :id="'mesh-' + parentindex + '-' + childindex"> {{ item }}</span>
                 </div>
               </div>
 
@@ -138,6 +134,7 @@ const copyText = () => {
   z-index: 1;
   background-color: #0d0d0d;
   color: #fff;
+
 
   &>div:nth-of-type(1) {
     margin-bottom: vh(5px);
@@ -172,7 +169,13 @@ const copyText = () => {
     width: vw(230px);
     height: vh(860px);
     border: 1px solid #3d3d3d;
-    overflow: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    /* Firefox滚动条样式 */
+    scrollbar-color: #0ab0b7 #3d3d3d;
+    /* Firefox 滚动条颜色，前者是滚动条，后者是轨道背景 */
+
+
 
     ul {
       &>li:nth-of-type(1) {
@@ -194,8 +197,8 @@ const copyText = () => {
       }
 
       .child-container {
-        height: vh(800px);
-        overflow-y: auto;
+        // height: vh(800px);
+        // overflow-y: auto;
         scrollbar-width: none;
 
         &::-webkit-scrollbar {
@@ -211,10 +214,6 @@ const copyText = () => {
             // white-space: nowrap;
             cursor: pointer;
             font-size: 14px;
-
-
-
-
 
             >div {
               display: flex;
@@ -243,6 +242,24 @@ const copyText = () => {
                   color: #fff;
                 }
               }
+
+              &.highlighted {
+                background: linear-gradient(to right, #0ab0b7, #0d0d0d);
+
+                i {
+                  background-color: #fff;
+                }
+
+                span {
+                  color: #fff;
+                }
+              }
+
+              span[id*='mesh'] {
+                width: 100%;
+                overflow: hidden;
+              }
+
             }
 
           }
